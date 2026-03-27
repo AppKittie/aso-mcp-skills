@@ -1,5 +1,5 @@
 #:schema node_modules/wrangler/config-schema.json
-name = "appkittie-mcp"
+name = "aso-mcp-skills"
 main = "src/worker.py"
 compatibility_date = "2024-12-06"
 compatibility_flags = ["python_workers"]
