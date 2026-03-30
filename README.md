@@ -1,90 +1,62 @@
-# AppKittie — App Store Intelligence Skills & MCP Server
+# AppKittie — App Store intelligence for AI agents
+
+**Full API documentation:** [www.appkittie.com/docs](https://www.appkittie.com/docs)
 
 ![AppKittie — App Store Intelligence branding](appkittie_promo.jpeg)
 
-AI agent skills for **App Store intelligence**, **ASO**, and **competitive analysis**. Built for indie developers, app marketers, and growth teams who want **Cursor**, **Claude Code**, or any Agent Skills-compatible AI assistant to help with app discovery, keyword research, revenue analysis, ad intelligence, and competitor tracking.
+Turn **Cursor**, **Claude Code**, or any Agent Skills–compatible assistant into a research partner for the App Store: discovery, ASO, competitors, growth, revenue, and ads—backed by live data from the [AppKittie API](https://appkittie.com) (**2M+ iOS apps**, estimates, growth windows, and ad signals).
 
-Powered by real App Store data via the [AppKittie API](https://appkittie.com). Access a database of **2M+ iOS apps** with downloads, revenue estimates, growth metrics, and ad intelligence.
+---
 
-## Quick Start
+## What you get
 
-**Cursor** — Settings (Cmd+Shift+J) → Rules → Add Rule → Remote Rule (Github) → paste `https://github.com/appkittie/mcp`
+| Piece | Role |
+|--------|------|
+| **Skills** | Opinionated playbooks under `skills/`—how to ask questions, structure answers, and chain workflows |
+| **MCP server** | Hosted proxy (`mcp.appkittie.com`) so MCP clients can call AppKittie without wiring HTTP yourself |
+| **REST API** | Direct `GET`/`POST` to `https://appkittie.com/api/v1` for scripts, backends, or custom tools |
 
-**Claude Code** — `npx skills add appkittie/mcp`
+Skills compose: e.g. **competitor-analysis** may point you to **keyword-research**, then **metadata-optimization** for execution.
 
-**Manual** — `git clone https://github.com/appkittie/mcp.git && cp -r mcp/skills/* .cursor/skills/`
+---
 
-Then ask your agent:
+## Install the skills
 
-```
-"Find the most profitable apps in the Health & Fitness category"
-"Research keywords for a meditation app targeting the US market"
-"Analyze my competitors — my app ID is 1234567890"
-"Which apps are running Meta ads in the productivity category?"
-"What apps are growing fastest this week?"
-"Optimize my App Store title and subtitle for these keywords"
-"Set up my app marketing context for ongoing analysis"
-"What's the revenue potential in the education category?"
-```
+Pick one path (or combine project + global copies if you prefer).
 
-Or invoke directly: `/app-discovery`, `/keyword-research`, `/metadata-optimization`, `/competitor-analysis`, `/growth-analysis`, `/ad-intelligence`, `/revenue-analysis`
+### Cursor
 
-## Skills
+| Approach | Steps |
+|----------|--------|
+| Remote rule | **Settings** (⌘⇧J) → **Rules** → **Add Rule** → **Remote Rule (GitHub)** → `https://github.com/appkittie/mcp` |
+| This repo | `cp -r mcp/skills/* .cursor/skills/` |
+| Machine-wide | `cp -r mcp/skills/* ~/.cursor/skills/` |
 
-### Core Intelligence
+### Claude Code
 
-| Skill | What it does |
-|-------|-------------|
-| [app-discovery](skills/app-discovery) | Search and filter iOS apps by category, revenue, downloads, growth, ratings, ads, and more |
-| [keyword-research](skills/keyword-research) | Evaluate keywords by popularity, difficulty, traffic score, and top-ranking apps — build a prioritized keyword strategy |
-| [metadata-optimization](skills/metadata-optimization) | Write optimized title, subtitle, keyword field, and description — with 3 variants and character counts |
-| [competitor-analysis](skills/competitor-analysis) | Keyword gaps, revenue comparison, ad strategy teardown, and positioning map |
+| Approach | Command |
+|----------|---------|
+| Full bundle | `npx skills add appkittie/mcp` |
+| Subset | `npx skills add appkittie/mcp --skill keyword-research competitor-analysis` |
+| From clone | `cp -r mcp/skills/* .claude/skills/` |
 
-### Growth & Revenue
+### Other agents (Skills standard)
 
-| Skill | What it does |
-|-------|-------------|
-| [growth-analysis](skills/growth-analysis) | Find fastest-growing apps, analyze growth drivers, spot market movers and emerging trends |
-| [revenue-analysis](skills/revenue-analysis) | Revenue benchmarking, monetization model analysis, in-app purchase patterns, and pricing strategy |
-| [ad-intelligence](skills/ad-intelligence) | Discover which apps run Meta ads and Apple Search Ads, analyze creative strategies, find UA opportunities |
-
-### Foundation
-
-| Skill | What it does |
-|-------|-------------|
-| [app-marketing-context](skills/app-marketing-context) | Create a context document (app, audience, competitors, goals) that all other skills reference |
-
-## How It Works
-
-```
-You: "Find the most profitable fitness apps"
-
-Agent:
-  1. Reads app-discovery/SKILL.md (framework, output template)
-  2. Calls AppKittie API → search_apps(categories: ["health-fitness"],
-     sortBy: "revenue", limit: 20)
-  3. Analyzes results: revenue distribution, growth patterns, pricing models
-  4. Returns: Top Apps Table + Revenue Insights + Niche Opportunities
-
-You: "Now research keywords for a meditation app"
-
-Agent:
-  1. Reads keyword-research/SKILL.md
-  2. Calls batch_keyword_difficulty(keywords: ["meditation", "mindfulness", ...])
-  3. Deep dives with get_keyword_difficulty on top opportunities
-  4. Returns: Keyword Report + Opportunity Scores + Strategy Recommendation
+```bash
+git clone https://github.com/appkittie/mcp.git
+cp -r mcp/skills/* .cursor/skills/   # or .agents/skills/, .claude/skills/, .codex/skills/
 ```
 
-Skills reference each other — `competitor-analysis` suggests running `keyword-research` for gaps found, which feeds into `metadata-optimization` for implementation.
+Compatible with any layout that follows the Agent Skills convention.
 
-## MCP Server
+---
 
-The MCP server runs on Cloudflare Workers and proxies the AppKittie API, making it accessible to any MCP-compatible AI agent.
+## Wire up the MCP server
 
-### Setup
+The worker on **Cloudflare** forwards requests to AppKittie; use it from any MCP-capable client.
 
-1. Get your API key at [appkittie.com/settings/api-keys](https://appkittie.com/settings/api-keys) — copy it immediately, it's only shown once
-2. Add to your MCP configuration:
+1. Create a key: [appkittie.com/settings/api-keys](https://appkittie.com/settings/api-keys) (shown once—copy immediately).
+2. Register the server:
 
 ```json
 {
@@ -99,179 +71,186 @@ The MCP server runs on Cloudflare Workers and proxies the AppKittie API, making 
 }
 ```
 
-### Tools
+### MCP tools
 
-| Tool | What it does | Credits |
-|------|-------------|---------|
-| `search_apps` | Search and filter iOS apps with 30+ filter parameters | 1 per app returned |
-| `get_app_detail` | Full app data: metadata, revenue, ads, IAPs, creator partnerships, contacts, historical data | 1 per request |
-| `get_keyword_difficulty` | Single keyword analysis with popularity, difficulty, traffic score, and top-ranking apps | 10 per request |
-| `batch_keyword_difficulty` | Analyze up to 10 keywords at once, sorted by opportunity score | 10 per keyword |
-| `get_supported_countries` | List valid App Store country codes | Free |
+| Tool | Purpose | Credits |
+|------|---------|---------|
+| `search_apps` | Filter iOS apps (30+ parameters) | 1 × rows returned |
+| `get_app_detail` | Metadata, revenue, ads, IAPs, creators, contacts, history | 1 / call |
+| `get_keyword_difficulty` | One keyword: popularity, difficulty, traffic, top apps | 10 / call |
+| `batch_keyword_difficulty` | Up to 10 keywords, ranked by opportunity | 10 × keyword |
+| `get_supported_countries` | Valid storefront codes | Free |
 
-### Prompts
+### MCP prompts
 
-| Prompt | What it does |
-|--------|-------------|
-| `discover_niche` | Guided workflow to find profitable niches in a category |
-| `competitor_analysis` | Step-by-step competitive intelligence gathering |
-| `keyword_research` | Structured keyword research and prioritization |
-| `app_growth_report` | Growth trend analysis with gainers and losers |
-| `ad_intelligence` | Ad landscape analysis for a category or niche |
+| Prompt | Use case |
+|--------|----------|
+| `discover_niche` | Walk through profitable niches inside a category |
+| `competitor_analysis` | Structured competitive intel |
+| `keyword_research` | Prioritize and document a keyword set |
+| `app_growth_report` | Gainers, losers, trend read |
+| `ad_intelligence` | Category or niche ad landscape |
 
-## API Reference
+---
 
-**Base URL:** `https://appkittie.com/api/v1`
+## Skill catalog
 
-**Authentication:** Bearer token in the `Authorization` header. Generate keys from your [dashboard](https://appkittie.com/settings/api-keys).
+### Intelligence & positioning
+
+| Skill | Link | Summary |
+|-------|------|---------|
+| App discovery | [app-discovery](skills/app-discovery) | Slice the catalog by category, money, traction, ratings, ads, and more |
+| Keyword research | [keyword-research](skills/keyword-research) | Popularity, difficulty, traffic score, leaders—turn into a ranked plan |
+| Metadata | [metadata-optimization](skills/metadata-optimization) | Title, subtitle, keyword field, description with variants and limits |
+| Competitors | [competitor-analysis](skills/competitor-analysis) | Gaps, revenue contrast, ad teardown, positioning |
+
+### Growth, money, ads
+
+| Skill | Link | Summary |
+|-------|------|---------|
+| Growth | [growth-analysis](skills/growth-analysis) | Fast movers, drivers, emerging patterns |
+| Revenue | [revenue-analysis](skills/revenue-analysis) | Benchmarks, monetization, IAP shape, pricing |
+| Ads | [ad-intelligence](skills/ad-intelligence) | Meta + Apple Search Ads footprint, creatives, UA angles |
+
+### Shared context
+
+| Skill | Link | Summary |
+|-------|------|---------|
+| Marketing context | [app-marketing-context](skills/app-marketing-context) | One doc: app, audience, rivals, goals—feeds the other skills |
+
+---
+
+## Example prompts & commands
+
+Natural language (after skills are installed):
+
+- “Surface the highest-earning Health & Fitness apps.”
+- “US keyword set for a meditation app—prioritize by opportunity.”
+- “Competitive read for app id `1234567890`.”
+- “Who’s buying Meta ads in productivity lately?”
+- “What’s climbing fastest this week?”
+- “Rewrite title + subtitle for these keywords, three options each.”
+- “Capture my marketing context so follow-ups stay consistent.”
+- “Rough revenue band for education—who owns the top?”
+
+Slash-style entry points: `/app-discovery`, `/keyword-research`, `/metadata-optimization`, `/competitor-analysis`, `/growth-analysis`, `/ad-intelligence`, `/revenue-analysis`.
+
+---
+
+## How an agent typically runs
+
+1. Loads the relevant `SKILL.md` (templates, guardrails, output shape).
+2. Calls AppKittie—via MCP tools or HTTP—e.g. `search_apps` with category + `sortBy: revenue`, or `batch_keyword_difficulty` for a seed list, then `get_keyword_difficulty` on shortlist items.
+3. Synthesizes: tables, takeaways, and next actions instead of raw JSON dumps.
+
+---
+
+## REST API quick reference
+
+**Base:** `https://appkittie.com/api/v1`  
+**Auth:** `Authorization: Bearer <key>` — same keys as the dashboard.
 
 ```bash
-curl -X GET "https://appkittie.com/api/v1/apps?search=fitness&limit=5" \
+curl -sS "https://appkittie.com/api/v1/apps?search=fitness&limit=5" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Endpoints
+### Routes & billing
 
-| Endpoint | Method | Description | Credits |
-|----------|--------|-------------|---------|
-| `/api/v1/apps` | `GET` | Search and filter apps | 1 per app returned |
-| `/api/v1/apps/:appId` | `GET` | Get detailed app data | 1 per request |
-| `/api/v1/keywords/difficulty` | `GET` | Single keyword difficulty | 10 per request |
-| `/api/v1/keywords/difficulty` | `POST` | Batch keywords (up to 10) | 10 per keyword |
+| Route | Verb | Role | Credits |
+|-------|------|------|---------|
+| `/api/v1/apps` | GET | Search / filter apps | 1 per app in the payload |
+| `/api/v1/apps/:appId` | GET | Full detail for one app | 1 per request |
+| `/api/v1/keywords/difficulty` | GET | Single keyword | 10 per request |
+| `/api/v1/keywords/difficulty` | POST | Batch (≤10 keywords) | 10 per keyword with data |
 
-### Response Format
+### Payload shape
 
-All successful responses wrap data in a `data` field. List endpoints include cursor-based pagination:
+Success bodies use a top-level `data`. Lists add cursor pagination:
 
 ```json
 {
-  "data": [{ "title": "Calm", "score": 4.8, "downloads": 85000, ... }],
+  "data": [{ "title": "Calm", "score": 4.8, "downloads": 85000 }],
   "pagination": { "nextCursor": 50, "totalCount": 12450 }
 }
 ```
 
-Pass `nextCursor` as the `cursor` query parameter to fetch the next page. When `nextCursor` is `null`, there are no more results.
+Request the next page with `cursor=<nextCursor>`. `null` means end of results.
 
-### Search Filters
+### `GET /api/v1/apps` filters (AND-combined)
 
-The `search_apps` tool / `GET /api/v1/apps` endpoint supports 30+ filters. All filters combine with AND logic.
+| Group | Parameters |
+|-------|------------|
+| Text | `search` — title, developer, description |
+| Categories | `categories`, `excludedCategories` (comma-separated names) |
+| Metrics | `minDownloads` / `maxDownloads`, `minRevenue` / `maxRevenue`, `minRating` / `maxRating`, `minReviews` / `maxReviews`, lifetime download/revenue min/max |
+| Price | `priceType` (`all` \| `free` \| `paid`), `minPrice`, `maxPrice` |
+| Growth | `growthPeriod` (`7d`…`90d`), `growthType` (`all` \| `positive` \| `negative`), `minGrowth`, `maxGrowth` |
+| Signals | `hasMetaAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` |
+| Content | `contentRating`, `languages`, `developer` |
+| Time | `releasedAfter`, `updatedAfter` (Unix seconds) |
+| Order | `sortBy` (`growth`, `rating`, `reviews`, `updated`, `released`, `downloads`, `revenue`, `trending`, `newest`), `sortOrder` (`asc` \| `desc`) |
 
-**Search:** `search` — full-text across title, developer, and description
+Full parameter matrix: [tools/REGISTRY.md](tools/REGISTRY.md).
 
-**Categories:** `categories`, `excludedCategories` — comma-separated category names
+### cURL samples
 
-**Metrics:** `minDownloads`/`maxDownloads`, `minRevenue`/`maxRevenue`, `minRating`/`maxRating`, `minReviews`/`maxReviews`, `minLifetimeDownloads`/`maxLifetimeDownloads`, `minLifetimeRevenue`/`maxLifetimeRevenue`
-
-**Price:** `priceType` (all/free/paid), `minPrice`/`maxPrice`
-
-**Growth:** `growthPeriod` (7d/14d/30d/60d/90d), `growthType` (all/positive/negative), `minGrowth`/`maxGrowth`
-
-**Intelligence:** `hasMetaAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite`
-
-**Content:** `contentRating` (all/4+/9+/12+/17+), `languages`, `developer`
-
-**Dates:** `releasedAfter`, `updatedAfter` — Unix timestamps
-
-**Sorting:** `sortBy` (growth/rating/reviews/updated/released/downloads/revenue/trending/newest), `sortOrder` (asc/desc)
-
-See [tools/REGISTRY.md](tools/REGISTRY.md) for the full filter reference.
-
-### Example Requests
-
-Search for high-revenue fitness apps:
+High-revenue fitness slice:
 
 ```bash
-curl -X GET "https://appkittie.com/api/v1/apps?search=fitness&categories=Health+%26+Fitness&minRevenue=10000&sortBy=revenue&sortOrder=desc&limit=10" \
+curl -sS "https://appkittie.com/api/v1/apps?search=fitness&categories=Health+%26+Fitness&minRevenue=10000&sortBy=revenue&sortOrder=desc&limit=10" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-Batch keyword analysis:
+Batch keywords (US storefront):
 
 ```bash
-curl -X POST "https://appkittie.com/api/v1/keywords/difficulty" \
+curl -sS -X POST "https://appkittie.com/api/v1/keywords/difficulty" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"keywords": ["meditation", "sleep tracker", "mindfulness", "breathing exercises", "yoga"], "country": "US"}'
+  -d '{"keywords":["meditation","sleep tracker","mindfulness","breathing exercises","yoga"],"country":"US"}'
 ```
 
-### Credits
+### Credits & headers
 
-The API uses credit-based billing. Each call consumes credits based on the endpoint and data returned.
+- **App list:** 1 credit per returned row; if your balance is below `limit`, the API trims the page.
+- **App detail:** 1 credit per call.
+- **Keyword (single):** 10 credits per call.
+- **Keyword (batch):** 10 credits per keyword that returns data; duplicates removed before charge.
 
-- **List Apps** charges 1 credit per app in the response. Requesting `limit=50` with 50 results costs 50 credits. If your balance is lower than the limit, the response is automatically truncated.
-- **Batch Keywords** charges 10 credits per keyword that returns data. Duplicates are deduplicated before processing.
-- **Keyword Difficulty** charges 10 credits per request.
-- **Get App Detail** charges 1 credit per request.
+Every response can include `X-Credits-Used` and `X-Credits-Remaining`. Balance also appears on the [API Keys](https://appkittie.com/settings/api-keys) page.
 
-Every response includes `X-Credits-Used` and `X-Credits-Remaining` headers. Check your balance from the [API Keys page](https://appkittie.com/settings/api-keys) or inspect these headers.
+### Rate limits
 
-### Rate Limiting
+Per key, **60s sliding window**. Useful headers:
 
-Rate limits are enforced per API key with a 60-second sliding window.
-
-| Header | Description |
-|--------|-------------|
-| `X-RateLimit-Limit` | Max requests per 60-second window |
-| `X-RateLimit-Remaining` | Requests remaining in current window |
-| `X-RateLimit-Reset` | Unix timestamp when the window resets |
-
-When exceeded, the API returns `429` with the reset timestamp. Use exponential backoff or wait for the reset.
-
-### Error Handling
-
-Errors return JSON with an `error` field. Validation errors include a `details` object with field-level messages.
-
-| Status | Meaning |
+| Header | Meaning |
 |--------|---------|
-| `400` | Invalid parameters — check `details` for specifics |
-| `401` | Invalid or missing API key |
-| `402` | Insufficient credits — top up or reduce request scope |
-| `404` | App not found |
-| `429` | Rate limit exceeded — wait for `X-RateLimit-Reset` |
-| `500` | Internal server error |
-| `503` | Search service temporarily unavailable |
+| `X-RateLimit-Limit` | Ceiling for the window |
+| `X-RateLimit-Remaining` | Calls left |
+| `X-RateLimit-Reset` | Unix time when the window rolls |
 
-### Data Available
+`429` includes reset timing—back off or wait.
 
-**App list fields:** Title, icon, developer, category, rating, reviews, downloads estimate, revenue estimate (last 30 days), growth metrics across 7/14/30/60/90-day windows, release and update dates
+### Errors
 
-**App detail fields:** Everything above plus: full description, screenshots, version history, in-app purchases (name, price, duration), Meta ad creatives (image/video, headline, CTA, active status, dates), Apple Search Ads data by country (placement, format, audience targeting, creative assets), creator/influencer partnerships (handle, platform, followers, country), decision-maker contacts (name, email, LinkedIn), social links, hiring status, historical time-series data for rank/reviews/revenue/downloads
+JSON body includes `error`; validation issues add `details` per field.
 
-**Keyword fields:** Popularity (0–100, search volume proxy), difficulty (0–100, competition), app count, traffic score (0–100, combined opportunity metric), top-ranking apps with title/icon/reviews/score/rank
+| HTTP | Situation |
+|------|-----------|
+| 400 | Bad input — inspect `details` |
+| 401 | Missing or invalid key |
+| 402 | Out of credits |
+| 404 | Unknown app |
+| 429 | Rate limited |
+| 500 | Server fault |
+| 503 | Search backend unavailable |
 
-## Installation
+### Fields you can expect
 
-### Cursor
-
-| Method | Command |
-|--------|---------|
-| GitHub Import | Settings → Rules → Add Rule → Remote Rule → `https://github.com/appkittie/mcp` |
-| Project-level | `cp -r mcp/skills/* .cursor/skills/` |
-| Global | `cp -r mcp/skills/* ~/.cursor/skills/` |
-
-### Claude Code
-
-| Method | Command |
-|--------|---------|
-| CLI | `npx skills add appkittie/mcp` |
-| Specific skills | `npx skills add appkittie/mcp --skill keyword-research competitor-analysis` |
-| Manual | `cp -r mcp/skills/* .claude/skills/` |
-
-### Any Agent
-
-```bash
-git submodule add https://github.com/appkittie/mcp.git .agents/appkittie
-```
-
-Works with any tool that supports the Agent Skills standard (`.agents/skills/`, `.cursor/skills/`, `.claude/skills/`, `.codex/skills/`).
-
-## Full Documentation
-
-For complete API documentation with interactive examples, see [docs.appkittie.com](https://docs.appkittie.com).
-
-## Contributing
-
-PRs welcome — fix an inaccuracy, improve a framework, or add a new skill. See [CONTRIBUTING.md](CONTRIBUTING.md).
+- **List rows:** Title, icon, developer, category, rating, reviews, download/revenue estimates (e.g. trailing 30d revenue), multi-window growth, release/update timestamps.
+- **Detail:** Everything above plus description, screenshots, versions, IAP catalog, Meta creatives (assets, copy, status, dates), Apple Search Ads by country, creator deals, contact hints, socials, hiring flags, historical series for rank/reviews/revenue/downloads.
+- **Keywords:** Popularity and difficulty (0–100), competing app count, traffic score (0–100), leaderboard snippets (title, icon, reviews, score, rank).
 
 ## License
 
