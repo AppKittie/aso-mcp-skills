@@ -8,6 +8,56 @@ Turn **Cursor**, **Claude Code**, or any Agent Skills–compatible assistant int
 
 ---
 
+## Install the skills
+
+Today’s coding agents load **Agent Skills** from disk: each skill is a folder with a `SKILL.md` (and optional files), placed where your tool looks—commonly `.cursor/skills/`, `.claude/skills/`, `.agents/skills/`, or `.codex/skills/`. You either **copy** those folders, **subscribe** to a remote rule (Cursor), or use a **CLI** that fetches from GitHub (Claude Code).
+
+**Claude Code** — official installer; downloads this repo and registers the skills:
+
+```bash
+npx skills add appkittie/mcp
+```
+
+Install only specific skills:
+
+```bash
+npx skills add appkittie/mcp --skill keyword-research competitor-analysis
+```
+
+If you already cloned the repo: `cp -r mcp/skills/* .claude/skills/`
+
+**Cursor** — **Settings** (⌘⇧J) → **Rules** → **Add Rule** → **Remote Rule (GitHub)** → `https://github.com/appkittie/mcp`, *or* copy skills locally:
+
+| Where | Command |
+|-------|---------|
+| Project | `cp -r mcp/skills/* .cursor/skills/` |
+| User (all projects) | `cp -r mcp/skills/* ~/.cursor/skills/` |
+
+**Any other agent** — clone and point `skills/` at the path your client documents:
+
+```bash
+git clone https://github.com/appkittie/mcp.git
+cp -r mcp/skills/* .cursor/skills/   # or .claude/skills/, .agents/skills/, .codex/skills/
+```
+
+---
+
+## Install the MCP server
+
+Skills describe *how* to reason about App Store work; **MCP** exposes live tools (`search_apps`, keyword endpoints, etc.) against AppKittie. Create an API key at [appkittie.com/settings/api-keys](https://appkittie.com/settings/api-keys) (it is only shown once when created).
+
+**Claude Code** — register the hosted server (HTTP transport + bearer auth):
+
+```bash
+claude mcp add appkittie --transport http https://mcp.appkittie.com --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+Substitute your real key for `YOUR_API_KEY`.
+
+**Cursor and other MCP clients** — use the same URL and `Authorization: Bearer …` header in your app’s MCP configuration. Example JSON: [Wire up the MCP server](#wire-up-the-mcp-server) below.
+
+---
+
 ## What you get
 
 | Piece | Role |
@@ -20,40 +70,9 @@ Skills compose: e.g. **competitor-analysis** may point you to **keyword-research
 
 ---
 
-## Install the skills
-
-Pick one path (or combine project + global copies if you prefer).
-
-### Cursor
-
-| Approach | Steps |
-|----------|--------|
-| Remote rule | **Settings** (⌘⇧J) → **Rules** → **Add Rule** → **Remote Rule (GitHub)** → `https://github.com/appkittie/mcp` |
-| This repo | `cp -r mcp/skills/* .cursor/skills/` |
-| Machine-wide | `cp -r mcp/skills/* ~/.cursor/skills/` |
-
-### Claude Code
-
-| Approach | Command |
-|----------|---------|
-| Full bundle | `npx skills add appkittie/mcp` |
-| Subset | `npx skills add appkittie/mcp --skill keyword-research competitor-analysis` |
-| From clone | `cp -r mcp/skills/* .claude/skills/` |
-
-### Other agents (Skills standard)
-
-```bash
-git clone https://github.com/appkittie/mcp.git
-cp -r mcp/skills/* .cursor/skills/   # or .agents/skills/, .claude/skills/, .codex/skills/
-```
-
-Compatible with any layout that follows the Agent Skills convention.
-
----
-
 ## Wire up the MCP server
 
-The worker on **Cloudflare** forwards requests to AppKittie; use it from any MCP-capable client.
+The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** users can register via [`claude mcp add` above](#install-the-mcp-server); everyone else (e.g. **Cursor**) typically pastes config like this:
 
 1. Create a key: [appkittie.com/settings/api-keys](https://appkittie.com/settings/api-keys) (shown once—copy immediately).
 2. Register the server:
