@@ -1,5 +1,7 @@
 # AppKittie — App Store Intelligence Skills & MCP Server
 
+![AppKittie — App Store Intelligence branding](appkittie_promo.jpeg)
+
 AI agent skills for **App Store intelligence**, **ASO**, and **competitive analysis**. Built for indie developers, app marketers, and growth teams who want **Cursor**, **Claude Code**, or any Agent Skills-compatible AI assistant to help with app discovery, keyword research, revenue analysis, ad intelligence, and competitor tracking.
 
 Powered by real App Store data via the [AppKittie API](https://appkittie.com). Access a database of **2M+ iOS apps** with downloads, revenue estimates, growth metrics, and ad intelligence.
