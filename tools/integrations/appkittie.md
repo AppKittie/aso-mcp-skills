@@ -134,6 +134,51 @@ Batch keyword analysis (up to 10 keywords).
 
 Results are sorted by opportunity (best first). Only successfully analyzed keywords are returned.
 
+### POST /reviews
+
+Fetch user reviews for an app.
+
+**Body:**
+```json
+{
+  "appId": "284882215",
+  "country": "US",
+  "maxReviews": 100,
+  "offset": 0
+}
+```
+
+**Body Parameters:**
+- `appId` (required) — App Store numeric ID
+- `country` (optional) — App Store country code (default: US)
+- `maxReviews` (optional) — max reviews to return, 1–300 (default: 100)
+- `offset` (optional) — pagination offset (default: 0)
+
+**Response:**
+```json
+{
+  "data": {
+    "appId": 284882215,
+    "country": "us",
+    "reviews": [
+      {
+        "id": "10458723456",
+        "rating": 5,
+        "title": "Great app!",
+        "body": "Love the new features.",
+        "reviewerNickname": "AppFan2024",
+        "date": "2025-12-15T10:30:00Z",
+        "country": "us"
+      }
+    ],
+    "nextOffset": 100,
+    "totalFetched": 100
+  }
+}
+```
+
+Paginate by passing the `nextOffset` value as `offset` in the next request. When `nextOffset` is `null`, there are no more reviews.
+
 ## Error Codes
 
 | Status | Meaning |
@@ -153,3 +198,4 @@ Results are sorted by opportunity (best first). Only successfully analyzed keywo
 | App detail | 1 credit |
 | Keyword difficulty (single) | 10 credits |
 | Keyword difficulty (batch, per keyword) | 10 credits |
+| App reviews (per review returned) | 1 credit |

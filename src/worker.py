@@ -341,6 +341,49 @@ TOOLS = [
         },
         "annotations": {"readOnlyHint": True, "openWorldHint": True},
     },
+    {
+        "name": "get_app_reviews",
+        "description": (
+            "Fetch user reviews for a specific iOS app from the App Store. "
+            "Returns reviews with star ratings, titles, body text, reviewer "
+            "nicknames, and dates. Supports pagination via offset for iterating "
+            "through all available reviews. Use this to understand user sentiment, "
+            "common complaints, feature requests, and overall app reception. "
+            "Costs 1 credit per review returned."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "appId": {
+                    "type": "string",
+                    "description": (
+                        "The App Store numeric ID (trackId) of the app to get reviews for. "
+                        "e.g. '284882215' for Facebook."
+                    ),
+                },
+                "country": {
+                    "type": "string",
+                    "description": (
+                        "App Store country code (e.g. 'US', 'GB', 'DE'). "
+                        "Default: US. Reviews are country-specific."
+                    ),
+                },
+                "maxReviews": {
+                    "type": "integer",
+                    "description": "Maximum reviews to fetch (1–300, default: 100)",
+                },
+                "offset": {
+                    "type": "integer",
+                    "description": (
+                        "Pagination offset. Use nextOffset from previous response "
+                        "to fetch the next page of reviews."
+                    ),
+                },
+            },
+            "required": ["appId"],
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
 ]
 
 
@@ -369,7 +412,7 @@ def tool_result(text, is_error=False):
 
 INSTRUCTIONS = """# AppKittie MCP — Agent Guide
 
-You have access to the AppKittie API through this MCP server. It lets you discover **iOS apps**, analyze **competitors**, research **App Store keywords**, and access **download/revenue intelligence** for any app in the App Store.
+You have access to the AppKittie API through this MCP server. It lets you discover **iOS apps**, analyze **competitors**, research **App Store keywords**, read **user reviews**, and access **download/revenue intelligence** for any app in the App Store.
 
 ## 1. Discovering & Searching Apps
 
@@ -437,6 +480,32 @@ Analyze up to 10 keywords at once. Results are sorted by opportunity (best first
 ### Country Codes
 Use `get_supported_countries` (free) to see valid country codes. Keywords are country-specific — "fitness" may have very different metrics in US vs DE.
 
+## 4. App Reviews
+
+Use `get_app_reviews` to fetch user reviews for any iOS app.
+
+**Parameters:**
+- `appId` (required) — the App Store numeric ID (trackId)
+- `country` — country code (default: US). Reviews are country-specific
+- `maxReviews` — number of reviews to fetch (1–300, default: 100)
+- `offset` — pagination offset. Use `nextOffset` from previous response
+
+**Returns:**
+- Individual reviews with `rating` (1–5), `title`, `body`, `reviewerNickname`, `date`
+- `nextOffset` for pagination (`null` when no more reviews)
+- `totalFetched` — number of reviews in this response
+
+**Cost:** 1 credit per review returned.
+
+**Use cases:**
+- **Sentiment analysis** — understand what users love and hate about an app
+- **Feature request mining** — find the most requested features in reviews
+- **Competitor weakness detection** — read competitor reviews for complaints you can address
+- **Rating trend context** — understand why ratings changed by reading recent reviews
+- **Cross-country comparison** — compare reviews across different markets
+
+**Pagination:** Fetch all reviews by starting with `offset: 0`, then using `nextOffset` from each response until it returns `null`.
+
 ## Credit Costs Summary
 
 | Tool | Cost |
@@ -445,6 +514,7 @@ Use `get_supported_countries` (free) to see valid country codes. Keywords are co
 | get_app_detail | 1 credit per request |
 | get_keyword_difficulty | 10 credits per request |
 | batch_keyword_difficulty | 10 credits per keyword (only charged for successful scrapes) |
+| get_app_reviews | 1 credit per review returned |
 | get_supported_countries | FREE |
 
 ## Tips for Agents
@@ -456,7 +526,8 @@ Use `get_supported_countries` (free) to see valid country codes. Keywords are co
 - **Ad intelligence:** `hasMetaAds=true` reveals which apps are actively spending on user acquisition — great for competitive analysis.
 - **Keyword research workflow:** Start with `batch_keyword_difficulty` to evaluate multiple keyword ideas, then use `get_keyword_difficulty` for deep dives on the most promising ones.
 - **Be credit-efficient:** Use smaller `limit` values when exploring. Default is 50, but 10–20 is often enough for initial discovery.
-- **Country matters:** Keyword metrics vary significantly by country. Always specify the target market.
+- **Country matters:** Keyword and review data vary significantly by country. Always specify the target market.
+- **Review analysis workflow:** Use `get_app_reviews` to understand user sentiment, then combine with `get_app_detail` for the full picture. Compare competitor reviews to find positioning opportunities.
 """
 
 
@@ -556,6 +627,25 @@ PROMPTS = [
             {
                 "name": "ad_platform",
                 "description": "Ad platform: 'meta', 'apple', or 'both' (default: both)",
+                "required": False,
+            },
+        ],
+    },
+    {
+        "name": "review_analysis",
+        "description": (
+            "Analyze user reviews for an iOS app. Identifies sentiment patterns, "
+            "common complaints, feature requests, and competitive review insights."
+        ),
+        "arguments": [
+            {
+                "name": "app_id",
+                "description": "App Store numeric ID to analyze reviews for",
+                "required": True,
+            },
+            {
+                "name": "country",
+                "description": "Country code for reviews (e.g. 'US', 'GB'). Default: US",
                 "required": False,
             },
         ],
@@ -709,6 +799,36 @@ def _render_prompt(name, arguments):
                         f"   - What's the relationship between ad spend and revenue?\n"
                         f"   - Are there well-performing apps NOT running ads (opportunity)?\n"
                         f"5. Provide actionable ad strategy recommendations."
+                    ),
+                },
+            }
+        ]
+
+    if name == "review_analysis":
+        app_id = args.get("app_id", "")
+        country = args.get("country", "US") or "US"
+        return [
+            {
+                "role": "user",
+                "content": {
+                    "type": "text",
+                    "text": (
+                        f"Analyze user reviews for app ID '{app_id}' in the {country} App Store.\n\n"
+                        f"1. Use get_app_detail with appId: '{app_id}' to understand the app.\n"
+                        f"2. Use get_app_reviews with appId: '{app_id}', country: '{country}', "
+                        f"maxReviews: 100 to fetch recent reviews.\n"
+                        f"3. If more context is needed, fetch another page with the nextOffset.\n"
+                        f"4. Analyze the reviews:\n"
+                        f"   - **Overall sentiment** — what's the balance of positive vs negative?\n"
+                        f"   - **Common praise** — what do users love most?\n"
+                        f"   - **Top complaints** — recurring issues and frustrations\n"
+                        f"   - **Feature requests** — what users want added or improved\n"
+                        f"   - **Rating distribution** — are most reviews 5-star or mixed?\n"
+                        f"5. Provide a summary with:\n"
+                        f"   - Sentiment breakdown (positive/neutral/negative percentages)\n"
+                        f"   - Top 5 themes from reviews\n"
+                        f"   - Actionable recommendations based on user feedback\n"
+                        f"   - Competitive opportunities (weaknesses competitors could exploit)"
                     ),
                 },
             }
@@ -900,12 +1020,30 @@ async def handle_get_supported_countries(_args, _api_key):
     return tool_result(json.dumps({"data": countries}, indent=2))
 
 
+async def handle_get_app_reviews(args, api_key):
+    app_id = args.get("appId", "").strip()
+    if not app_id:
+        return tool_result("Error: 'appId' is required.", is_error=True)
+    body = {"appId": app_id}
+    if "country" in args:
+        body["country"] = args["country"]
+    if "maxReviews" in args:
+        body["maxReviews"] = args["maxReviews"]
+    if "offset" in args:
+        body["offset"] = args["offset"]
+    data, err = await api_post("/api/v1/reviews", body, api_key)
+    if err:
+        return tool_result(err, is_error=True)
+    return tool_result(json.dumps(data, indent=2))
+
+
 TOOL_HANDLERS = {
     "search_apps": handle_search_apps,
     "get_app_detail": handle_get_app_detail,
     "get_keyword_difficulty": handle_get_keyword_difficulty,
     "batch_keyword_difficulty": handle_batch_keyword_difficulty,
     "get_supported_countries": handle_get_supported_countries,
+    "get_app_reviews": handle_get_app_reviews,
 }
 
 
