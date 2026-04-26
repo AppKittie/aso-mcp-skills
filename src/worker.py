@@ -2,8 +2,8 @@
 AppKittie MCP Server — Cloudflare Workers (Python)
 
 An MCP (Model Context Protocol) server that proxies the AppKittie API,
-enabling AI agents to discover iOS apps, analyze competitors, research
-keywords, and access App Store intelligence data.
+enabling AI agents to discover Apple App Store and Google Play apps, analyze
+competitors, research keywords, and access mobile app intelligence data.
 
 Authentication: Clients pass their AppKittie API key as a Bearer token
 in the Authorization header. The server forwards it to the AppKittie API.
@@ -39,6 +39,7 @@ GROWTH_METRICS = ["reviews", "downloads", "revenue"]
 
 CONTENT_RATINGS = ["all", "4+", "9+", "12+", "17+"]
 PRICE_TYPES = ["all", "free", "paid"]
+STORE_SOURCES = ["apple_mobile", "google_mobile"]
 
 APP_STORE_COUNTRY_CODES = [
     "US", "GB", "CA", "AU", "NZ", "IE",
@@ -65,7 +66,7 @@ TOOLS = [
     {
         "name": "search_apps",
         "description": (
-            "Search and filter iOS apps from the App Store. "
+            "Search and filter mobile apps from the Apple App Store and Google Play. "
             "Discover apps by category, revenue, downloads, growth, ratings, "
             "and more. Supports full-text search, advanced filtering, sorting, "
             "and cursor-based pagination. Returns app metadata including title, "
@@ -91,6 +92,16 @@ TOOLS = [
                     "type": "array",
                     "items": {"type": "string"},
                     "description": "Categories to exclude from results",
+                },
+                "source": {
+                    "type": "string",
+                    "enum": STORE_SOURCES,
+                    "description": "Store source to include: apple_mobile or google_mobile",
+                },
+                "excludedSource": {
+                    "type": "string",
+                    "enum": STORE_SOURCES,
+                    "description": "Store source to exclude: apple_mobile or google_mobile",
                 },
                 "sortBy": {
                     "type": "string",
@@ -247,7 +258,7 @@ TOOLS = [
     {
         "name": "get_app_detail",
         "description": (
-            "Get detailed information about a specific iOS app by its ID. "
+            "Get detailed information about a specific mobile app by its ID. "
             "Returns comprehensive data including metadata, description, "
             "screenshots, historical download/revenue data, Meta ads, "
             "Apple Search Ads, in-app purchases, decision-makers, "
@@ -272,7 +283,7 @@ TOOLS = [
     {
         "name": "get_keyword_difficulty",
         "description": (
-            "Analyze a single App Store keyword's competitiveness. Returns "
+            "Analyze a single Apple App Store or Google Play keyword's competitiveness. Returns "
             "popularity score (search volume proxy), difficulty score, "
             "number of competing apps, traffic score, and the top-ranking "
             "apps for that keyword. Use this for deep-dive analysis of "
@@ -292,6 +303,11 @@ TOOLS = [
                         "Default: US. Use get_supported_countries to see all valid codes."
                     ),
                 },
+                "source": {
+                    "type": "string",
+                    "enum": STORE_SOURCES,
+                    "description": "Store source to analyze: apple_mobile or google_mobile. Default: apple_mobile.",
+                },
             },
             "required": ["keyword"],
         },
@@ -300,7 +316,7 @@ TOOLS = [
     {
         "name": "batch_keyword_difficulty",
         "description": (
-            "Analyze multiple App Store keywords at once (up to 10). Returns "
+            "Analyze multiple Apple App Store or Google Play keywords at once (up to 10). Returns "
             "popularity, difficulty, app count, and traffic score for each keyword, "
             "sorted by opportunity (best keywords first). More efficient than "
             "individual lookups when researching multiple keywords. "
@@ -323,6 +339,11 @@ TOOLS = [
                         "App Store country code (e.g. 'US', 'GB', 'DE'). Default: US."
                     ),
                 },
+                "source": {
+                    "type": "string",
+                    "enum": STORE_SOURCES,
+                    "description": "Store source to analyze: apple_mobile or google_mobile. Default: apple_mobile.",
+                },
             },
             "required": ["keywords"],
         },
@@ -344,7 +365,7 @@ TOOLS = [
     {
         "name": "get_app_reviews",
         "description": (
-            "Fetch user reviews for a specific iOS app from the App Store. "
+            "Fetch user reviews for a specific Apple App Store or Google Play app. "
             "Returns reviews with star ratings, titles, body text, reviewer "
             "nicknames, and dates. Supports pagination via offset for iterating "
             "through all available reviews. Use this to understand user sentiment, "
@@ -357,8 +378,16 @@ TOOLS = [
                 "appId": {
                     "type": "string",
                     "description": (
-                        "The App Store numeric ID (trackId) of the app to get reviews for. "
-                        "e.g. '284882215' for Facebook."
+                        "The store-specific app ID. Use numeric App Store IDs for Apple apps "
+                        "or package names for Google Play apps."
+                    ),
+                },
+                "source": {
+                    "type": "string",
+                    "enum": STORE_SOURCES,
+                    "description": (
+                        "Store source: apple_mobile or google_mobile. If omitted, AppKittie "
+                        "infers Apple for numeric IDs and Google Play for package names."
                     ),
                 },
                 "country": {
@@ -412,14 +441,15 @@ def tool_result(text, is_error=False):
 
 INSTRUCTIONS = """# AppKittie MCP — Agent Guide
 
-You have access to the AppKittie API through this MCP server. It lets you discover **iOS apps**, analyze **competitors**, research **App Store keywords**, read **user reviews**, and access **download/revenue intelligence** for any app in the App Store.
+You have access to the AppKittie API through this MCP server. It lets you discover **mobile apps** across the Apple App Store and Google Play, analyze **competitors**, research **store keywords**, read **user reviews**, and access **download/revenue intelligence**.
 
 ## 1. Discovering & Searching Apps
 
-Use `search_apps` to find and filter iOS apps across the entire App Store.
+Use `search_apps` to find and filter apps across the Apple App Store and Google Play.
 
 **Key filters:**
 - `search` — full-text search query (e.g. "meditation app", "calorie tracker")
+- `source` — store source: `apple_mobile` or `google_mobile`
 - `categories` — App Store categories (e.g. ["games", "health-fitness", "productivity"])
 - `sortBy` — sort by: `growth`, `rating`, `reviews`, `downloads`, `revenue`, `trending`, `newest`, `updated`, `released`
 - `sortOrder` — "desc" (default) or "asc"
@@ -460,7 +490,7 @@ Use `get_app_detail` with an app ID to get comprehensive data about a single app
 
 ## 3. Keyword Research
 
-Two tools for App Store keyword analysis:
+Two tools for Apple App Store and Google Play keyword analysis:
 
 ### Single Keyword — `get_keyword_difficulty`
 Deep analysis of one keyword. Returns:
@@ -468,7 +498,7 @@ Deep analysis of one keyword. Returns:
 - **Difficulty** — competition score (higher = harder to rank)
 - **Apps Count** — number of apps competing for this keyword
 - **Traffic Score** — estimated traffic potential
-- **Top Apps** — the apps currently ranking for this keyword (with title, icon, reviews, score, rank)
+- **Top Apps** — the apps currently ranking for this keyword (with title, icon, source, reviews, score, rank)
 
 **Cost:** 10 credits per request.
 
@@ -479,13 +509,15 @@ Analyze up to 10 keywords at once. Results are sorted by opportunity (best first
 
 ### Country Codes
 Use `get_supported_countries` (free) to see valid country codes. Keywords are country-specific — "fitness" may have very different metrics in US vs DE.
+Use `source: "google_mobile"` to analyze Google Play instead of the default `apple_mobile`.
 
 ## 4. App Reviews
 
-Use `get_app_reviews` to fetch user reviews for any iOS app.
+Use `get_app_reviews` to fetch user reviews for Apple App Store or Google Play apps.
 
 **Parameters:**
-- `appId` (required) — the App Store numeric ID (trackId)
+- `appId` (required) — numeric App Store ID or Google Play package name
+- `source` — `apple_mobile` or `google_mobile`; omitted values are inferred from `appId`
 - `country` — country code (default: US). Reviews are country-specific
 - `maxReviews` — number of reviews to fetch (1–300, default: 100)
 - `offset` — pagination offset. Use `nextOffset` from previous response
@@ -539,7 +571,7 @@ PROMPTS = [
     {
         "name": "discover_niche",
         "description": (
-            "Discover a profitable App Store niche. Analyzes categories, "
+            "Discover a profitable App Store or Google Play niche. Analyzes categories, "
             "revenue ranges, and growth patterns to find opportunities."
         ),
         "arguments": [
@@ -551,6 +583,11 @@ PROMPTS = [
             {
                 "name": "revenue_range",
                 "description": "Target monthly revenue range (e.g. '1000-10000')",
+                "required": False,
+            },
+            {
+                "name": "source",
+                "description": "Store source: apple_mobile or google_mobile. Default: apple_mobile.",
                 "required": False,
             },
         ],
@@ -572,7 +609,7 @@ PROMPTS = [
     {
         "name": "keyword_research",
         "description": (
-            "Research and prioritize App Store keywords for an app. "
+            "Research and prioritize App Store or Google Play keywords for an app. "
             "Evaluates search volume, difficulty, and opportunity."
         ),
         "arguments": [
@@ -584,6 +621,11 @@ PROMPTS = [
             {
                 "name": "country",
                 "description": "Target country code (e.g. 'US', 'GB'). Default: US",
+                "required": False,
+            },
+            {
+                "name": "source",
+                "description": "Store source: apple_mobile or google_mobile. Default: apple_mobile.",
                 "required": False,
             },
         ],
@@ -634,14 +676,19 @@ PROMPTS = [
     {
         "name": "review_analysis",
         "description": (
-            "Analyze user reviews for an iOS app. Identifies sentiment patterns, "
+            "Analyze user reviews for an App Store or Google Play app. Identifies sentiment patterns, "
             "common complaints, feature requests, and competitive review insights."
         ),
         "arguments": [
             {
                 "name": "app_id",
-                "description": "App Store numeric ID to analyze reviews for",
+                "description": "App Store numeric ID or Google Play package name to analyze reviews for",
                 "required": True,
+            },
+            {
+                "name": "source",
+                "description": "Store source: apple_mobile or google_mobile. Inferred from app_id if omitted.",
+                "required": False,
             },
             {
                 "name": "country",
@@ -660,6 +707,7 @@ def _render_prompt(name, arguments):
     if name == "discover_niche":
         category = args.get("category", "")
         revenue = args.get("revenue_range", "")
+        source = args.get("source", "apple_mobile") or "apple_mobile"
         revenue_filters = ""
         if revenue and "-" in revenue:
             parts = revenue.split("-")
@@ -671,11 +719,11 @@ def _render_prompt(name, arguments):
                     "type": "text",
                     "text": (
                         f"Help me discover profitable opportunities in the '{category}' "
-                        f"App Store category.\n\n"
+                        f"category for source '{source}'.\n\n"
                         f"1. Use search_apps with categories: ['{category}'], sortBy: 'revenue', "
-                        f"sortOrder: 'desc'{revenue_filters}, limit: 20 to see the top revenue apps.\n"
+                        f"sortOrder: 'desc'{revenue_filters}, source: '{source}', limit: 20 to see the top revenue apps.\n"
                         f"2. Then search_apps with categories: ['{category}'], sortBy: 'growth', "
-                        f"growthMetric: 'downloads', growthPeriod: '7d', limit: 20 for fastest growers.\n"
+                        f"growthMetric: 'downloads', growthPeriod: '7d', source: '{source}', limit: 20 for fastest growers.\n"
                         f"3. Analyze the results:\n"
                         f"   - What revenue range do apps in this category typically fall in?\n"
                         f"   - Which apps are growing fastest and why?\n"
@@ -717,6 +765,7 @@ def _render_prompt(name, arguments):
     if name == "keyword_research":
         seeds = args.get("seed_keywords", "")
         country = args.get("country", "US") or "US"
+        source = args.get("source", "apple_mobile") or "apple_mobile"
         keyword_list = [k.strip() for k in seeds.split(",") if k.strip()]
         keywords_json = json.dumps(keyword_list[:10])
         return [
@@ -725,12 +774,12 @@ def _render_prompt(name, arguments):
                 "content": {
                     "type": "text",
                     "text": (
-                        f"Research App Store keywords for country '{country}' "
+                        f"Research keywords for source '{source}' in country '{country}' "
                         f"starting with these seeds: {seeds}\n\n"
                         f"1. Use batch_keyword_difficulty with keywords: {keywords_json}, "
-                        f"country: '{country}' to get initial metrics.\n"
+                        f"country: '{country}', source: '{source}' to get initial metrics.\n"
                         f"2. For the top 3 keywords by opportunity, use get_keyword_difficulty "
-                        f"to see which apps currently rank for them.\n"
+                        f"with source: '{source}' to see which apps currently rank for them.\n"
                         f"3. Analyze the results:\n"
                         f"   - Which keywords have the best volume-to-difficulty ratio?\n"
                         f"   - Are the top-ranking apps beatable (low reviews, low ratings)?\n"
@@ -807,15 +856,17 @@ def _render_prompt(name, arguments):
     if name == "review_analysis":
         app_id = args.get("app_id", "")
         country = args.get("country", "US") or "US"
+        source = args.get("source", "")
+        source_fragment = f", source: '{source}'" if source else ""
         return [
             {
                 "role": "user",
                 "content": {
                     "type": "text",
                     "text": (
-                        f"Analyze user reviews for app ID '{app_id}' in the {country} App Store.\n\n"
+                        f"Analyze user reviews for app ID '{app_id}' in country '{country}'.\n\n"
                         f"1. Use get_app_detail with appId: '{app_id}' to understand the app.\n"
-                        f"2. Use get_app_reviews with appId: '{app_id}', country: '{country}', "
+                        f"2. Use get_app_reviews with appId: '{app_id}', country: '{country}'{source_fragment}, "
                         f"maxReviews: 100 to fetch recent reviews.\n"
                         f"3. If more context is needed, fetch another page with the nextOffset.\n"
                         f"4. Analyze the reviews:\n"
@@ -946,7 +997,7 @@ async def api_post(path, body, api_key):
 # ═══════════════════════════════════════════════════════════════════════════
 
 _SEARCH_APPS_KEYS = [
-    "search", "categories", "excludedCategories", "sortBy", "sortOrder",
+    "search", "categories", "excludedCategories", "source", "excludedSource", "sortBy", "sortOrder",
     "priceType", "minPrice", "maxPrice", "minRating", "maxRating",
     "minReviews", "maxReviews", "minDownloads", "maxDownloads",
     "minRevenue", "maxRevenue", "minLifetimeDownloads", "maxLifetimeDownloads",
@@ -986,6 +1037,8 @@ async def handle_get_keyword_difficulty(args, api_key):
     params = {"keyword": keyword}
     if "country" in args:
         params["country"] = args["country"]
+    if "source" in args:
+        params["source"] = args["source"]
     data, err = await api_get("/api/v1/keywords/difficulty", params, api_key)
     if err:
         return tool_result(err, is_error=True)
@@ -1007,6 +1060,8 @@ async def handle_batch_keyword_difficulty(args, api_key):
     body = {"keywords": keywords}
     if "country" in args:
         body["country"] = args["country"]
+    if "source" in args:
+        body["source"] = args["source"]
     data, err = await api_post("/api/v1/keywords/difficulty", body, api_key)
     if err:
         return tool_result(err, is_error=True)
@@ -1025,6 +1080,8 @@ async def handle_get_app_reviews(args, api_key):
     if not app_id:
         return tool_result("Error: 'appId' is required.", is_error=True)
     body = {"appId": app_id}
+    if "source" in args:
+        body["source"] = args["source"]
     if "country" in args:
         body["country"] = args["country"]
     if "maxReviews" in args:
@@ -1167,8 +1224,8 @@ async def on_fetch(request, env):
             "version": SERVER_VERSION,
             "protocol": "MCP",
             "description": (
-                "AppKittie MCP Server — discover iOS apps, analyze competitors, "
-                "research App Store keywords, and access download/revenue intelligence."
+                "AppKittie MCP Server — discover App Store and Google Play apps, "
+                "research ASO keywords, and access download/revenue intelligence."
             ),
             "tools": len(TOOLS),
             "docs": "https://appkittie.com/docs",

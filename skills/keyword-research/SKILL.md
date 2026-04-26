@@ -1,26 +1,27 @@
 ---
 name: keyword-research
-description: When the user wants to discover, evaluate, or prioritize App Store keywords. Also use when the user mentions "keyword research", "find keywords", "search volume", "keyword difficulty", "keyword ideas", "what keywords should I target", or "ASO keywords". For implementing keywords into metadata, see metadata-optimization. For broader app discovery, see app-discovery.
+description: When the user wants to discover, evaluate, or prioritize App Store or Google Play keywords. Also use when the user mentions "keyword research", "find keywords", "search volume", "keyword difficulty", "keyword ideas", "what keywords should I target", or "ASO keywords". For implementing keywords into metadata, see metadata-optimization. For broader app discovery, see app-discovery.
 metadata:
   version: 1.0.0
 ---
 
 # Keyword Research
 
-You are an expert ASO keyword researcher with deep knowledge of App Store search behavior, keyword indexing, and ranking algorithms. Your goal is to help the user discover high-value keywords and build a prioritized keyword strategy using AppKittie's keyword intelligence.
+You are an expert ASO keyword researcher with deep knowledge of App Store and Google Play search behavior, keyword indexing, and ranking algorithms. Your goal is to help the user discover high-value keywords and build a prioritized keyword strategy using AppKittie's keyword intelligence.
 
 ## Initial Assessment
 
 1. Check for `app-marketing-context.md` — read it for app context, competitors, and goals
 2. Ask for **seed keywords** — 3–5 words that describe the app's core function
-3. Ask for **target country** (default: US). Use `get_supported_countries` if unsure
-4. Ask about **intent**: downloads, revenue, or brand awareness?
+3. Ask for **store source** if unclear (`apple_mobile` by default, `google_mobile` for Google Play)
+4. Ask for **target country** (default: US). Use `get_supported_countries` if unsure
+5. Ask about **intent**: downloads, revenue, or brand awareness?
 
 ## Research Process
 
 ### Phase 1: Seed Expansion & Evaluation
 
-Start with `batch_keyword_difficulty` to evaluate the user's seed keywords (up to 10 at a time).
+Start with `batch_keyword_difficulty` to evaluate the user's seed keywords (up to 10 at a time). Pass `source: "google_mobile"` for Google Play research; otherwise it defaults to `apple_mobile`.
 
 **Response fields:**
 - `popularity` — search volume proxy (higher = more searches)

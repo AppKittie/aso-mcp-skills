@@ -20,7 +20,7 @@ https://appkittie.com/api/v1
 
 ### GET /apps
 
-Search and filter App Store apps.
+Search and filter Apple App Store and Google Play apps.
 
 **Query Parameters:** See [REGISTRY.md](../REGISTRY.md) for the full filter list.
 
@@ -30,6 +30,7 @@ Search and filter App Store apps.
   "data": [
     {
       "app_slug": "headspace-meditation-sleep",
+      "source": "apple_mobile",
       "title": "Headspace: Meditation & Sleep",
       "icon": "https://...",
       "developer": "Headspace Health Inc.",
@@ -78,6 +79,7 @@ Single keyword analysis.
 **Query Parameters:**
 - `keyword` (required) — keyword to analyze
 - `country` (optional) — App Store country code (default: US)
+- `source` (optional) — `apple_mobile` or `google_mobile` (default: `apple_mobile`)
 
 **Response:**
 ```json
@@ -85,6 +87,7 @@ Single keyword analysis.
   "data": {
     "keyword": "meditation",
     "country": "US",
+    "source": "apple_mobile",
     "popularity": 65,
     "difficulty": 78,
     "appsCount": 1200,
@@ -92,6 +95,7 @@ Single keyword analysis.
     "topApps": [
       {
         "appStoreId": "1573759751",
+        "source": "apple_mobile",
         "title": "Headspace: Meditation & Sleep",
         "icon": "https://...",
         "developer": "Headspace Health Inc.",
@@ -112,7 +116,8 @@ Batch keyword analysis (up to 10 keywords).
 ```json
 {
   "keywords": ["meditation", "mindfulness", "sleep sounds"],
-  "country": "US"
+  "country": "US",
+  "source": "apple_mobile"
 }
 ```
 
@@ -123,6 +128,7 @@ Batch keyword analysis (up to 10 keywords).
     {
       "keyword": "sleep sounds",
       "country": "US",
+      "source": "apple_mobile",
       "popularity": 55,
       "difficulty": 45,
       "appsCount": 800,
@@ -142,6 +148,7 @@ Fetch user reviews for an app.
 ```json
 {
   "appId": "284882215",
+  "source": "apple_mobile",
   "country": "US",
   "maxReviews": 100,
   "offset": 0
@@ -149,7 +156,8 @@ Fetch user reviews for an app.
 ```
 
 **Body Parameters:**
-- `appId` (required) — App Store numeric ID
+- `appId` (required) — numeric App Store ID or Google Play package name
+- `source` (optional) — `apple_mobile` or `google_mobile`; inferred from `appId` if omitted
 - `country` (optional) — App Store country code (default: US)
 - `maxReviews` (optional) — max reviews to return, 1–300 (default: 100)
 - `offset` (optional) — pagination offset (default: 0)
@@ -159,6 +167,7 @@ Fetch user reviews for an app.
 {
   "data": {
     "appId": 284882215,
+    "source": "apple_mobile",
     "country": "us",
     "reviews": [
       {
