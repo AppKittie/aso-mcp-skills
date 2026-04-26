@@ -1,10 +1,10 @@
-# AppKittie — App Store intelligence for AI agents
+# AppKittie — mobile app intelligence for AI agents
 
 **Full API documentation:** [www.appkittie.com/docs](https://www.appkittie.com/docs)
 
-![AppKittie — App Store Intelligence branding](appkittie_promo.jpeg)
+![AppKittie — Mobile App Intelligence branding](appkittie_promo.jpeg)
 
-Turn **Cursor**, **Claude Code**, or any Agent Skills–compatible assistant into a research partner for the App Store: discovery, ASO, competitors, growth, revenue, and ads—backed by live data from the [AppKittie API](https://appkittie.com) (**2M+ iOS apps**, estimates, growth windows, and ad signals).
+Turn **Cursor**, **Claude Code**, or any Agent Skills–compatible assistant into a research partner for the App Store and Google Play: discovery, ASO, competitors, growth, revenue, and ads—backed by live data from the [AppKittie API](https://appkittie.com) (**2M+ mobile apps**, estimates, growth windows, and ad signals).
 
 ---
 
@@ -44,7 +44,7 @@ cp -r mcp/skills/* .cursor/skills/   # or .claude/skills/, .agents/skills/, .cod
 
 ## Install the MCP server
 
-Skills describe *how* to reason about App Store work; **MCP** exposes live tools (`search_apps`, keyword endpoints, etc.) against AppKittie. Create an API key at [appkittie.com/settings/api-keys](https://appkittie.com/settings/api-keys) (it is only shown once when created).
+Skills describe *how* to reason about mobile app store work; **MCP** exposes live tools (`search_apps`, keyword endpoints, etc.) against AppKittie. Create an API key at [appkittie.com/settings/api-keys](https://appkittie.com/settings/api-keys) (it is only shown once when created).
 
 **Claude Code** — register the hosted server (HTTP transport + bearer auth):
 
@@ -94,7 +94,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 
 | Tool | Purpose | Credits |
 |------|---------|---------|
-| `search_apps` | Filter iOS apps (30+ parameters) | 1 × rows returned |
+| `search_apps` | Filter App Store and Google Play apps (30+ parameters) | 1 × rows returned |
 | `get_app_detail` | Metadata, revenue, ads, IAPs, creators, contacts, history | 1 / call |
 | `get_keyword_difficulty` | One keyword: popularity, difficulty, traffic, top apps | 10 / call |
 | `batch_keyword_difficulty` | Up to 10 keywords, ranked by opportunity | 10 × keyword |
@@ -208,6 +208,7 @@ Request the next page with `cursor=<nextCursor>`. `null` means end of results.
 |-------|------------|
 | Text | `search` — title, developer, description |
 | Categories | `categories`, `excludedCategories` (comma-separated names) |
+| Store | `source`, `excludedSource` (`apple_mobile` \| `google_mobile`) |
 | Metrics | `minDownloads` / `maxDownloads`, `minRevenue` / `maxRevenue`, `minRating` / `maxRating`, `minReviews` / `maxReviews`, lifetime download/revenue min/max |
 | Price | `priceType` (`all` \| `free` \| `paid`), `minPrice`, `maxPrice` |
 | Growth | `growthPeriod` (`7d`…`90d`), `growthType` (`all` \| `positive` \| `negative`), `minGrowth`, `maxGrowth` |
@@ -233,7 +234,7 @@ Batch keywords (US storefront):
 curl -sS -X POST "https://appkittie.com/api/v1/keywords/difficulty" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"keywords":["meditation","sleep tracker","mindfulness","breathing exercises","yoga"],"country":"US"}'
+  -d '{"keywords":["meditation","sleep tracker","mindfulness","breathing exercises","yoga"],"country":"US","source":"apple_mobile"}'
 ```
 
 ### Credits & headers
