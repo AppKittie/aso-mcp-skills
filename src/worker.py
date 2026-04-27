@@ -1171,7 +1171,7 @@ async def handle_rpc(rpc, api_key, env):
         if not handler:
             return rpc_error(req_id, -32602, f"Unknown tool: {tool_name}")
 
-        resolved_key = api_key or getattr(env, "APPKITTIE_API_KEY", None)
+        resolved_key = api_key
         if not resolved_key:
             if tool_name == "get_supported_countries":
                 try:
