@@ -4,7 +4,7 @@
 
 ![AppKittie — Mobile App Intelligence branding](appkittie_promo.jpeg)
 
-Turn **Cursor**, **Claude Code**, or any Agent Skills–compatible assistant into a research partner for the App Store and Google Play: discovery, ASO, competitors, growth, revenue, and ads—backed by live data from the [AppKittie API](https://appkittie.com) (**2M+ mobile apps**, estimates, growth windows, and ad signals).
+Turn **Cursor**, **Claude Code**, **Manus**, or any Agent Skills–compatible assistant into a research partner for the App Store and Google Play: discovery, ASO, competitors, growth, revenue, and ads—backed by live data from the [AppKittie API](https://appkittie.com) (**2M+ mobile apps**, estimates, growth windows, and ad signals).
 
 ---
 
@@ -32,6 +32,10 @@ If you already cloned the repo: `cp -r mcp/skills/* .claude/skills/`
 |-------|---------|
 | Project | `cp -r mcp/skills/* .cursor/skills/` |
 | User (all projects) | `cp -r mcp/skills/* ~/.cursor/skills/` |
+
+**Manus** — **Skills** → **Create / Import** → **Import from public GitHub repository** → `https://github.com/appkittie/mcp`.
+
+Manus expects a `SKILL.md` at the repository root, so this repo includes a root `SKILL.md` wrapper that routes to the focused workflow docs under `skills/`.
 
 **Any other agent** — clone and point `skills/` at the path your client documents:
 
@@ -152,7 +156,9 @@ Natural language (after skills are installed):
 - “Capture my marketing context so follow-ups stay consistent.”
 - “Rough revenue band for education—who owns the top?”
 
-Slash-style entry points: `/app-discovery`, `/keyword-research`, `/metadata-optimization`, `/competitor-analysis`, `/growth-analysis`, `/ad-intelligence`, `/revenue-analysis`.
+Slash-style entry points in clients that install the focused folders directly: `/app-discovery`, `/keyword-research`, `/metadata-optimization`, `/competitor-analysis`, `/growth-analysis`, `/ad-intelligence`, `/revenue-analysis`.
+
+In clients that import the GitHub repo as one skill, such as Manus, use `/appkittie` and describe the workflow you want.
 
 ---
 
