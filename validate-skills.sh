@@ -7,6 +7,26 @@ ERRORS=0
 echo "Validating skills..."
 echo "===================="
 
+echo ""
+echo "Checking: repository root"
+if [ ! -f "SKILL.md" ]; then
+  echo "  ❌ Missing root SKILL.md"
+  ERRORS=$((ERRORS + 1))
+elif ! head -1 "SKILL.md" | grep -q "^---"; then
+  echo "  ❌ Root SKILL.md missing YAML frontmatter (must start with ---)"
+  ERRORS=$((ERRORS + 1))
+elif ! grep -q "^name:" "SKILL.md"; then
+  echo "  ❌ Root SKILL.md missing name in frontmatter"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "  ✅ Root SKILL.md present"
+fi
+
+if [ -f "$SKILLS_DIR/SKILL.md" ]; then
+  echo "  ❌ Unexpected $SKILLS_DIR/SKILL.md; only skill subdirectories should contain SKILL.md files"
+  ERRORS=$((ERRORS + 1))
+fi
+
 for skill_dir in "$SKILLS_DIR"/*/; do
   skill_name=$(basename "$skill_dir")
   skill_file="$skill_dir/SKILL.md"
