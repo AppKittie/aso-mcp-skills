@@ -51,7 +51,7 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 ### App Data Fields
 
 **List response** (from `search_apps`):
-`app_slug`, `source`, `icon`, `title`, `developer`, `primary_genre`, `score`, `reviews`, `url`, `downloads`, `historical_counts.revenue_last_30d`, `app_released_date_timestamp`, `app_updated_date_timestamp`, `date_updated_timestamp`, `historical_counts.reviews_growth_7d`
+`app_slug`, `source`, `icon`, `title`, `developer`, `primary_genre`, `score`, `reviews`, `url`, `downloads`, `revenue`, `app_released_date_timestamp`, `app_updated_date_timestamp`, `date_updated_timestamp`, `historical_counts.reviews_growth_7d`
 
 **Detail response** (from `get_app_detail`):
 All list fields plus: `description`, `genres`, `languages`, `size`, `version`, `released`, `updated`, `release_notes`, `price`, `currency`, `free`, `developer_url`, `historical_counts`, `historical_data`, `screenshots`, `meta_ads`, `apple_ads`, `in_app_purchases`, `decision_makers`, `socials`, `hiring`, `emails`, `websites`, `topyappers_creators`
