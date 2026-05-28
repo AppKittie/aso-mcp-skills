@@ -28,7 +28,6 @@ SERVER_VERSION = "1.0.0"
 SORT_BY_OPTIONS = [
     "growth", "rating", "reviews", "updated", "released",
     "app_updated", "downloads", "revenue", "trending", "newest",
-    "historical_counts.revenue_last_30d",
 ]
 
 SORT_ORDERS = ["asc", "desc"]

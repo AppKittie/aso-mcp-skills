@@ -38,7 +38,7 @@ Search and filter Apple App Store and Google Play apps.
       "score": 4.9,
       "reviews": 750000,
       "downloads": 500000,
-      "historical_counts": { "revenue_last_30d": 2500000 }
+      "revenue": 2500000
     }
   ],
   "pagination": {
