@@ -43,17 +43,8 @@ STORE_SOURCES = ["apple_mobile", "google_mobile"]
 APP_STORE_COUNTRY_CODES = [
     "US", "GB", "CA", "AU", "NZ", "IE",
     "DE", "FR", "IT", "ES", "NL", "BE", "AT", "CH", "PT", "LU",
-    "SE", "NO", "DK", "FI", "IS",
+    "SE", "NO", "DK", "FI",
     "JP", "KR", "CN", "TW", "HK", "SG",
-    "BR", "MX", "IN", "ID", "TH", "MY", "PH", "VN",
-    "TR", "SA", "AE", "IL", "EG", "NG", "ZA",
-    "PL", "CZ", "RO", "HU", "UA", "RU",
-    "AR", "CL", "CO", "PE",
-    "GR", "BG", "HR", "SK", "SI", "LT", "LV", "EE",
-    "RS", "BA", "MK", "AL", "ME",
-    "QA", "KW", "BH", "OM", "JO", "LB",
-    "KZ", "UZ", "PK", "BD", "LK",
-    "KH", "MM", "LA", "NP",
 ]
 
 
