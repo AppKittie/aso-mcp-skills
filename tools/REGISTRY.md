@@ -66,6 +66,8 @@ All list fields plus: `description`, `genres`, `languages`, `size`, `version`, `
 | `categories` | string[] | App Store categories |
 | `sortBy` | enum | growth, rating, reviews, downloads, revenue, trending, newest, updated, released |
 | `sortOrder` | enum | asc, desc |
+| `growthMetric` | enum | reviews |
+| `growthPeriod` | enum | 7d, 14d, 30d, 60d, 90d |
 | `priceType` | enum | all, free, paid |
 | `minPrice` / `maxPrice` | number | Price range (USD) |
 | `minRating` / `maxRating` | number | Star rating (0–5) |
@@ -74,9 +76,6 @@ All list fields plus: `description`, `genres`, `languages`, `size`, `version`, `
 | `minRevenue` / `maxRevenue` | integer | Est. monthly revenue (USD) |
 | `minLifetimeDownloads` / `maxLifetimeDownloads` | integer | Est. total downloads |
 | `minLifetimeRevenue` / `maxLifetimeRevenue` | integer | Est. total revenue (USD) |
-| `growthMetric` | enum | reviews, downloads, revenue |
-| `growthPeriod` | enum | 7d, 14d, 30d, 60d, 90d |
-| `growthType` | enum | all, positive, negative |
 | `contentRating` | enum | all, 4+, 9+, 12+, 17+ |
 | `languages` | string[] | Supported languages |
 | `developer` | string | Developer name |

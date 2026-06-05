@@ -33,8 +33,7 @@ SORT_BY_OPTIONS = [
 SORT_ORDERS = ["asc", "desc"]
 
 GROWTH_PERIODS = ["7d", "14d", "30d", "60d", "90d"]
-GROWTH_TYPES = ["all", "positive", "negative"]
-GROWTH_METRICS = ["reviews", "downloads", "revenue"]
+GROWTH_METRICS = ["reviews"]
 
 CONTENT_RATINGS = ["all", "4+", "9+", "12+", "17+"]
 PRICE_TYPES = ["all", "free", "paid"]
@@ -57,7 +56,7 @@ TOOLS = [
         "name": "search_apps",
         "description": (
             "Search and filter mobile apps from the Apple App Store and Google Play. "
-            "Discover apps by category, revenue, downloads, growth, ratings, "
+            "Discover apps by category, revenue, downloads, traction, ratings, "
             "and more. Supports full-text search, advanced filtering, sorting, "
             "and cursor-based pagination. Returns app metadata including title, "
             "icon, developer, genre, rating, reviews, downloads, and revenue. "
@@ -170,25 +169,12 @@ TOOLS = [
                 "growthMetric": {
                     "type": "string",
                     "enum": GROWTH_METRICS,
-                    "description": "Which metric to measure growth on: reviews, downloads, or revenue (default: reviews)",
+                    "description": "Which metric to sort growth on: reviews (default: reviews)",
                 },
                 "growthPeriod": {
                     "type": "string",
                     "enum": GROWTH_PERIODS,
-                    "description": "Growth period window: 7d, 14d, 30d, 60d, 90d (default: 7d)",
-                },
-                "growthType": {
-                    "type": "string",
-                    "enum": GROWTH_TYPES,
-                    "description": "Growth direction: all, positive, or negative (default: all)",
-                },
-                "minGrowth": {
-                    "type": "number",
-                    "description": "Minimum growth value",
-                },
-                "maxGrowth": {
-                    "type": "number",
-                    "description": "Maximum growth value",
+                    "description": "Growth sort period window: 7d, 14d, 30d, 60d, 90d (default: 7d)",
                 },
                 "contentRating": {
                     "type": "string",
@@ -443,8 +429,8 @@ Use `search_apps` to find and filter apps across the Apple App Store and Google 
 - `categories` — App Store categories (e.g. ["games", "health-fitness", "productivity"])
 - `sortBy` — sort by: `growth`, `rating`, `reviews`, `downloads`, `revenue`, `trending`, `newest`, `updated`, `released`
 - `sortOrder` — "desc" (default) or "asc"
-- `growthMetric` — what to measure growth by: `reviews`, `downloads`, or `revenue`
-- `growthPeriod` — time window: `7d`, `14d`, `30d`, `60d`, `90d`
+- `growthMetric` — growth sort metric: `reviews`
+- `growthPeriod` — growth sort window: `7d`, `14d`, `30d`, `60d`, `90d`
 
 **Revenue/download filters:**
 - `minDownloads` / `maxDownloads` — estimated monthly downloads
@@ -542,7 +528,7 @@ Use `get_app_reviews` to fetch user reviews for Apple App Store or Google Play a
 ## Tips for Agents
 
 - **Start broad, then narrow:** Use `search_apps` with minimal filters first to understand the landscape, then add filters to zero in.
-- **Growth is powerful:** Sort by `growth` with `growthMetric=downloads` and `growthPeriod=7d` to find apps gaining traction right now.
+- **Growth sorting:** Sort by `growth` with `growthMetric=reviews` and a `growthPeriod` to find apps gaining review traction. Do not use growth direction/range filters.
 - **Find competitors:** Search for apps in the same category with similar download/revenue ranges.
 - **Revenue intelligence:** Use `minRevenue` / `maxRevenue` to find apps in specific revenue brackets. Combine with categories to find profitable niches.
 - **Ad intelligence:** `hasMetaAds=true` reveals which apps are actively spending on user acquisition — great for competitive analysis.
@@ -623,7 +609,7 @@ PROMPTS = [
     {
         "name": "app_growth_report",
         "description": (
-            "Generate a growth report — find the fastest-growing apps "
+            "Generate a traction report — find apps with strong review signals "
             "in a category or across the entire App Store."
         ),
         "arguments": [
@@ -633,13 +619,8 @@ PROMPTS = [
                 "required": False,
             },
             {
-                "name": "growth_metric",
-                "description": "Metric to track: reviews, downloads, or revenue (default: downloads)",
-                "required": False,
-            },
-            {
                 "name": "period",
-                "description": "Time period: 7d, 14d, 30d, 60d, 90d (default: 7d)",
+                "description": "Growth sort period: 7d, 14d, 30d, 60d, 90d (default: 7d)",
                 "required": False,
             },
         ],
@@ -713,7 +694,8 @@ def _render_prompt(name, arguments):
                         f"1. Use search_apps with categories: ['{category}'], sortBy: 'revenue', "
                         f"sortOrder: 'desc'{revenue_filters}, source: '{source}', limit: 20 to see the top revenue apps.\n"
                         f"2. Then search_apps with categories: ['{category}'], sortBy: 'growth', "
-                        f"growthMetric: 'downloads', growthPeriod: '7d', source: '{source}', limit: 20 for fastest growers.\n"
+                        f"growthMetric: 'reviews', growthPeriod: '7d', sortOrder: 'desc', source: '{source}', "
+                        f"limit: 20 for apps with the strongest review growth.\n"
                         f"3. Analyze the results:\n"
                         f"   - What revenue range do apps in this category typically fall in?\n"
                         f"   - Which apps are growing fastest and why?\n"
@@ -786,7 +768,6 @@ def _render_prompt(name, arguments):
 
     if name == "app_growth_report":
         category = args.get("category", "")
-        metric = args.get("growth_metric", "downloads") or "downloads"
         period = args.get("period", "7d") or "7d"
         cat_filter = f", categories: ['{category}']" if category else ""
         return [
@@ -797,15 +778,12 @@ def _render_prompt(name, arguments):
                     "text": (
                         f"Generate an app growth report"
                         f"{f' for the {category} category' if category else ' across all categories'}.\n\n"
-                        f"1. Use search_apps with sortBy: 'growth', growthMetric: '{metric}', "
-                        f"growthPeriod: '{period}', growthType: 'positive'"
-                        f"{cat_filter}, limit: 20 for top gainers.\n"
-                        f"2. Use search_apps with same filters but growthType: 'negative', "
-                        f"sortOrder: 'asc', limit: 10 for top losers.\n"
-                        f"3. Get detail on the top 3 fastest-growing apps.\n"
+                        f"1. Use search_apps with sortBy: 'growth', growthMetric: 'reviews', "
+                        f"growthPeriod: '{period}', sortOrder: 'desc'"
+                        f"{cat_filter}, limit: 20 for apps with strong review growth.\n"
+                        f"2. Get detail on the top 3 most interesting apps.\n"
                         f"4. Compile a report:\n"
-                        f"   - Top gainers with growth rates and likely causes\n"
-                        f"   - Notable decliners and possible reasons\n"
+                        f"   - Top apps by review traction and likely causes\n"
                         f"   - Trends and patterns (seasonal? new feature? viral?)\n"
                         f"   - Opportunities for new entrants"
                     ),
@@ -992,7 +970,7 @@ _SEARCH_APPS_KEYS = [
     "minReviews", "maxReviews", "minDownloads", "maxDownloads",
     "minRevenue", "maxRevenue", "minLifetimeDownloads", "maxLifetimeDownloads",
     "minLifetimeRevenue", "maxLifetimeRevenue", "growthMetric", "growthPeriod",
-    "growthType", "minGrowth", "maxGrowth", "contentRating", "languages",
+    "contentRating", "languages",
     "developer", "releasedAfter", "updatedAfter", "hasWebsite", "hasCreators",
     "hasMetaAds", "hasAppleAds", "hasEmails", "limit", "cursor",
 ]

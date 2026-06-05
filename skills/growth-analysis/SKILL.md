@@ -20,13 +20,13 @@ You are an expert App Store growth analyst. Your goal is to help the user identi
 
 ## Growth Metrics
 
-AppKittie tracks growth across three dimensions:
+Reviews growth sorting is available. Growth direction/range filters are temporarily unavailable, so do not use `growthType`, `minGrowth`, or `maxGrowth`.
 
 | Metric | What It Measures | Best For |
 |--------|-----------------|----------|
-| `reviews` | Change in review count | Engagement and adoption signals |
-| `downloads` | Change in estimated downloads | User acquisition momentum |
-| `revenue` | Change in estimated revenue | Monetization success |
+| `reviews` | Review growth over a selected period | Engagement and adoption momentum |
+| `downloads` | Not supported for growth sorting yet | Use `sortBy: "downloads"` for current scale |
+| `revenue` | Not supported for growth sorting yet | Use `sortBy: "revenue"` for current scale |
 
 Each metric has **five time windows**: 7d, 14d, 30d, 60d, 90d.
 
@@ -35,19 +35,17 @@ Each metric has **five time windows**: 7d, 14d, 30d, 60d, 90d.
 ### Category Growth Report
 
 ```
-1. search_apps(categories: [cat], sortBy: "growth", growthMetric: "downloads",
-   growthPeriod: "7d", growthType: "positive", limit: 20)
-2. search_apps(same but growthType: "negative", sortOrder: "asc", limit: 10)
+1. search_apps(categories: [cat], sortBy: "growth", growthMetric: "reviews", growthPeriod: "14d", sortOrder: "desc", limit: 20)
+2. search_apps(categories: [cat], sortBy: "released", sortOrder: "desc", limit: 10)
 3. get_app_detail on top 3 gainers
 ```
 
 ### Market Movers
 
 ```
-1. search_apps(sortBy: "growth", growthMetric: "downloads",
-   growthPeriod: "7d", growthType: "positive", limit: 20)
-2. search_apps(same but growthPeriod: "30d") to compare short vs medium term
-3. Identify apps that appear in both — sustained growth vs flash-in-the-pan
+1. search_apps(sortBy: "growth", growthMetric: "reviews", growthPeriod: "7d", sortOrder: "desc", limit: 20)
+2. search_apps(sortBy: "released", sortOrder: "desc", limit: 20)
+3. Identify apps with strong review growth despite recent release dates
 ```
 
 ### Growth Deep Dive (Single App)
@@ -75,7 +73,7 @@ Each metric has **five time windows**: 7d, 14d, 30d, 60d, 90d.
 ### Growth Report
 
 **Period analyzed:** [7d/14d/30d/60d/90d]
-**Metric:** [downloads/revenue/reviews]
+**Metric:** reviews
 **Scope:** [category or "all categories"]
 
 **Top Gainers:**
