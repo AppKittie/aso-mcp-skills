@@ -211,7 +211,7 @@ Request the next page with `cursor=<nextCursor>`. `null` means end of results.
 | Store | `source`, `excludedSource` (`apple_mobile` \| `google_mobile`) |
 | Metrics | `minDownloads` / `maxDownloads`, `minRevenue` / `maxRevenue`, `minRating` / `maxRating`, `minReviews` / `maxReviews`, lifetime download/revenue min/max |
 | Price | `priceType` (`all` \| `free` \| `paid`), `minPrice`, `maxPrice` |
-| Growth | `growthPeriod` (`7d`…`90d`), `growthType` (`all` \| `positive` \| `negative`), `minGrowth`, `maxGrowth` |
+| Growth sort | `sortBy=growth`, `growthMetric=reviews`, `growthPeriod` (`7d`, `14d`, `30d`, `60d`, `90d`). Growth direction/range filters are temporarily unavailable |
 | Signals | `hasMetaAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` |
 | Content | `contentRating`, `languages`, `developer` |
 | Time | `releasedAfter`, `updatedAfter` (Unix seconds) |
@@ -274,7 +274,7 @@ JSON body includes `error`; validation issues add `details` per field.
 
 ### Fields you can expect
 
-- **List rows:** Title, icon, developer, category, rating, reviews, download/revenue estimates (e.g. trailing 30d revenue), multi-window growth, release/update timestamps.
+- **List rows:** Title, icon, developer, category, rating, reviews, review growth, download/revenue estimates (e.g. trailing 30d revenue), release/update timestamps.
 - **Detail:** Everything above plus description, screenshots, versions, IAP catalog, Meta creatives (assets, copy, status, dates), Apple Search Ads by country, creator deals, contact hints, socials, hiring flags, historical series for rank/reviews/revenue/downloads.
 - **Keywords:** Popularity and difficulty (0–100), competing app count, traffic score (0–100), leaderboard snippets (title, icon, reviews, score, rank).
 

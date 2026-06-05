@@ -50,10 +50,10 @@ AppKittie provides:
 ### Revenue Growth Tracking
 
 ```
-1. search_apps(sortBy: "growth", growthMetric: "revenue", growthPeriod: "30d",
-   growthType: "positive", limit: 20)
-2. Cross-reference with download growth — is revenue growing because of
-   more users or better monetization?
+1. search_apps(sortBy: "revenue", sortOrder: "desc", limit: 20)
+2. Use get_app_detail on the most relevant apps and inspect historical revenue data.
+3. Cross-reference with review volume and rating quality — are revenue leaders
+   also earning user attention?
 ```
 
 ## Revenue Tier Benchmarks

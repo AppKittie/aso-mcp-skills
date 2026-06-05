@@ -30,7 +30,7 @@ Find apps in a specific category or market segment.
    - `categories` — target category
    - `sortBy: "revenue"` — see the top earners first
    - `limit: 20`
-2. Then sort by `growth` with `growthMetric: "downloads"`, `growthPeriod: "7d"` to see momentum
+2. Then sort by `reviews` to see review traction
 3. Analyze the results for patterns
 
 **Key questions to answer:**
@@ -64,7 +64,7 @@ Identify apps gaining traction right now.
 | 30d | Emerging trends |
 | 60d-90d | Seasonal or structural shifts |
 
-Use `growthType: "positive"` for gainers, `"negative"` for decliners.
+Reviews growth sorting is available with `sortBy: "growth"`, `growthMetric: "reviews"`, and `growthPeriod`. Growth direction/range filters are temporarily unavailable.
 
 ### Ad Intelligence
 
