@@ -62,6 +62,35 @@ Substitute your real key for `YOUR_API_KEY`.
 
 ---
 
+## UPDATE
+
+MCP server updates and skill updates are separate:
+
+### MCP server
+
+If you use the hosted MCP server at `https://mcp.appkittie.com`, there is nothing to reinstall. AppKittie deploys server updates, and your existing MCP configuration keeps working.
+
+If new tools or prompts do not appear immediately, restart your agent or reconnect the AppKittie MCP server so the client refreshes its tool list.
+
+### Skills
+
+If you installed with the skills CLI, update the local skill files:
+
+```bash
+npx skills update
+```
+
+If you copied the folders manually, pull the latest repo and copy them again:
+
+```bash
+git pull
+cp -r mcp/skills/* .claude/skills/   # or .cursor/skills/, .agents/skills/, .codex/skills/
+```
+
+Cursor remote GitHub rules and Manus GitHub imports are managed by those clients. If an update does not appear, refresh/re-import the GitHub rule or restart the client.
+
+---
+
 ## What you get
 
 | Piece | Role |
