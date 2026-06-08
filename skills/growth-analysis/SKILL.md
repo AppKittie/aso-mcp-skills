@@ -53,7 +53,7 @@ Each metric has **five time windows**: 7d, 14d, 30d, 60d, 90d.
 ```
 1. get_app_detail(appId) — check historical_data for trend lines
 2. Look at historical_counts for period-over-period changes
-3. Check if they recently launched ads (meta_ads, apple_ads)
+3. Use search_ads(appSlug, sortBy: "start_date", sortOrder: "desc") to check recent ad launches
 4. Check for recent app updates (updated, release_notes)
 ```
 

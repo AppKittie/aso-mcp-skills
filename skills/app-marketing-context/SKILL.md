@@ -47,7 +47,7 @@ Use `get_app_detail` if available:
 - **Revenue/month** (estimated)
 - **Rating** and **review count**
 - **Current keywords** (if known)
-- **Running ads?** (Meta, Apple Search Ads)
+- **Running ads?** Use `search_apps` for Meta/Apple presence signals and `search_ads(appSlug)` for creative records
 
 ### 5. Goals
 

@@ -39,6 +39,31 @@ CONTENT_RATINGS = ["all", "4+", "9+", "12+", "17+"]
 PRICE_TYPES = ["all", "free", "paid"]
 STORE_SOURCES = ["apple_mobile", "google_mobile"]
 
+AD_SOURCE_OPTIONS = ["all", "meta", "google"]
+AD_MEDIA_TYPES = ["all", "image", "video"]
+AD_STATUSES = ["all", "active", "inactive"]
+AD_SORT_BY_OPTIONS = [
+    "start_date",
+    "end_date",
+    "app_downloads",
+    "app_revenue",
+    "app_released_timestamp",
+    "app_updated_timestamp",
+]
+AD_TEXT_SEARCH_FIELDS = [
+    "creative_text",
+    "title",
+    "body",
+    "caption",
+    "description",
+    "label",
+    "cta_text",
+    "page_name",
+    "developer",
+    "app_title",
+    "category",
+]
+
 APP_STORE_COUNTRY_CODES = [
     "US", "GB", "CA", "AU", "NZ", "IE",
     "DE", "FR", "IT", "ES", "NL", "BE", "AT", "CH", "PT", "LU",
@@ -236,9 +261,10 @@ TOOLS = [
         "description": (
             "Get detailed information about a specific mobile app by its ID. "
             "Returns comprehensive data including metadata, description, "
-            "screenshots, historical download/revenue data, Meta ads, "
-            "Apple Search Ads, in-app purchases, decision-makers, "
+            "screenshots, historical download/revenue data, "
+            "in-app purchases, decision-makers, "
             "social links, and creator partnerships. "
+            "Use search_ads and get_ad_detail to fetch ad creatives separately. "
             "Costs 1 credit per request."
         ),
         "inputSchema": {
@@ -253,6 +279,165 @@ TOOLS = [
                 },
             },
             "required": ["appId"],
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
+    {
+        "name": "search_ads",
+        "description": (
+            "Search and filter ad creatives for mobile apps. Returns Meta and "
+            "Google ad creative records with hosted assets, copy, delivery "
+            "metadata, and advertised app fields. Supports full-text search, "
+            "filters, sorting, and cursor-based pagination. "
+            "Costs 1 credit per ad returned."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "search": {
+                    "type": "string",
+                    "description": "Full-text search query across ad creative text and app metadata",
+                },
+                "textSearchFields": {
+                    "type": "array",
+                    "items": {"type": "string", "enum": AD_TEXT_SEARCH_FIELDS},
+                    "description": "Fields to search. Defaults to all supported ad text fields.",
+                },
+                "adSource": {
+                    "type": "string",
+                    "enum": AD_SOURCE_OPTIONS,
+                    "description": "Ad source to include: all, meta, or google (default: all)",
+                },
+                "mediaType": {
+                    "type": "string",
+                    "enum": AD_MEDIA_TYPES,
+                    "description": "Creative media type: all, image, or video (default: all)",
+                },
+                "status": {
+                    "type": "string",
+                    "enum": AD_STATUSES,
+                    "description": "Ad status: all, active, or inactive (default: all)",
+                },
+                "categories": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Advertised app categories to include",
+                },
+                "excludedCategories": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Advertised app categories to exclude",
+                },
+                "adLanguages": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Representative country codes mapped to ad language codes (e.g. ['US', 'DE'])",
+                },
+                "excludedAdLanguages": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Representative country codes whose mapped ad languages should be excluded",
+                },
+                "appSlug": {
+                    "type": "string",
+                    "description": "Filter ads for a single app slug from search_apps or get_app_detail",
+                },
+                "countries": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Countries where the ad was observed",
+                },
+                "excludedCountries": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Countries to exclude",
+                },
+                "surfaces": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Ad surfaces or placements to include",
+                },
+                "excludedSurfaces": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Ad surfaces or placements to exclude",
+                },
+                "developer": {
+                    "type": "string",
+                    "description": "Exact advertised app developer name",
+                },
+                "startedAfter": {
+                    "type": "integer",
+                    "description": "Only ads that started after this Unix timestamp",
+                },
+                "startedBefore": {
+                    "type": "integer",
+                    "description": "Only ads that started before this Unix timestamp",
+                },
+                "endedAfter": {
+                    "type": "integer",
+                    "description": "Only ads that ended after this Unix timestamp",
+                },
+                "endedBefore": {
+                    "type": "integer",
+                    "description": "Only ads that ended before this Unix timestamp",
+                },
+                "minAppDownloads": {
+                    "type": "integer",
+                    "description": "Minimum estimated monthly downloads for the advertised app",
+                },
+                "maxAppDownloads": {
+                    "type": "integer",
+                    "description": "Maximum estimated monthly downloads for the advertised app",
+                },
+                "minAppRevenue": {
+                    "type": "integer",
+                    "description": "Minimum estimated monthly revenue for the advertised app",
+                },
+                "maxAppRevenue": {
+                    "type": "integer",
+                    "description": "Maximum estimated monthly revenue for the advertised app",
+                },
+                "sortBy": {
+                    "type": "string",
+                    "enum": AD_SORT_BY_OPTIONS,
+                    "description": "Sort by: start_date, end_date, app_downloads, app_revenue, app_released_timestamp, app_updated_timestamp",
+                },
+                "sortOrder": {
+                    "type": "string",
+                    "enum": SORT_ORDERS,
+                    "description": "Sort direction (default: desc)",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Results per page (1–100, default: 50)",
+                    "default": 50,
+                },
+                "cursor": {
+                    "type": "integer",
+                    "description": "Pagination cursor (offset). Use nextCursor from previous response.",
+                },
+            },
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
+    {
+        "name": "get_ad_detail",
+        "description": (
+            "Get detailed information for a single ad creative by ad_doc_id. "
+            "Returns hosted creative assets, copy, delivery metadata, "
+            "advertised app fields, and compact app summary when available. "
+            "Costs 1 credit per request."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "adId": {
+                    "type": "string",
+                    "description": "The ad_doc_id returned by search_ads",
+                },
+            },
+            "required": ["adId"],
         },
         "annotations": {"readOnlyHint": True, "openWorldHint": True},
     },
@@ -458,13 +643,37 @@ Use `get_app_detail` with an app ID to get comprehensive data about a single app
 - Ratings and reviews (overall + current version)
 - Developer info (name, website, socials, decision-makers, hiring status)
 - **Historical data** — time series of downloads, revenue, reviews, and ratings
-- **Meta ads** — Facebook/Instagram ad creatives the app is running
-- **Apple ads** — Apple Search Ads transparency data
 - **Creator partnerships** — influencers promoting the app (via TopYappers)
 
 **Cost:** 1 credit per request.
 
-## 3. Keyword Research
+## 3. Ad Intelligence
+
+Use `search_ads` and `get_ad_detail` for ad creatives. App detail responses do not embed ad payloads.
+
+### Search Ads — `search_ads`
+
+Find Meta and Google ad creatives by search term, advertised app, category, creative type, status, country, surface, dates, and advertised app metrics.
+
+**Key filters:**
+- `search` — full-text search query across creative text and app metadata
+- `adSource` — `all`, `meta`, or `google`
+- `mediaType` — `all`, `image`, or `video`
+- `status` — `all`, `active`, or `inactive`
+- `appSlug` — ads for one app from `search_apps` or `get_app_detail`
+- `categories`, `countries`, `surfaces`, `developer` — market and placement filters
+- `minAppDownloads` / `maxAppDownloads`, `minAppRevenue` / `maxAppRevenue` — advertised app scale filters
+- `sortBy` — `start_date`, `end_date`, `app_downloads`, `app_revenue`, `app_released_timestamp`, `app_updated_timestamp`
+
+**Cost:** 1 credit per ad returned.
+
+### Get Ad Detail — `get_ad_detail`
+
+Use `get_ad_detail` with an `ad_doc_id` from `search_ads` to inspect one creative, including hosted creative assets, copy, delivery metadata, advertised app fields, and compact app summary.
+
+**Cost:** 1 credit per request.
+
+## 4. Keyword Research
 
 Two tools for Apple App Store and Google Play keyword analysis:
 
@@ -487,7 +696,7 @@ Analyze up to 10 keywords at once. Results are sorted by opportunity (best first
 Use `get_supported_countries` (free) to see valid country codes. Keywords are country-specific — "fitness" may have very different metrics in US vs DE.
 Use `source: "google_mobile"` to analyze Google Play instead of the default `apple_mobile`.
 
-## 4. App Reviews
+## 5. App Reviews
 
 Use `get_app_reviews` to fetch user reviews for Apple App Store or Google Play apps.
 
@@ -520,6 +729,8 @@ Use `get_app_reviews` to fetch user reviews for Apple App Store or Google Play a
 |------|------|
 | search_apps | 1 credit per app returned |
 | get_app_detail | 1 credit per request |
+| search_ads | 1 credit per ad returned |
+| get_ad_detail | 1 credit per request |
 | get_keyword_difficulty | 10 credits per request |
 | batch_keyword_difficulty | 10 credits per keyword (only charged for successful scrapes) |
 | get_app_reviews | 1 credit per review returned |
@@ -531,7 +742,7 @@ Use `get_app_reviews` to fetch user reviews for Apple App Store or Google Play a
 - **Growth sorting:** Sort by `growth` with `growthMetric=reviews` and a `growthPeriod` to find apps gaining review traction. Do not use growth direction/range filters.
 - **Find competitors:** Search for apps in the same category with similar download/revenue ranges.
 - **Revenue intelligence:** Use `minRevenue` / `maxRevenue` to find apps in specific revenue brackets. Combine with categories to find profitable niches.
-- **Ad intelligence:** `hasMetaAds=true` reveals which apps are actively spending on user acquisition — great for competitive analysis.
+- **Ad intelligence:** Use `hasMetaAds=true` or `hasAppleAds=true` on `search_apps` to find apps with ad signals, then call `search_ads` by `appSlug` to inspect creatives.
 - **Keyword research workflow:** Start with `batch_keyword_difficulty` to evaluate multiple keyword ideas, then use `get_keyword_difficulty` for deep dives on the most promising ones.
 - **Be credit-efficient:** Use smaller `limit` values when exploring. Default is 50, but 10–20 is often enough for initial discovery.
 - **Country matters:** Keyword and review data vary significantly by country. Always specify the target market.
@@ -628,7 +839,7 @@ PROMPTS = [
     {
         "name": "ad_intelligence",
         "description": (
-            "Discover which apps are running ads (Meta and Apple Search Ads) "
+            "Discover which apps are running ads and inspect Meta/Google creatives "
             "in a specific category or niche."
         ),
         "arguments": [
@@ -639,7 +850,7 @@ PROMPTS = [
             },
             {
                 "name": "ad_platform",
-                "description": "Ad platform: 'meta', 'apple', or 'both' (default: both)",
+                "description": "Ad platform: 'meta', 'google', 'apple', or 'all' (default: all)",
                 "required": False,
             },
         ],
@@ -721,10 +932,11 @@ def _render_prompt(name, arguments):
                         f"Otherwise, use search_apps with search: '{target}', limit: 10.\n"
                         f"2. Identify the top 5 competitors in the same space.\n"
                         f"3. For each competitor, note: downloads, revenue, ratings, reviews, "
-                        f"whether they run Meta ads or Apple ads.\n"
-                        f"4. Use batch_keyword_difficulty with keywords related to '{target}' "
+                        f"and whether search results indicate Meta or Apple ad presence.\n"
+                        f"4. For competitors with ad signals, use search_ads with appSlug to inspect creatives.\n"
+                        f"5. Use batch_keyword_difficulty with keywords related to '{target}' "
                         f"to find keyword opportunities.\n"
-                        f"5. Create a comparison table and identify:\n"
+                        f"6. Create a comparison table and identify:\n"
                         f"   - Strengths and weaknesses of each competitor\n"
                         f"   - Keyword gaps you could exploit\n"
                         f"   - Ad strategies being used\n"
@@ -793,9 +1005,19 @@ def _render_prompt(name, arguments):
 
     if name == "ad_intelligence":
         target = args.get("category_or_search", "")
-        platform = args.get("ad_platform", "both") or "both"
-        meta_filter = platform in ("meta", "both")
-        apple_filter = platform in ("apple", "both")
+        platform = (args.get("ad_platform", "all") or "all").lower()
+        meta_filter = platform in ("meta", "all", "both")
+        apple_filter = platform in ("apple", "all", "both")
+        creative_sources = []
+        if platform in ("meta", "all", "both"):
+            creative_sources.append("meta")
+        if platform in ("google", "all", "both"):
+            creative_sources.append("google")
+        if not creative_sources:
+            creative_sources = ["meta", "google"]
+        creative_source_text = " and ".join(
+            f"adSource: '{source}'" for source in creative_sources
+        )
         return [
             {
                 "role": "user",
@@ -805,17 +1027,19 @@ def _render_prompt(name, arguments):
                         f"Discover which apps are running ads for '{target}'.\n\n"
                         f"1. Use search_apps with search: '{target}'"
                         f"{', hasMetaAds: true' if meta_filter else ''}"
-                        f", sortBy: 'revenue', limit: 20 to find apps with Meta ads.\n"
+                        f", sortBy: 'revenue', limit: 20 to identify top apps with revenue/ad signals.\n"
                         f"2. Use search_apps with search: '{target}'"
                         f"{', hasAppleAds: true' if apple_filter else ''}"
-                        f", sortBy: 'revenue', limit: 20 for Apple Search Ads.\n"
-                        f"3. Get detail on the top 5 advertisers to see their ad creatives.\n"
-                        f"4. Analyze:\n"
+                        f", sortBy: 'revenue', limit: 20 for an Apple Search Ads signal pass when relevant.\n"
+                        f"3. For the top advertisers, use search_ads with appSlug and {creative_source_text}, "
+                        f"sortBy: 'start_date', sortOrder: 'desc', limit: 10 to inspect creatives.\n"
+                        f"4. Use get_ad_detail on standout ad_doc_id values when you need full creative metadata.\n"
+                        f"5. Analyze:\n"
                         f"   - Which apps are spending on ads and on which platforms?\n"
-                        f"   - What do their Meta ad creatives look like?\n"
+                        f"   - What do their ad creatives and copy look like?\n"
                         f"   - What's the relationship between ad spend and revenue?\n"
                         f"   - Are there well-performing apps NOT running ads (opportunity)?\n"
-                        f"5. Provide actionable ad strategy recommendations."
+                        f"6. Provide actionable ad strategy recommendations."
                     ),
                 },
             }
@@ -975,6 +1199,15 @@ _SEARCH_APPS_KEYS = [
     "hasMetaAds", "hasAppleAds", "hasEmails", "limit", "cursor",
 ]
 
+_SEARCH_ADS_KEYS = [
+    "search", "textSearchFields", "adSource", "mediaType", "status",
+    "categories", "excludedCategories", "adLanguages", "excludedAdLanguages",
+    "appSlug", "countries", "excludedCountries", "surfaces", "excludedSurfaces",
+    "developer", "startedAfter", "startedBefore", "endedAfter", "endedBefore",
+    "minAppDownloads", "maxAppDownloads", "minAppRevenue", "maxAppRevenue",
+    "sortBy", "sortOrder", "limit", "cursor",
+]
+
 
 def _pick(args, keys):
     return {k: args[k] for k in keys if k in args}
@@ -993,6 +1226,24 @@ async def handle_get_app_detail(args, api_key):
     if not app_id:
         return tool_result("Error: 'appId' is required.", is_error=True)
     data, err = await api_get(f"/api/v1/apps/{app_id}", {}, api_key)
+    if err:
+        return tool_result(err, is_error=True)
+    return tool_result(json.dumps(data, indent=2))
+
+
+async def handle_search_ads(args, api_key):
+    params = _pick(args, _SEARCH_ADS_KEYS)
+    data, err = await api_get("/api/v1/ads", params, api_key)
+    if err:
+        return tool_result(err, is_error=True)
+    return tool_result(json.dumps(data, indent=2))
+
+
+async def handle_get_ad_detail(args, api_key):
+    ad_id = args.get("adId", "").strip()
+    if not ad_id:
+        return tool_result("Error: 'adId' is required.", is_error=True)
+    data, err = await api_get(f"/api/v1/ads/{ad_id}", {}, api_key)
     if err:
         return tool_result(err, is_error=True)
     return tool_result(json.dumps(data, indent=2))
@@ -1065,6 +1316,8 @@ async def handle_get_app_reviews(args, api_key):
 TOOL_HANDLERS = {
     "search_apps": handle_search_apps,
     "get_app_detail": handle_get_app_detail,
+    "search_ads": handle_search_ads,
+    "get_ad_detail": handle_get_ad_detail,
     "get_keyword_difficulty": handle_get_keyword_difficulty,
     "batch_keyword_difficulty": handle_batch_keyword_difficulty,
     "get_supported_countries": handle_get_supported_countries,

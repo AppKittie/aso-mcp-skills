@@ -31,6 +31,8 @@ Prefer live AppKittie data. Use the MCP tools if the client exposes them:
 
 - `search_apps`
 - `get_app_detail`
+- `search_ads`
+- `get_ad_detail`
 - `get_keyword_difficulty`
 - `batch_keyword_difficulty`
 - `get_app_reviews`

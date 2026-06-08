@@ -19,6 +19,8 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 |----------|--------|---------|------|
 | `/api/v1/apps` | GET | Search and filter apps | 1 credit/hit |
 | `/api/v1/apps/:appId` | GET | Get app detail | 1 credit |
+| `/api/v1/ads` | GET | Search and filter ad creatives | 1 credit/hit |
+| `/api/v1/ads/:adId` | GET | Get ad detail | 1 credit |
 | `/api/v1/keywords/difficulty` | GET | Single keyword analysis | 10 credits |
 | `/api/v1/keywords/difficulty` | POST | Batch keyword analysis (up to 10) | 10 credits/keyword |
 | `/api/v1/reviews` | POST | Fetch app reviews | 1 credit/review |
@@ -29,6 +31,8 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 |----------|-------------|--------|
 | `search_apps` | `/api/v1/apps` | GET |
 | `get_app_detail` | `/api/v1/apps/:appId` | GET |
+| `search_ads` | `/api/v1/ads` | GET |
+| `get_ad_detail` | `/api/v1/ads/:adId` | GET |
 | `get_keyword_difficulty` | `/api/v1/keywords/difficulty` | GET |
 | `batch_keyword_difficulty` | `/api/v1/keywords/difficulty` | POST |
 | `get_app_reviews` | `/api/v1/reviews` | POST |
@@ -41,12 +45,12 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 | `app-discovery` | `search_apps`, `get_app_detail` |
 | `keyword-research` | `batch_keyword_difficulty`, `get_keyword_difficulty`, `search_apps` |
 | `metadata-optimization` | `batch_keyword_difficulty`, `get_keyword_difficulty` |
-| `competitor-analysis` | `search_apps`, `get_app_detail`, `batch_keyword_difficulty` |
-| `growth-analysis` | `search_apps`, `get_app_detail` |
-| `ad-intelligence` | `search_apps`, `get_app_detail` |
+| `competitor-analysis` | `search_apps`, `get_app_detail`, `search_ads`, `get_ad_detail`, `batch_keyword_difficulty` |
+| `growth-analysis` | `search_apps`, `get_app_detail`, `search_ads` |
+| `ad-intelligence` | `search_apps`, `search_ads`, `get_ad_detail`, `get_app_detail` |
 | `revenue-analysis` | `search_apps`, `get_app_detail` |
 | `review-analysis` | `get_app_reviews`, `get_app_detail`, `search_apps` |
-| `app-marketing-context` | `get_app_detail`, `search_apps` |
+| `app-marketing-context` | `get_app_detail`, `search_apps`, `search_ads` |
 
 ### App Data Fields
 
@@ -54,7 +58,17 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 `app_slug`, `source`, `icon`, `title`, `developer`, `primary_genre`, `score`, `reviews`, `url`, `downloads`, `revenue`, `app_released_date_timestamp`, `app_updated_date_timestamp`, `date_updated_timestamp`, `historical_counts.reviews_growth_7d`
 
 **Detail response** (from `get_app_detail`):
-All list fields plus: `description`, `genres`, `languages`, `size`, `version`, `released`, `updated`, `release_notes`, `price`, `currency`, `free`, `developer_url`, `historical_counts`, `historical_data`, `screenshots`, `meta_ads`, `apple_ads`, `in_app_purchases`, `decision_makers`, `socials`, `hiring`, `emails`, `websites`, `topyappers_creators`
+All list fields plus: `description`, `genres`, `languages`, `size`, `version`, `released`, `updated`, `release_notes`, `price`, `currency`, `free`, `developer_url`, `historical_counts`, `historical_data`, `screenshots`, `in_app_purchases`, `decision_makers`, `socials`, `hiring`, `emails`, `websites`, `topyappers_creators`
+
+Ad creatives are fetched separately with `search_ads` and `get_ad_detail`.
+
+### Ad Data Fields
+
+**List response** (from `search_ads`):
+`ad_doc_id`, `ad_source`, `ad_network`, `page_name`, `type`, `src`, `poster`, `preview_url`, `title`, `body`, `caption`, `description`, `label`, `cta_text`, `cta_type`, `link_url`, `is_active`, `publisher_platform`, `countries`, `surfaces`, `start_date`, `end_date`, `creative_text`, `app_slug`, `app_title`, `app_url`, `app_icon`, `category`, `ad_language`, `app_downloads`, `app_revenue`, `developer`
+
+**Detail response** (from `get_ad_detail`):
+All ad list fields plus deeper delivery/transparency fields such as `transparency_by_location`, `region_stats`, `content`, and compact `app` summary when available.
 
 ### Search Filters
 
@@ -84,5 +98,29 @@ All list fields plus: `description`, `genres`, `languages`, `size`, `version`, `
 | `hasMetaAds` | boolean | Running Meta ads |
 | `hasAppleAds` | boolean | Running Apple Search Ads |
 | `hasEmails` | boolean | Has contact emails |
+| `limit` | integer | Results per page (1–100) |
+| `cursor` | integer | Pagination offset |
+
+### Ad Search Filters
+
+| Filter | Type | Description |
+|--------|------|-------------|
+| `search` | string | Full-text search across creative text and app metadata |
+| `textSearchFields` | string[] | Search fields such as `creative_text`, `title`, `body`, `cta_text`, `page_name`, `developer`, `app_title`, `category` |
+| `adSource` | enum | `all`, `meta`, `google` |
+| `mediaType` | enum | `all`, `image`, `video` |
+| `status` | enum | `all`, `active`, `inactive` |
+| `appSlug` | string | Ads for one app |
+| `categories` / `excludedCategories` | string[] | Advertised app categories |
+| `adLanguages` / `excludedAdLanguages` | string[] | Representative country codes mapped to ad language |
+| `countries` / `excludedCountries` | string[] | Countries where ads were observed |
+| `surfaces` / `excludedSurfaces` | string[] | Ad surfaces or placements |
+| `developer` | string | Advertised app developer |
+| `startedAfter` / `startedBefore` | integer | Ad start date Unix timestamp bounds |
+| `endedAfter` / `endedBefore` | integer | Ad end date Unix timestamp bounds |
+| `minAppDownloads` / `maxAppDownloads` | integer | Advertised app estimated monthly downloads |
+| `minAppRevenue` / `maxAppRevenue` | integer | Advertised app estimated monthly revenue |
+| `sortBy` | enum | `start_date`, `end_date`, `app_downloads`, `app_revenue`, `app_released_timestamp`, `app_updated_timestamp` |
+| `sortOrder` | enum | `asc`, `desc` |
 | `limit` | integer | Results per page (1–100) |
 | `cursor` | integer | Pagination offset |
