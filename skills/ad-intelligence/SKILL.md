@@ -20,20 +20,32 @@ You are an expert in mobile app user acquisition and ad intelligence. Your goal 
 
 ## Data Available
 
-AppKittie tracks two ad platforms:
+AppKittie exposes ad intelligence in two places:
 
-### Meta Ads (Facebook / Instagram)
+### Ad Creative Records
+
+Use `search_ads` and `get_ad_detail` for creative-level data. App detail responses do not embed ad arrays.
+
+Supported creative sources:
+
+- Meta ads (`adSource: "meta"`)
+- Google ads (`adSource: "google"`)
+
+Creative data can include:
+
 - Ad creative images and videos (with poster frames)
 - Ad copy and landing pages
-- Available via `get_app_detail` → `meta_ads` field
+- Delivery dates, status, surfaces, countries, and impression fields
+- Advertised app metadata such as `app_slug`, `app_title`, downloads, and revenue
 
-### Apple Search Ads
-- Ad transparency data
-- Available via `get_app_detail` → `apple_ads` field
+### App-Level Ad Signals
 
-### Discovery Filters
+Use `search_apps` to discover apps with ad presence signals:
+
 - `hasMetaAds: true` — filter `search_apps` to only show apps with Meta ad creatives
-- `hasAppleAds: true` — filter to apps with Apple Search Ads presence
+- `hasAppleAds: true` — filter to apps with Apple Search Ads presence signals
+
+Apple Search Ads presence is currently an app-level signal in MCP workflows, not an embedded app detail payload.
 
 ## Analysis Workflows
 
@@ -41,21 +53,27 @@ AppKittie tracks two ad platforms:
 
 ```
 1. search_apps(categories: [cat], hasMetaAds: true, sortBy: "revenue", limit: 20)
-   → Who's spending on Meta ads?
+   → Which high-revenue apps have Meta ad signals?
 2. search_apps(categories: [cat], hasAppleAds: true, sortBy: "revenue", limit: 20)
-   → Who's spending on Apple Search Ads?
-3. search_apps(categories: [cat], sortBy: "revenue", limit: 20)
+   → Which high-revenue apps have Apple Search Ads signals?
+3. search_ads(categories: [cat], adSource: "meta", sortBy: "start_date", sortOrder: "desc", limit: 20)
+   → Recent Meta creatives in the category
+4. search_ads(categories: [cat], adSource: "google", sortBy: "start_date", sortOrder: "desc", limit: 20)
+   → Recent Google creatives in the category
+5. search_apps(categories: [cat], sortBy: "revenue", limit: 20)
    → Top apps overall for comparison
-4. Cross-reference: which top-revenue apps DON'T run ads? (organic opportunity)
+6. Cross-reference: which top-revenue apps DON'T show ad signals? (organic opportunity)
 ```
 
 ### Competitor Creative Analysis
 
 ```
-1. get_app_detail for each competitor
-2. Review meta_ads — image/video creatives, messaging themes
-3. Look for patterns: UGC vs polished, feature-focused vs emotional
-4. Note what's missing — creative angles competitors haven't tried
+1. get_app_detail for each competitor to collect app context and app_slug
+2. search_ads(appSlug: competitor.app_slug, adSource: "meta", limit: 20)
+3. search_ads(appSlug: competitor.app_slug, adSource: "google", limit: 20)
+4. Use get_ad_detail for standout ad_doc_id values
+5. Look for patterns: UGC vs polished, feature-focused vs emotional
+6. Note what's missing — creative angles competitors haven't tried
 ```
 
 ## Ad Strategy Signals
@@ -65,7 +83,7 @@ AppKittie tracks two ad platforms:
 | High revenue + Meta ads | Performance marketing works for this niche |
 | High revenue + No ads | Strong organic / brand — hard to outspend |
 | Low revenue + Meta ads | UA may not be efficient — or early-stage investment |
-| High growth + Apple ads | Search ads capturing high-intent users |
+| High growth + Apple Search Ads signal | Search ads may be capturing high-intent users |
 | Many competitors with ads | Competitive UA market — need strong creatives to stand out |
 | Few competitors with ads | Opportunity to capture paid channels before others do |
 
@@ -78,17 +96,17 @@ AppKittie tracks two ad platforms:
 
 **Ad Platform Breakdown:**
 
-| Metric | Meta Ads | Apple Ads | No Ads |
-|--------|----------|-----------|--------|
-| App count | [N] | [N] | [N] |
-| Avg. revenue | [est.] | [est.] | [est.] |
-| Avg. downloads | [est.] | [est.] | [est.] |
+| Metric | Meta Creatives | Google Creatives | Apple Signal | No Ads |
+|--------|----------------|------------------|--------------|--------|
+| App count | [N] | [N] | [N] | [N] |
+| Avg. revenue | [est.] | [est.] | [est.] | [est.] |
+| Avg. downloads | [est.] | [est.] | [est.] | [est.] |
 
 **Top Advertisers:**
 
 | App | Platform(s) | Revenue/mo | Downloads/mo | Ad Count |
 |-----|------------|------------|-------------|----------|
-| [app] | Meta / Apple / Both | [est.] | [est.] | [N] |
+| [app] | Meta / Google / Apple signal | [est.] | [est.] | [N] |
 
 **Creative Patterns:**
 1. [Common ad formats and styles]

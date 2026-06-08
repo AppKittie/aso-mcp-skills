@@ -128,7 +128,9 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | Tool | Purpose | Credits |
 |------|---------|---------|
 | `search_apps` | Filter App Store and Google Play apps (30+ parameters) | 1 × rows returned |
-| `get_app_detail` | Metadata, revenue, ads, IAPs, creators, contacts, history | 1 / call |
+| `get_app_detail` | Metadata, revenue, IAPs, creators, contacts, history | 1 / call |
+| `search_ads` | Search Meta and Google ad creatives | 1 × rows returned |
+| `get_ad_detail` | Full detail for one ad creative | 1 / call |
 | `get_keyword_difficulty` | One keyword: popularity, difficulty, traffic, top apps | 10 / call |
 | `batch_keyword_difficulty` | Up to 10 keywords, ranked by opportunity | 10 × keyword |
 | `get_supported_countries` | Valid storefront codes | Free |
@@ -162,7 +164,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 |-------|------|---------|
 | Growth | [growth-analysis](skills/growth-analysis) | Fast movers, drivers, emerging patterns |
 | Revenue | [revenue-analysis](skills/revenue-analysis) | Benchmarks, monetization, IAP shape, pricing |
-| Ads | [ad-intelligence](skills/ad-intelligence) | Meta + Apple Search Ads footprint, creatives, UA angles |
+| Ads | [ad-intelligence](skills/ad-intelligence) | Meta/Google creatives, Apple Search Ads signals, UA angles |
 
 ### Shared context
 
@@ -215,6 +217,8 @@ curl -sS "https://appkittie.com/api/v1/apps?search=fitness&limit=5" \
 |-------|------|------|---------|
 | `/api/v1/apps` | GET | Search / filter apps | 1 per app in the payload |
 | `/api/v1/apps/:appId` | GET | Full detail for one app | 1 per request |
+| `/api/v1/ads` | GET | Search / filter ad creatives | 1 per ad in the payload |
+| `/api/v1/ads/:adId` | GET | Full detail for one ad creative | 1 per request |
 | `/api/v1/keywords/difficulty` | GET | Single keyword | 10 per request |
 | `/api/v1/keywords/difficulty` | POST | Batch (≤10 keywords) | 10 per keyword with data |
 
@@ -248,6 +252,16 @@ Request the next page with `cursor=<nextCursor>`. `null` means end of results.
 
 Full parameter matrix: [tools/REGISTRY.md](tools/REGISTRY.md).
 
+### `GET /api/v1/ads` filters
+
+| Group | Parameters |
+|-------|------------|
+| Text | `search`, `textSearchFields` |
+| Creative | `adSource` (`all` \| `meta` \| `google`), `mediaType` (`all` \| `image` \| `video`), `status` (`all` \| `active` \| `inactive`) |
+| App | `appSlug`, `categories`, `excludedCategories`, `developer`, app download/revenue min/max |
+| Delivery | `countries`, `excludedCountries`, `surfaces`, `excludedSurfaces`, start/end timestamp bounds |
+| Order | `sortBy` (`start_date`, `end_date`, `app_downloads`, `app_revenue`, `app_released_timestamp`, `app_updated_timestamp`), `sortOrder` (`asc` \| `desc`) |
+
 ### cURL samples
 
 High-revenue fitness slice:
@@ -270,6 +284,8 @@ curl -sS -X POST "https://appkittie.com/api/v1/keywords/difficulty" \
 
 - **App list:** 1 credit per returned row; if your balance is below `limit`, the API trims the page.
 - **App detail:** 1 credit per call.
+- **Ads list:** 1 credit per returned ad; if your balance is below `limit`, the API trims the page.
+- **Ad detail:** 1 credit per call.
 - **Keyword (single):** 10 credits per call.
 - **Keyword (batch):** 10 credits per keyword that returns data; duplicates removed before charge.
 
@@ -304,7 +320,8 @@ JSON body includes `error`; validation issues add `details` per field.
 ### Fields you can expect
 
 - **List rows:** Title, icon, developer, category, rating, reviews, review growth, download/revenue estimates (e.g. trailing 30d revenue), release/update timestamps.
-- **Detail:** Everything above plus description, screenshots, versions, IAP catalog, Meta creatives (assets, copy, status, dates), Apple Search Ads by country, creator deals, contact hints, socials, hiring flags, historical series for rank/reviews/revenue/downloads.
+- **Detail:** Everything above plus description, screenshots, versions, IAP catalog, creator deals, contact hints, socials, hiring flags, historical series for rank/reviews/revenue/downloads.
+- **Ads:** Creative assets, copy, status, dates, surfaces, countries, delivery metadata, advertised app fields, and compact app summaries.
 - **Keywords:** Popularity and difficulty (0–100), competing app count, traffic score (0–100), leaderboard snippets (title, icon, reviews, score, rank).
 
 ## License

@@ -63,11 +63,69 @@ Get detailed data for a single app.
   "data": {
     "title": "Headspace: Meditation & Sleep",
     "description": "...",
-    "meta_ads": [{ "src": "https://...", "poster": "https://..." }],
-    "apple_ads": [{ ... }],
     "in_app_purchases": [{ "name": "Annual", "price": "$69.99" }],
     "historical_data": [{ "date": "2026-01-01", "downloads": 15000 }],
     ...
+  }
+}
+```
+
+Ad creatives are not embedded in app detail responses. Fetch them separately with `/ads` and `/ads/:adId`.
+
+### GET /ads
+
+Search and filter Meta and Google ad creatives.
+
+**Query Parameters:** See [REGISTRY.md](../REGISTRY.md) for the full ad filter list.
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "ad_doc_id": "meta_ad_123",
+      "ad_source": "meta",
+      "type": "video",
+      "src": "https://...",
+      "poster": "https://...",
+      "title": "Sleep better tonight",
+      "body": "Try guided meditations for deep sleep.",
+      "cta_text": "Install Now",
+      "is_active": true,
+      "start_date": 1751328000,
+      "app_slug": "headspace-meditation-sleep",
+      "app_title": "Headspace: Meditation & Sleep",
+      "developer": "Headspace Health Inc."
+    }
+  ],
+  "pagination": {
+    "nextCursor": 20,
+    "totalCount": 250
+  }
+}
+```
+
+### GET /ads/:adId
+
+Get detailed data for a single ad creative.
+
+**Response:**
+```json
+{
+  "data": {
+    "ad_doc_id": "meta_ad_123",
+    "ad_source": "meta",
+    "type": "video",
+    "src": "https://...",
+    "poster": "https://...",
+    "title": "Sleep better tonight",
+    "body": "Try guided meditations for deep sleep.",
+    "app_slug": "headspace-meditation-sleep",
+    "app": {
+      "app_slug": "headspace-meditation-sleep",
+      "title": "Headspace: Meditation & Sleep",
+      "developer": "Headspace Health Inc."
+    }
   }
 }
 ```

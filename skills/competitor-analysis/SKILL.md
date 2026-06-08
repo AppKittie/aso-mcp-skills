@@ -49,8 +49,8 @@ For each competitor, use `get_app_detail` to collect:
 | Rating & reviews | User satisfaction, common complaints |
 | Downloads & revenue | Market share estimate |
 | Historical data | Growth trajectory |
-| Meta ads | Ad creative strategy, spend signals |
-| Apple ads | Search ad investment |
+| Ad signals | Meta / Apple presence from search results |
+| Ad creatives | Use `search_ads(appSlug)` and `get_ad_detail(adId)` for creative strategy |
 | In-app purchases | Monetization model |
 | Creators | Influencer partnerships |
 
@@ -80,9 +80,9 @@ Identify quadrants:
 
 **Competitor Matrix:**
 
-| App | Downloads/mo | Revenue/mo | Rating | Reviews | Meta Ads? | Apple Ads? |
-|-----|-------------|------------|--------|---------|-----------|------------|
-| [comp1] | ... | ... | ... | ... | ✅/❌ | ✅/❌ |
+| App | Downloads/mo | Revenue/mo | Rating | Reviews | Meta? | Google? | Apple signal? |
+|-----|-------------|------------|--------|---------|-------|---------|---------------|
+| [comp1] | ... | ... | ... | ... | ✅/❌ | ✅/❌ | ✅/❌ |
 
 **Keyword Gap Analysis:**
 
