@@ -128,12 +128,18 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | Tool | Purpose | Credits |
 |------|---------|---------|
 | `search_apps` | Filter App Store and Google Play apps (30+ parameters) | 1 × rows returned |
-| `get_app_detail` | Metadata, revenue, IAPs, creators, contacts, history | 1 / call |
-| `search_ads` | Search Meta and Google ad creatives | 1 × rows returned |
+| `get_app_detail` | Metadata, revenue, IAPs, contacts, growth summaries | 1 / call |
+| `get_app_historicals` | Raw historical metric series for one app | 1 / call |
+| `search_ads` | Search Meta and Google ad creatives; accepts app slug, store ID, or store URL for app-specific ads | 1 × rows returned |
 | `get_ad_detail` | Full detail for one ad creative | 1 / call |
+| `list_creators` | Creator profile data for one app | 1 × rows returned |
+| `list_organic_content` | Organic creator videos for one app | 1 × rows returned |
 | `get_keyword_difficulty` | One keyword: popularity, difficulty, traffic, top apps | 10 / call |
 | `batch_keyword_difficulty` | Up to 10 keywords, ranked by opportunity | 10 × keyword |
+| `get_app_reviews` | User reviews for one App Store or Google Play app | 1 × rows returned |
 | `get_supported_countries` | Valid storefront codes | Free |
+
+App-scoped MCP tools such as `search_ads`, `list_creators`, `list_organic_content`, and `get_app_historicals` accept `appSlug`/`app_slug`. They can also use `appId`, `appStoreId`, or `appStoreUrl` when a user provides a store ID or store listing URL.
 
 ### MCP prompts
 
@@ -144,6 +150,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | `keyword_research` | Prioritize and document a keyword set |
 | `app_growth_report` | Gainers, losers, trend read |
 | `ad_intelligence` | Category or niche ad landscape |
+| `review_analysis` | Mine app reviews for sentiment, complaints, and feature requests |
 
 ---
 
@@ -171,6 +178,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | Skill | Link | Summary |
 |-------|------|---------|
 | Marketing context | [app-marketing-context](skills/app-marketing-context) | One doc: app, audience, rivals, goals—feeds the other skills |
+| Reviews | [review-analysis](skills/review-analysis) | Turn app reviews into sentiment, complaints, requests, and product moves |
 
 ---
 
@@ -187,7 +195,7 @@ Natural language (after skills are installed):
 - “Capture my marketing context so follow-ups stay consistent.”
 - “Rough revenue band for education—who owns the top?”
 
-Slash-style entry points in clients that install the focused folders directly: `/app-discovery`, `/keyword-research`, `/metadata-optimization`, `/competitor-analysis`, `/growth-analysis`, `/ad-intelligence`, `/revenue-analysis`.
+Slash-style entry points in clients that install the focused folders directly: `/app-discovery`, `/keyword-research`, `/metadata-optimization`, `/competitor-analysis`, `/growth-analysis`, `/ad-intelligence`, `/revenue-analysis`, `/review-analysis`.
 
 In clients that import the GitHub repo as one skill, such as Manus, use `/appkittie` and describe the workflow you want.
 
@@ -217,10 +225,14 @@ curl -sS "https://appkittie.com/api/v1/apps?search=fitness&limit=5" \
 |-------|------|------|---------|
 | `/api/v1/apps` | GET | Search / filter apps | 1 per app in the payload |
 | `/api/v1/apps/:appId` | GET | Full detail for one app | 1 per request |
+| `/api/v1/apps/:appId/historicals` | GET | Historical metric time series | 1 per request |
 | `/api/v1/ads` | GET | Search / filter ad creatives | 1 per ad in the payload |
 | `/api/v1/ads/:adId` | GET | Full detail for one ad creative | 1 per request |
+| `/api/v1/creators` | GET | Creator profiles for one app | 1 per creator in the payload |
+| `/api/v1/organic` | GET | Organic creator videos for one app | 1 per item in the payload |
 | `/api/v1/keywords/difficulty` | GET | Single keyword | 10 per request |
 | `/api/v1/keywords/difficulty` | POST | Batch (≤10 keywords) | 10 per keyword with data |
+| `/api/v1/reviews` | POST | User reviews for one app | 1 per review in the payload |
 
 ### Payload shape
 
@@ -234,6 +246,8 @@ Success bodies use a top-level `data`. Lists add cursor pagination:
 ```
 
 Request the next page with `cursor=<nextCursor>`. `null` means end of results.
+
+App-scoped list routes use `app_slug` to identify the app. The MCP server also accepts store IDs and store URLs for convenience and resolves them before calling the REST API.
 
 ### `GET /api/v1/apps` filters (AND-combined)
 
@@ -258,7 +272,7 @@ Full parameter matrix: [tools/REGISTRY.md](tools/REGISTRY.md).
 |-------|------------|
 | Text | `search`, `textSearchFields` |
 | Creative | `adSource` (`all` \| `meta` \| `google`), `mediaType` (`all` \| `image` \| `video`), `status` (`all` \| `active` \| `inactive`) |
-| App | `appSlug`, `categories`, `excludedCategories`, `developer`, app download/revenue min/max |
+| App | `app_slug`/`appSlug`, `categories`, `excludedCategories`, `developer`, app download/revenue min/max |
 | Delivery | `countries`, `excludedCountries`, `surfaces`, `excludedSurfaces`, start/end timestamp bounds |
 | Order | `sortBy` (`start_date`, `end_date`, `app_downloads`, `app_revenue`, `app_released_timestamp`, `app_updated_timestamp`), `sortOrder` (`asc` \| `desc`) |
 
@@ -284,10 +298,14 @@ curl -sS -X POST "https://appkittie.com/api/v1/keywords/difficulty" \
 
 - **App list:** 1 credit per returned row; if your balance is below `limit`, the API trims the page.
 - **App detail:** 1 credit per call.
+- **App historicals:** 1 credit per call.
 - **Ads list:** 1 credit per returned ad; if your balance is below `limit`, the API trims the page.
 - **Ad detail:** 1 credit per call.
+- **Creators list:** 1 credit per returned creator.
+- **Organic content list:** 1 credit per returned item.
 - **Keyword (single):** 10 credits per call.
 - **Keyword (batch):** 10 credits per keyword that returns data; duplicates removed before charge.
+- **Reviews:** 1 credit per returned review.
 
 Every response can include `X-Credits-Used` and `X-Credits-Remaining`. Balance also appears on the [API Keys](https://appkittie.com/settings/api-keys) page.
 
@@ -320,9 +338,12 @@ JSON body includes `error`; validation issues add `details` per field.
 ### Fields you can expect
 
 - **List rows:** Title, icon, developer, category, rating, reviews, review growth, download/revenue estimates (e.g. trailing 30d revenue), release/update timestamps.
-- **Detail:** Everything above plus description, screenshots, versions, IAP catalog, creator deals, contact hints, socials, hiring flags, historical series for rank/reviews/revenue/downloads.
+- **Detail:** Everything above plus description, screenshots, versions, IAP catalog, contact hints, socials, hiring flags, and growth summary fields.
+- **Historicals:** Raw daily series for reviews, score, downloads, revenue, MAU/DAU, size, and price.
 - **Ads:** Creative assets, copy, status, dates, surfaces, countries, delivery metadata, advertised app fields, and compact app summaries.
+- **Creators / organic content:** Creator profiles and hosted organic creator videos fetched separately by app slug.
 - **Keywords:** Popularity and difficulty (0–100), competing app count, traffic score (0–100), leaderboard snippets (title, icon, reviews, score, rank).
+- **Reviews:** Rating, title, body, reviewer nickname, date, country, and pagination offsets.
 
 ## License
 
