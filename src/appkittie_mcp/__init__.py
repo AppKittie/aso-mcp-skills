@@ -1,0 +1,2 @@
+"""AppKittie MCP worker package."""
+
