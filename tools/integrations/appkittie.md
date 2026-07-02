@@ -53,9 +53,13 @@ Search and filter Apple App Store and Google Play apps.
 - `X-Credits-Remaining` — remaining balance
 - `X-RateLimit-Limit` / `X-RateLimit-Remaining` / `X-RateLimit-Reset`
 
+## App Identifiers
+
+App-scoped endpoints accept any of these identifier forms and resolve them automatically: AppKittie app slug, numeric App Store ID, Google Play package name, or store URL. Pass the identifier as `app_slug`/`appSlug`, `appId`, `appStoreId`, or `appStoreUrl`.
+
 ### GET /apps/:appId
 
-Get detailed data for a single app.
+Get detailed data for a single app. The path segment accepts any identifier form (app slug recommended).
 
 **Response:**
 ```json
@@ -72,11 +76,15 @@ Get detailed data for a single app.
 
 Ad creatives are not embedded in app detail responses. Fetch them separately with `/ads` and `/ads/:adId`.
 
+### GET /apps/:appId/historicals
+
+Historical metric time series (reviews, score, downloads, revenue, MAU, DAU, size, price) for a single app. Query with `period` (`30d`, `90d`, `300d`, `all`) and an optional comma-separated `metrics` list.
+
 ### GET /ads
 
 Search and filter Meta and Google ad creatives.
 
-**Query Parameters:** See [REGISTRY.md](../REGISTRY.md) for the full ad filter list.
+**Query Parameters:** See [REGISTRY.md](../REGISTRY.md) for the full ad filter list. Use `view=compact` for trimmed payloads (identity, status, key copy, and app metrics only) in automated workflows.
 
 **Response:**
 ```json
@@ -130,6 +138,21 @@ Get detailed data for a single ad creative.
 }
 ```
 
+### GET /creators
+
+Creator profiles for one app or across a category.
+
+**Query Parameters:**
+- any app identifier, or `category` for cross-app discovery
+- `platform`, `country`, `minFollowers` / `maxFollowers` — creator filters
+- `sortBy` (`relevance` | `followers`), `sortOrder`, `count`, `cursor`
+
+**Response:** each creator includes `user_id`, `handle`, `source`, `country`, `followers`, `avatar_url`, plus `app_slug` and `app_title`.
+
+### GET /organic
+
+Organic creator videos with hosted media for one app or across a category. Supports the same scope parameters plus `platform`, `count`, and `cursor`.
+
 ### GET /keywords/difficulty
 
 Single keyword analysis.
@@ -138,6 +161,8 @@ Single keyword analysis.
 - `keyword` (required) — keyword to analyze
 - `country` (optional) — App Store country code (default: US)
 - `source` (optional) — `apple_mobile` or `google_mobile` (default: `apple_mobile`)
+- `topAppsLimit` (optional) — number of top-ranking apps to include, 0–50 (default: 50)
+- `includeTopApps` (optional) — set `false` for a metrics-only response
 
 **Response:**
 ```json
@@ -200,7 +225,7 @@ Results are sorted by opportunity (best first). Only successfully analyzed keywo
 
 ### POST /reviews
 
-Fetch user reviews for an app.
+Fetch user reviews for an app. Also available as `GET /reviews` with the same fields as query parameters.
 
 **Body:**
 ```json
@@ -214,8 +239,8 @@ Fetch user reviews for an app.
 ```
 
 **Body Parameters:**
-- `appId` (required) — numeric App Store ID or Google Play package name
-- `source` (optional) — `apple_mobile` or `google_mobile`; inferred from `appId` if omitted
+- `appId` (required) — any app identifier: numeric App Store ID, Google Play package name, AppKittie app slug, or store URL (`appSlug` and `appStoreUrl` accepted as aliases)
+- `source` (optional) — `apple_mobile` or `google_mobile`; inferred from the identifier if omitted
 - `country` (optional) — App Store country code (default: US)
 - `maxReviews` (optional) — max reviews to return, 1–300 (default: 100)
 - `offset` (optional) — pagination offset (default: 0)
@@ -263,6 +288,11 @@ Paginate by passing the `nextOffset` value as `offset` in the next request. When
 |-----------|------|
 | Search apps (per hit returned) | 1 credit |
 | App detail | 1 credit |
+| App historicals | 1 credit |
+| Search ads (per ad returned) | 1 credit |
+| Ad detail | 1 credit |
+| Creators (per creator returned) | 1 credit |
+| Organic content (per item returned) | 1 credit |
 | Keyword difficulty (single) | 10 credits |
 | Keyword difficulty (batch, per keyword) | 10 credits |
 | App reviews (per review returned) | 1 credit |

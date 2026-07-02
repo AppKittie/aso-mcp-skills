@@ -126,50 +126,6 @@ def first_app_identifier(args):
     return None, ""
 
 
-async def resolve_app_slug(args, api_key, required=False):
-    explicit_slug = as_str(args.get("appSlug")) or as_str(args.get("app_slug"))
-    if explicit_slug:
-        return explicit_slug, None
-
-    key, raw_identifier = first_app_identifier(args)
-    if not raw_identifier:
-        if required:
-            return None, "Error: one of 'appSlug', 'appId', 'appStoreId', or 'appStoreUrl' is required."
-        return None, None
-
-    derived_slug = (
-        create_app_slug_from_store_url(raw_identifier)
-        or google_play_slug_from_package(raw_identifier)
-    )
-    if derived_slug:
-        return derived_slug, None
-
-    if looks_like_app_slug(raw_identifier):
-        return raw_identifier, None
-
-    apple_slug = None
-    if key in ["appStoreId", "storeId"]:
-        apple_slug = await lookup_apple_app_slug(raw_identifier)
-        if apple_slug:
-            return apple_slug, None
-
-    data, err = await api_get(f"/api/v1/apps/{quote(raw_identifier, safe='')}", {}, api_key)
-    if not err:
-        app = data.get("data", {}) if isinstance(data, dict) else {}
-        app_slug = as_str(app.get("app_slug")) if isinstance(app, dict) else ""
-        if app_slug:
-            return app_slug, None
-
-    apple_slug = apple_slug or await lookup_apple_app_slug(raw_identifier)
-    if apple_slug:
-        return apple_slug, None
-
-    if err:
-        return None, f"Could not resolve app identifier '{raw_identifier}' to app_slug. {err}"
-
-    return None, f"Could not resolve app identifier '{raw_identifier}' to app_slug."
-
-
 async def resolve_app_path_identifier(args, _api_key):
     explicit_slug = as_str(args.get("appSlug")) or as_str(args.get("app_slug"))
     if explicit_slug:

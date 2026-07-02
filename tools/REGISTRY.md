@@ -19,11 +19,16 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 |----------|--------|---------|------|
 | `/api/v1/apps` | GET | Search and filter apps | 1 credit/hit |
 | `/api/v1/apps/:appId` | GET | Get app detail | 1 credit |
+| `/api/v1/apps/:appId/historicals` | GET | Historical metric time series | 1 credit |
 | `/api/v1/ads` | GET | Search and filter ad creatives | 1 credit/hit |
 | `/api/v1/ads/:adId` | GET | Get ad detail | 1 credit |
+| `/api/v1/creators` | GET | Creator discovery (per app or per category) | 1 credit/creator |
+| `/api/v1/organic` | GET | Organic creator videos (per app or per category) | 1 credit/item |
 | `/api/v1/keywords/difficulty` | GET | Single keyword analysis | 10 credits |
 | `/api/v1/keywords/difficulty` | POST | Batch keyword analysis (up to 10) | 10 credits/keyword |
-| `/api/v1/reviews` | POST | Fetch app reviews | 1 credit/review |
+| `/api/v1/reviews` | GET / POST | Fetch app reviews | 1 credit/review |
+
+App-scoped endpoints accept any identifier form: app slug, AppKittie app ID, numeric App Store ID, Google Play package name, or store URL.
 
 ### MCP Tool ↔ API Mapping
 
@@ -31,8 +36,11 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 |----------|-------------|--------|
 | `search_apps` | `/api/v1/apps` | GET |
 | `get_app_detail` | `/api/v1/apps/:appId` | GET |
+| `get_app_historicals` | `/api/v1/apps/:appId/historicals` | GET |
 | `search_ads` | `/api/v1/ads` | GET |
 | `get_ad_detail` | `/api/v1/ads/:adId` | GET |
+| `list_creators` | `/api/v1/creators` | GET |
+| `list_organic_content` | `/api/v1/organic` | GET |
 | `get_keyword_difficulty` | `/api/v1/keywords/difficulty` | GET |
 | `batch_keyword_difficulty` | `/api/v1/keywords/difficulty` | POST |
 | `get_app_reviews` | `/api/v1/reviews` | POST |
@@ -48,6 +56,7 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 | `competitor-analysis` | `search_apps`, `get_app_detail`, `search_ads`, `get_ad_detail`, `batch_keyword_difficulty` |
 | `growth-analysis` | `search_apps`, `get_app_detail`, `search_ads` |
 | `ad-intelligence` | `search_apps`, `search_ads`, `get_ad_detail`, `get_app_detail` |
+| `creator-discovery` | `list_creators`, `list_organic_content`, `search_apps` |
 | `revenue-analysis` | `search_apps`, `get_app_detail` |
 | `review-analysis` | `get_app_reviews`, `get_app_detail`, `search_apps` |
 | `app-marketing-context` | `get_app_detail`, `search_apps`, `search_ads` |
@@ -110,7 +119,8 @@ All ad list fields plus deeper delivery/transparency fields such as `transparenc
 | `adSource` | enum | `all`, `meta`, `google` |
 | `mediaType` | enum | `all`, `image`, `video` |
 | `status` | enum | `all`, `active`, `inactive` |
-| `appSlug` | string | Ads for one app |
+| `appSlug` / `appId` / `appStoreId` / `appStoreUrl` | string | Ads for one app (any identifier form) |
+| `view` | enum | `full`, `compact` — compact returns identity, status, key copy, and app metrics only |
 | `categories` / `excludedCategories` | string[] | Advertised app categories |
 | `adLanguages` / `excludedAdLanguages` | string[] | Representative country codes mapped to ad language |
 | `countries` / `excludedCountries` | string[] | Countries where ads were observed |
@@ -124,3 +134,19 @@ All ad list fields plus deeper delivery/transparency fields such as `transparenc
 | `sortOrder` | enum | `asc`, `desc` |
 | `limit` | integer | Results per page (1–100) |
 | `cursor` | integer | Pagination offset |
+
+### Creator Search Filters
+
+| Filter | Type | Description |
+|--------|------|-------------|
+| any app identifier | string | Scope to one app (`app_slug`, `appId`, `appStoreId`, or `appStoreUrl`) |
+| `category` | string | Cross-app discovery across the category's top apps |
+| `platform` | string | `tiktok`, `instagram`, or `youtube` |
+| `country` | string | Creator country code |
+| `minFollowers` / `maxFollowers` | integer | Follower range |
+| `sortBy` | enum | `relevance`, `followers` |
+| `sortOrder` | enum | `asc`, `desc` |
+| `count` / `limit` | integer | Results per page (1–100) |
+| `cursor` | integer | Pagination offset |
+
+`list_organic_content` supports the same scope parameters plus `platform`.

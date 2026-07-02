@@ -1,7 +1,7 @@
 import json
 
 from ..api import api_get
-from ..identifiers import resolve_app_slug
+from ..identifiers import as_str
 from ..rpc import tool_result
 
 
@@ -27,13 +27,32 @@ APP_SCOPED_ANY_OF = [
     {"required": ["appStoreUrl"]},
 ]
 
+# Query param keys forwarded verbatim to the API. The API resolves any
+# identifier form (slug, store ID, package name, or store URL) server-side.
+IDENTIFIER_KEYS = ["app_slug", "appSlug", "appId", "appStoreId", "appStoreUrl"]
 
-async def handle_app_scoped_list(args, api_key, endpoint):
-    app_slug, err = await resolve_app_slug(args, api_key, required=True)
-    if err:
-        return tool_result(err, is_error=True)
+MISSING_SCOPE_ERROR = (
+    "Error: provide an app identifier ('appSlug', 'appId', 'appStoreId', or "
+    "'appStoreUrl') or a 'category' for cross-app discovery."
+)
 
-    params = {"app_slug": app_slug}
+
+async def handle_app_scoped_list(args, api_key, endpoint, extra_keys=(), allow_category=False):
+    params = {}
+
+    for key in IDENTIFIER_KEYS:
+        value = as_str(args.get(key))
+        if value:
+            params[key] = value
+            break
+
+    category = as_str(args.get("category")) if allow_category else ""
+    if category:
+        params["category"] = category
+
+    if not params:
+        return tool_result(MISSING_SCOPE_ERROR, is_error=True)
+
     if "count" in args:
         params["count"] = args["count"]
     elif "limit" in args:
@@ -41,8 +60,11 @@ async def handle_app_scoped_list(args, api_key, endpoint):
     if "cursor" in args:
         params["cursor"] = args["cursor"]
 
+    for key in extra_keys:
+        if key in args:
+            params[key] = args[key]
+
     data, err = await api_get(endpoint, params, api_key)
     if err:
         return tool_result(err, is_error=True)
     return tool_result(json.dumps(data, indent=2))
-
