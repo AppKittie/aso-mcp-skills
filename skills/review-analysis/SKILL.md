@@ -26,7 +26,7 @@ You are an expert mobile app review analyst with deep understanding of App Store
 Understand the overall user sentiment for an app.
 
 1. Use `get_app_detail` to get the app's metadata, rating, and review count
-2. Use `get_app_reviews` with `maxReviews: 100` to fetch the most recent reviews; pass `source: "google_mobile"` for Google Play when the app ID could be ambiguous
+2. Use `get_app_reviews` with `maxReviews: 100` to fetch the most recent reviews. The `appId` accepts any identifier — numeric App Store ID, Google Play package name, AppKittie app slug, or store URL. Pass `source: "google_mobile"` for Google Play when the identifier could be ambiguous
 3. If more depth is needed, paginate with `nextOffset` to get additional pages
 4. Categorize each review:
    - **Positive** (4–5 stars with praise)

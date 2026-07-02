@@ -20,6 +20,7 @@ Read only the focused workflow that matches the user's intent:
 | Analyze fast movers, trends, or growth windows | `skills/growth-analysis/SKILL.md` |
 | Benchmark revenue, pricing, IAPs, or monetization | `skills/revenue-analysis/SKILL.md` |
 | Analyze Meta ads, Apple Search Ads, creatives, or UA angles | `skills/ad-intelligence/SKILL.md` |
+| Find influencers, creators, or organic content for an app or niche | `skills/creator-discovery/SKILL.md` |
 | Analyze user reviews, complaints, sentiment, or feature requests | `skills/review-analysis/SKILL.md` |
 | Capture reusable app, audience, rival, and goal context | `skills/app-marketing-context/SKILL.md` |
 
@@ -31,8 +32,11 @@ Prefer live AppKittie data. Use the MCP tools if the client exposes them:
 
 - `search_apps`
 - `get_app_detail`
+- `get_app_historicals`
 - `search_ads`
 - `get_ad_detail`
+- `list_creators`
+- `list_organic_content`
 - `get_keyword_difficulty`
 - `batch_keyword_difficulty`
 - `get_app_reviews`

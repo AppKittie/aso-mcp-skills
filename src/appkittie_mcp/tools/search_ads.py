@@ -9,7 +9,6 @@ from ..constants import (
     AD_TEXT_SEARCH_FIELDS,
     SORT_ORDERS,
 )
-from ..identifiers import resolve_app_slug
 from ..rpc import tool_result
 
 
@@ -18,7 +17,10 @@ TOOL = {
     "description": (
         "Search and filter Meta and Google ad creatives for mobile apps. "
         "Supports full-text search, filters, sorting, app-specific lookup, "
-        "and cursor-based pagination. Costs 1 credit per ad returned."
+        "and cursor-based pagination. Returns a compact view (identity, "
+        "status, key copy, app metrics) by default; set view='full' for "
+        "complete creative payloads including media URLs. "
+        "Costs 1 credit per ad returned."
     ),
     "inputSchema": {
         "type": "object",
@@ -75,6 +77,14 @@ TOOL = {
                 "description": "Sort field for ad results.",
             },
             "sortOrder": {"type": "string", "enum": SORT_ORDERS, "description": "Sort direction."},
+            "view": {
+                "type": "string",
+                "enum": ["compact", "full"],
+                "description": (
+                    "Response shape. compact (default): identity, status, key copy, "
+                    "and app metrics only. full: complete creative payload with media URLs."
+                ),
+            },
             "limit": {"type": "integer", "description": "Results per page (1-100, default: 50)", "default": 50},
             "cursor": {"type": "integer", "description": "Pagination cursor (offset)."},
         },
@@ -83,13 +93,17 @@ TOOL = {
 }
 
 
+# All keys are forwarded verbatim; the API resolves app identifiers
+# (slug, store ID, package name, or store URL) server-side.
 SEARCH_ADS_KEYS = [
     "search", "textSearchFields", "adSource", "mediaType", "status",
     "categories", "excludedCategories", "adLanguages", "excludedAdLanguages",
-    "appSlug", "app_slug", "countries", "excludedCountries", "surfaces",
+    "appSlug", "app_slug", "appId", "appStoreId", "appStoreUrl",
+    "countries", "excludedCountries", "surfaces",
     "excludedSurfaces", "developer", "startedAfter", "startedBefore",
     "endedAfter", "endedBefore", "minAppDownloads", "maxAppDownloads",
-    "minAppRevenue", "maxAppRevenue", "sortBy", "sortOrder", "limit", "cursor",
+    "minAppRevenue", "maxAppRevenue", "sortBy", "sortOrder", "view",
+    "limit", "cursor",
 ]
 
 
@@ -99,12 +113,8 @@ def _pick(args, keys):
 
 async def handle(args, api_key):
     params = _pick(args, SEARCH_ADS_KEYS)
-    app_slug, err = await resolve_app_slug(args, api_key)
-    if err:
-        return tool_result(err, is_error=True)
-    if app_slug:
-        params["appSlug"] = app_slug
-        params.pop("app_slug", None)
+    # Compact by default to keep tool output small for agent context windows.
+    params.setdefault("view", "compact")
 
     data, err = await api_get("/api/v1/ads", params, api_key)
     if err:

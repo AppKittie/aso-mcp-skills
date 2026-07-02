@@ -130,16 +130,18 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | `search_apps` | Filter App Store and Google Play apps (30+ parameters) | 1 × rows returned |
 | `get_app_detail` | Metadata, revenue, IAPs, contacts, growth summaries | 1 / call |
 | `get_app_historicals` | Raw historical metric series for one app | 1 / call |
-| `search_ads` | Search Meta and Google ad creatives; accepts app slug, store ID, or store URL for app-specific ads | 1 × rows returned |
+| `search_ads` | Search Meta and Google ad creatives; compact view by default, `view='full'` for complete payloads | 1 × rows returned |
 | `get_ad_detail` | Full detail for one ad creative | 1 / call |
-| `list_creators` | Creator profile data for one app | 1 × rows returned |
-| `list_organic_content` | Organic creator videos for one app | 1 × rows returned |
-| `get_keyword_difficulty` | One keyword: popularity, difficulty, traffic, top apps | 10 / call |
+| `list_creators` | Creator discovery for one app or across a category; filter by platform, country, and followers | 1 × rows returned |
+| `list_organic_content` | Organic creator videos for one app or across a category | 1 × rows returned |
+| `get_keyword_difficulty` | One keyword: popularity, difficulty, traffic, top apps (`topAppsLimit`, default 10) | 10 / call |
 | `batch_keyword_difficulty` | Up to 10 keywords, ranked by opportunity | 10 × keyword |
 | `get_app_reviews` | User reviews for one App Store or Google Play app | 1 × rows returned |
 | `get_supported_countries` | Valid storefront codes | Free |
 
-App-scoped MCP tools such as `search_ads`, `list_creators`, `list_organic_content`, and `get_app_historicals` accept `appSlug`/`app_slug`. They can also use `appId`, `appStoreId`, or `appStoreUrl` when a user provides a store ID or store listing URL.
+**App identifiers:** every app-scoped tool (`get_app_detail`, `get_app_historicals`, `search_ads`, `list_creators`, `list_organic_content`, `get_app_reviews`) accepts an app slug, AppKittie app ID, numeric App Store ID, Google Play package name, or store URL. Resolution happens automatically — pass whichever identifier you have.
+
+**Influencer discovery:** `list_creators` supports `category` for cross-app discovery, `platform` / `country` / `minFollowers` / `maxFollowers` filters, and `sortBy='followers'`. To confirm a creator actually posted about an app, cross-reference their handle against `list_organic_content` for that app.
 
 ### MCP prompts
 
@@ -172,6 +174,7 @@ App-scoped MCP tools such as `search_ads`, `list_creators`, `list_organic_conten
 | Growth | [growth-analysis](skills/growth-analysis) | Fast movers, drivers, emerging patterns |
 | Revenue | [revenue-analysis](skills/revenue-analysis) | Benchmarks, monetization, IAP shape, pricing |
 | Ads | [ad-intelligence](skills/ad-intelligence) | Meta/Google creatives, Apple Search Ads signals, UA angles |
+| Creators | [creator-discovery](skills/creator-discovery) | Influencer discovery per app or category — follower tiers, platforms, outreach lists |
 
 ### Shared context
 
@@ -190,12 +193,13 @@ Natural language (after skills are installed):
 - “US keyword set for a meditation app—prioritize by opportunity.”
 - “Competitive read for app id `1234567890`.”
 - “Who’s buying Meta ads in productivity lately?”
+- “Find TikTok micro-influencers associated with calorie-tracking apps.”
 - “What’s climbing fastest this week?”
 - “Rewrite title + subtitle for these keywords, three options each.”
 - “Capture my marketing context so follow-ups stay consistent.”
 - “Rough revenue band for education—who owns the top?”
 
-Slash-style entry points in clients that install the focused folders directly: `/app-discovery`, `/keyword-research`, `/metadata-optimization`, `/competitor-analysis`, `/growth-analysis`, `/ad-intelligence`, `/revenue-analysis`, `/review-analysis`.
+Slash-style entry points in clients that install the focused folders directly: `/app-discovery`, `/keyword-research`, `/metadata-optimization`, `/competitor-analysis`, `/growth-analysis`, `/ad-intelligence`, `/creator-discovery`, `/revenue-analysis`, `/review-analysis`.
 
 In clients that import the GitHub repo as one skill, such as Manus, use `/appkittie` and describe the workflow you want.
 
@@ -226,13 +230,13 @@ curl -sS "https://appkittie.com/api/v1/apps?search=fitness&limit=5" \
 | `/api/v1/apps` | GET | Search / filter apps | 1 per app in the payload |
 | `/api/v1/apps/:appId` | GET | Full detail for one app | 1 per request |
 | `/api/v1/apps/:appId/historicals` | GET | Historical metric time series | 1 per request |
-| `/api/v1/ads` | GET | Search / filter ad creatives | 1 per ad in the payload |
+| `/api/v1/ads` | GET | Search / filter ad creatives (`view=compact` for trimmed payloads) | 1 per ad in the payload |
 | `/api/v1/ads/:adId` | GET | Full detail for one ad creative | 1 per request |
-| `/api/v1/creators` | GET | Creator profiles for one app | 1 per creator in the payload |
-| `/api/v1/organic` | GET | Organic creator videos for one app | 1 per item in the payload |
-| `/api/v1/keywords/difficulty` | GET | Single keyword | 10 per request |
+| `/api/v1/creators` | GET | Creator discovery for one app or a category, with filters and match quality | 1 per creator in the payload |
+| `/api/v1/organic` | GET | Organic creator videos for one app or a category | 1 per item in the payload |
+| `/api/v1/keywords/difficulty` | GET | Single keyword (`topAppsLimit` / `includeTopApps=false` for compact payloads) | 10 per request |
 | `/api/v1/keywords/difficulty` | POST | Batch (≤10 keywords) | 10 per keyword with data |
-| `/api/v1/reviews` | POST | User reviews for one app | 1 per review in the payload |
+| `/api/v1/reviews` | GET / POST | User reviews for one app (any identifier form) | 1 per review in the payload |
 
 ### Payload shape
 
@@ -247,7 +251,7 @@ Success bodies use a top-level `data`. Lists add cursor pagination:
 
 Request the next page with `cursor=<nextCursor>`. `null` means end of results.
 
-App-scoped list routes use `app_slug` to identify the app. The MCP server also accepts store IDs and store URLs for convenience and resolves them before calling the REST API.
+App-scoped routes accept any identifier form — `app_slug`/`appSlug`, `appId`, `appStoreId` (numeric App Store ID or Google Play package name), or `appStoreUrl` — and resolve it server-side.
 
 ### `GET /api/v1/apps` filters (AND-combined)
 
@@ -272,9 +276,20 @@ Full parameter matrix: [tools/REGISTRY.md](tools/REGISTRY.md).
 |-------|------------|
 | Text | `search`, `textSearchFields` |
 | Creative | `adSource` (`all` \| `meta` \| `google`), `mediaType` (`all` \| `image` \| `video`), `status` (`all` \| `active` \| `inactive`) |
-| App | `app_slug`/`appSlug`, `categories`, `excludedCategories`, `developer`, app download/revenue min/max |
+| App | `app_slug`/`appSlug`/`appId`/`appStoreId`/`appStoreUrl` (any identifier form), `categories`, `excludedCategories`, `developer`, app download/revenue min/max |
 | Delivery | `countries`, `excludedCountries`, `surfaces`, `excludedSurfaces`, start/end timestamp bounds |
+| Shape | `view` (`full` \| `compact`) |
 | Order | `sortBy` (`start_date`, `end_date`, `app_downloads`, `app_revenue`, `app_released_timestamp`, `app_updated_timestamp`), `sortOrder` (`asc` \| `desc`) |
+
+### `GET /api/v1/creators` filters
+
+| Group | Parameters |
+|-------|------------|
+| Scope | any app identifier, or `category` for cross-app discovery |
+| Creator | `platform` (`tiktok` \| `instagram` \| `youtube`), `country`, `minFollowers` / `maxFollowers` |
+| Order | `sortBy` (`relevance` \| `followers`), `sortOrder` (`asc` \| `desc`) |
+
+`GET /api/v1/organic` supports the same scope parameters plus `platform`.
 
 ### cURL samples
 
@@ -341,7 +356,7 @@ JSON body includes `error`; validation issues add `details` per field.
 - **Detail:** Everything above plus description, screenshots, versions, IAP catalog, contact hints, socials, hiring flags, and growth summary fields.
 - **Historicals:** Raw daily series for reviews, score, downloads, revenue, MAU/DAU, size, and price.
 - **Ads:** Creative assets, copy, status, dates, surfaces, countries, delivery metadata, advertised app fields, and compact app summaries.
-- **Creators / organic content:** Creator profiles and hosted organic creator videos fetched separately by app slug.
+- **Creators / organic content:** Creator profiles (follower counts, platform, country) and hosted organic creator videos, per app or per category, each annotated with `app_slug`/`app_title`.
 - **Keywords:** Popularity and difficulty (0–100), competing app count, traffic score (0–100), leaderboard snippets (title, icon, reviews, score, rank).
 - **Reviews:** Rating, title, body, reviewer nickname, date, country, and pagination offsets.
 

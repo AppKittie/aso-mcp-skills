@@ -6,11 +6,16 @@ from ..identifiers import as_str
 from ..rpc import tool_result
 
 
+# Compact default keeps tool output small for agent context windows.
+DEFAULT_TOP_APPS_LIMIT = 10
+
 TOOL = {
     "name": "get_keyword_difficulty",
     "description": (
         "Analyze a single Apple App Store or Google Play keyword's competitiveness. "
         "Returns popularity, difficulty, app count, traffic score, and top-ranking apps. "
+        f"Returns the top {DEFAULT_TOP_APPS_LIMIT} ranked apps by default; "
+        "set topAppsLimit (0-50) for more or fewer, or includeTopApps=false for metrics only. "
         "Costs 10 credits per request."
     ),
     "inputSchema": {
@@ -25,6 +30,17 @@ TOOL = {
                 "type": "string",
                 "enum": STORE_SOURCES,
                 "description": "Store source: apple_mobile or google_mobile. Default: apple_mobile.",
+            },
+            "topAppsLimit": {
+                "type": "integer",
+                "description": (
+                    "Number of top-ranking apps to include (0-50). "
+                    f"Default: {DEFAULT_TOP_APPS_LIMIT}."
+                ),
+            },
+            "includeTopApps": {
+                "type": "boolean",
+                "description": "Set false for a metrics-only response (no topApps).",
             },
         },
         "required": ["keyword"],
@@ -43,6 +59,10 @@ async def handle(args, api_key):
         params["country"] = args["country"]
     if "source" in args:
         params["source"] = args["source"]
+    if args.get("includeTopApps") is False:
+        params["includeTopApps"] = "false"
+    else:
+        params["topAppsLimit"] = args.get("topAppsLimit", DEFAULT_TOP_APPS_LIMIT)
 
     data, err = await api_get("/api/v1/keywords/difficulty", params, api_key)
     if err:
