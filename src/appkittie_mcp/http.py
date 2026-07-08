@@ -7,7 +7,8 @@ CORS_HEADERS = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": (
-        "Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version, Accept"
+        "Content-Type, Authorization, X-AppKittie-API-Key, X-API-Key, Api-Key, "
+        "Mcp-Session-Id, MCP-Protocol-Version, Accept"
     ),
     "Access-Control-Expose-Headers": "WWW-Authenticate, Mcp-Session-Id",
     "Access-Control-Max-Age": "86400",
