@@ -153,6 +153,9 @@ async def on_fetch(request, env):
     if path == "/token" and request.method == "POST":
         return await handle_token(request, env)
 
+    if request.method == "GET" and path == "/mcp":
+        return empty_response(405)
+
     if request.method == "GET":
         return json_response({
             "name": SERVER_NAME,

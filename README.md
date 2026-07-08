@@ -53,7 +53,7 @@ Skills describe *how* to reason about mobile app store work; **MCP** exposes liv
 **Claude Code** — register the hosted server (HTTP transport + bearer auth):
 
 ```bash
-claude mcp add appkittie --transport http https://mcp.appkittie.com --header "Authorization: Bearer YOUR_API_KEY"
+claude mcp add appkittie --transport http https://mcp.appkittie.com/mcp --header "Authorization: Bearer YOUR_API_KEY"
 ```
 
 Substitute your real key for `YOUR_API_KEY`.
@@ -61,7 +61,7 @@ Substitute your real key for `YOUR_API_KEY`.
 **Claude Web / Claude Desktop custom connector** — if your connector UI supports request headers, use `Authorization: Bearer YOUR_API_KEY`. If it only exposes OAuth fields, use the hosted OAuth proxy shim:
 
 ```text
-Connector URL: https://mcp.appkittie.com
+Connector URL: https://mcp.appkittie.com/mcp
 Auth type: OAuth
 Client ID: appkittie-claude
 Client Secret: YOUR_API_KEY
@@ -125,7 +125,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 {
   "mcpServers": {
     "appkittie": {
-      "url": "https://mcp.appkittie.com",
+      "url": "https://mcp.appkittie.com/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY"
       }

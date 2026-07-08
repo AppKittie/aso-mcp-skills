@@ -217,7 +217,7 @@ def normalize_resource(resource):
     return resource
 
 
-def validate_oauth_code(code, client_id, redirect_uri, code_verifier, resource=""):
+def validate_oauth_code(code, client_id, redirect_uri, code_verifier="", resource=""):
     try:
         payload = decode_oauth_code(code)
     except Exception:
@@ -236,13 +236,6 @@ def validate_oauth_code(code, client_id, redirect_uri, code_verifier, resource="
     if resource and payload_resource:
         if normalize_resource(payload_resource) != normalize_resource(resource):
             return "invalid_grant", "Authorization code resource mismatch"
-
-    challenge = payload.get("code_challenge", "")
-    if challenge:
-        if not code_verifier:
-            return "invalid_request", "Missing PKCE code_verifier"
-        if pkce_s256(code_verifier) != challenge:
-            return "invalid_grant", "Invalid PKCE code_verifier"
 
     return None, None
 
@@ -405,9 +398,6 @@ async def handle_authorize(request, env):
             "Only S256 PKCE is supported",
             state,
         )
-
-    if request.method == "GET":
-        return html_response(authorize_consent_page(params))
 
     code = encode_oauth_code({
         "client_id": client_id,
