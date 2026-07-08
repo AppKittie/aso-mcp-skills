@@ -7,36 +7,21 @@ MCP JSON-RPC routing. Tool definitions and handlers live in appkittie_mcp/tools.
 
 import json
 
-from js import Headers, Response
-
 from appkittie_mcp.constants import PROTOCOL_VERSION, SERVER_NAME, SERVER_VERSION
+from appkittie_mcp.http import empty_response, json_response
 from appkittie_mcp.instructions import INSTRUCTIONS
+from appkittie_mcp.oauth import (
+    auth_required_response,
+    authorization_server_metadata,
+    calls_protected_tool,
+    handle_authorize,
+    handle_token,
+    protected_resource_metadata,
+    request_path,
+)
 from appkittie_mcp.prompts import PROMPTS, render_prompt
 from appkittie_mcp.rpc import rpc_error, rpc_success, tool_result
 from appkittie_mcp.tools import TOOLS, TOOL_HANDLERS
-
-
-CORS_HEADERS = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, Mcp-Session-Id",
-    "Access-Control-Max-Age": "86400",
-}
-
-
-def json_response(body, status=200):
-    headers = Headers.new()
-    headers.set("Content-Type", "application/json")
-    for key, value in CORS_HEADERS.items():
-        headers.set(key, value)
-    return Response.new(json.dumps(body), status=status, headers=headers)
-
-
-def empty_response(status=202):
-    headers = Headers.new()
-    for key, value in CORS_HEADERS.items():
-        headers.set(key, value)
-    return Response.new("", status=status, headers=headers)
 
 
 def extract_api_key(request):
@@ -142,8 +127,25 @@ async def handle_rpc(rpc, api_key, env):
 
 
 async def on_fetch(request, env):
+    path = request_path(request)
+
     if request.method == "OPTIONS":
         return empty_response(204)
+
+    if request.method == "GET" and path.startswith("/.well-known/oauth-protected-resource"):
+        return json_response(protected_resource_metadata(request))
+
+    if request.method == "GET" and path in (
+        "/.well-known/oauth-authorization-server",
+        "/.well-known/openid-configuration",
+    ):
+        return json_response(authorization_server_metadata(request))
+
+    if path == "/authorize" and request.method in ("GET", "POST"):
+        return await handle_authorize(request, env)
+
+    if path == "/token" and request.method == "POST":
+        return await handle_token(request, env)
 
     if request.method == "GET":
         return json_response({
@@ -175,6 +177,9 @@ async def on_fetch(request, env):
 
     api_key = extract_api_key(request)
 
+    if not api_key and calls_protected_tool(rpc, TOOL_HANDLERS):
+        return auth_required_response(request)
+
     if isinstance(rpc, list):
         results = []
         for message in rpc:
@@ -189,4 +194,3 @@ async def on_fetch(request, env):
     if result is None:
         return empty_response()
     return json_response(result)
-
