@@ -90,7 +90,7 @@ def metadata_resource_from_request(request):
     suffix = path[len(prefix):] if path.startswith(prefix) else ""
     if suffix and suffix != "/":
         return f"{origin}{suffix}"
-    return origin
+    return f"{origin}/"
 
 
 def authorization_server_metadata(request):
@@ -210,7 +210,14 @@ def pkce_s256(verifier):
     return base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
 
 
-def validate_oauth_code(code, client_id, redirect_uri, code_verifier):
+def normalize_resource(resource):
+    parsed = urlparse(resource)
+    if parsed.scheme and parsed.netloc and parsed.path in ("", "/"):
+        return f"{parsed.scheme}://{parsed.netloc}/"
+    return resource
+
+
+def validate_oauth_code(code, client_id, redirect_uri, code_verifier, resource=""):
     try:
         payload = decode_oauth_code(code)
     except Exception:
@@ -224,6 +231,11 @@ def validate_oauth_code(code, client_id, redirect_uri, code_verifier):
 
     if redirect_uri and payload.get("redirect_uri") != redirect_uri:
         return "invalid_grant", "Authorization code redirect mismatch"
+
+    payload_resource = payload.get("resource", "")
+    if resource and payload_resource:
+        if normalize_resource(payload_resource) != normalize_resource(resource):
+            return "invalid_grant", "Authorization code resource mismatch"
 
     challenge = payload.get("code_challenge", "")
     if challenge:
@@ -375,6 +387,7 @@ async def handle_authorize(request, env):
     state = params.get("state", "")
     code_challenge = params.get("code_challenge", "")
     code_challenge_method = params.get("code_challenge_method", "")
+    resource = params.get("resource", "")
 
     if response_type != "code":
         return oauth_error("unsupported_response_type", "Only authorization code is supported")
@@ -400,6 +413,7 @@ async def handle_authorize(request, env):
         "client_id": client_id,
         "redirect_uri": redirect_uri,
         "code_challenge": code_challenge,
+        "resource": resource,
     })
     callback_params = {"code": code}
     if state:
@@ -426,6 +440,7 @@ async def handle_token(request, env):
             client_id,
             redirect_uri,
             form.get("code_verifier", ""),
+            form.get("resource", ""),
         )
         if error:
             return oauth_error(error, description)
