@@ -28,6 +28,12 @@ def extract_api_key(request):
     auth = request.headers.get("Authorization") or ""
     if auth.startswith("Bearer "):
         return auth[7:].strip()
+
+    for header in ("X-AppKittie-API-Key", "X-API-Key", "Api-Key"):
+        value = request.headers.get(header) or ""
+        if value:
+            return value.strip()
+
     return None
 
 

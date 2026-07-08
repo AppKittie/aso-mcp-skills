@@ -58,6 +58,17 @@ claude mcp add appkittie --transport http https://mcp.appkittie.com --header "Au
 
 Substitute your real key for `YOUR_API_KEY`.
 
+**Claude Web / Claude Desktop custom connector** — if your connector UI supports request headers, use `Authorization: Bearer YOUR_API_KEY`. If it only exposes OAuth fields, use the hosted OAuth proxy shim:
+
+```text
+Connector URL: https://mcp.appkittie.com
+Auth type: OAuth
+Client ID: appkittie-claude
+Client Secret: YOUR_API_KEY
+```
+
+The OAuth consent screen is just a Claude-compatible API-key handoff. AppKittie does not require a separate OAuth account flow.
+
 **Cursor and other MCP clients** — use the same URL and `Authorization: Bearer …` header in your app’s MCP configuration. Example JSON: [Wire up the MCP server](#wire-up-the-mcp-server) below.
 
 ---

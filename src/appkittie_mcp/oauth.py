@@ -12,6 +12,7 @@ DEFAULT_OAUTH_CLIENT_ID = "appkittie-claude"
 OAUTH_SCOPE = "appkittie:read"
 OAUTH_CODE_TTL_SECONDS = 600
 PUBLIC_TOOLS = {"get_supported_countries"}
+API_KEY_FORM_FIELDS = ("client_secret", "api_key", "apiKey", "appkittie_api_key")
 
 
 def env_get(env, name, default=None):
@@ -42,19 +43,27 @@ def env_get(env, name, default=None):
     return default
 
 
-def allowed_oauth_client_ids(env):
+def configured_oauth_client_ids(env):
     raw = (
         env_get(env, "OAUTH_CLIENT_IDS")
         or env_get(env, "OAUTH_CLIENT_ID")
         or env_get(env, "APPKITTIE_OAUTH_CLIENT_IDS")
         or env_get(env, "APPKITTIE_OAUTH_CLIENT_ID")
-        or DEFAULT_OAUTH_CLIENT_ID
     )
+    if not raw:
+        return None
     return {item.strip() for item in raw.split(",") if item.strip()}
 
 
 def is_oauth_client_allowed(client_id, env):
-    return bool(client_id and client_id in allowed_oauth_client_ids(env))
+    if not client_id:
+        return False
+
+    allowed = configured_oauth_client_ids(env)
+    if allowed is None:
+        return True
+
+    return "*" in allowed or client_id in allowed
 
 
 def request_origin(request):
@@ -159,6 +168,22 @@ def oauth_error(error, description, status=400):
     )
 
 
+def oauth_token_response(api_key, scope):
+    return json_response(
+        {
+            "access_token": api_key,
+            "token_type": "Bearer",
+            "expires_in": 31536000,
+            "refresh_token": api_key,
+            "scope": scope or OAUTH_SCOPE,
+        },
+        extra_headers={
+            "Cache-Control": "no-store",
+            "Pragma": "no-cache",
+        },
+    )
+
+
 def oauth_redirect_error(redirect_uri, error, description, state=""):
     params = {"error": error, "error_description": description}
     if state:
@@ -197,7 +222,7 @@ def validate_oauth_code(code, client_id, redirect_uri, code_verifier):
     if payload.get("client_id") != client_id:
         return "invalid_grant", "Authorization code client mismatch"
 
-    if payload.get("redirect_uri") != redirect_uri:
+    if redirect_uri and payload.get("redirect_uri") != redirect_uri:
         return "invalid_grant", "Authorization code redirect mismatch"
 
     challenge = payload.get("code_challenge", "")
@@ -235,6 +260,14 @@ def extract_basic_client_auth(request):
         return unquote(client_id), unquote(client_secret)
     except Exception:
         return None, None
+
+
+def api_key_from_form(form, fallback=""):
+    for field in API_KEY_FORM_FIELDS:
+        value = form.get(field, "")
+        if value:
+            return value
+    return fallback
 
 
 def authorize_consent_page(params):
@@ -380,7 +413,7 @@ async def handle_token(request, env):
     basic_client_id, basic_client_secret = extract_basic_client_auth(request)
     grant_type = form.get("grant_type", "")
     client_id = basic_client_id or form.get("client_id", "")
-    client_secret = basic_client_secret or form.get("client_secret", "")
+    api_key = api_key_from_form(form, basic_client_secret)
 
     if not is_oauth_client_allowed(client_id, env):
         return oauth_error("invalid_client", "Unknown OAuth client_id", status=401)
@@ -397,10 +430,11 @@ async def handle_token(request, env):
         if error:
             return oauth_error(error, description)
 
-        api_key = client_secret
-
     elif grant_type == "refresh_token":
-        api_key = client_secret or form.get("refresh_token", "")
+        api_key = api_key or form.get("refresh_token", "")
+
+    elif grant_type == "client_credentials":
+        pass
 
     else:
         return oauth_error("unsupported_grant_type", "Unsupported grant_type")
@@ -408,14 +442,8 @@ async def handle_token(request, env):
     if not api_key:
         return oauth_error(
             "invalid_client",
-            "OAuth client_secret must contain the AppKittie API key",
+            "OAuth client_secret or API key field must contain the AppKittie API key",
             status=401,
         )
 
-    return json_response({
-        "access_token": api_key,
-        "token_type": "Bearer",
-        "expires_in": 31536000,
-        "refresh_token": api_key,
-        "scope": form.get("scope", OAUTH_SCOPE),
-    })
+    return oauth_token_response(api_key, form.get("scope", OAUTH_SCOPE))
