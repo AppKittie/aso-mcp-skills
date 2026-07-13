@@ -153,8 +153,13 @@ async def on_fetch(request, env):
     if path == "/token" and request.method == "POST":
         return await handle_token(request, env)
 
-    if request.method == "GET" and path == "/mcp":
-        return empty_response(405)
+    if request.method == "GET":
+        # MCP Streamable HTTP: clients open a listening SSE stream via GET.
+        # We don't support server-initiated streams, so return 405 per spec —
+        # a 200 here puts the client in a tight reconnect loop.
+        accept = request.headers.get("Accept") or ""
+        if "text/event-stream" in accept or path == "/mcp":
+            return empty_response(405)
 
     if request.method == "GET":
         return json_response({
