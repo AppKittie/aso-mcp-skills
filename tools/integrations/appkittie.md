@@ -225,7 +225,10 @@ Results are sorted by opportunity (best first). Only successfully analyzed keywo
 
 ### POST /reviews
 
-Fetch user reviews for an app. Also available as `GET /reviews` with the same fields as query parameters.
+Fetch current user reviews in real time directly from the Apple App Store or
+Google Play. Each request retrieves current store data; it does not read from
+or write to AppKittie's review-monitor database. Also available as `GET /reviews`
+with the same fields as query parameters.
 
 **Body:**
 ```json
@@ -252,6 +255,8 @@ Fetch user reviews for an app. Also available as `GET /reviews` with the same fi
     "appId": 284882215,
     "source": "apple_mobile",
     "country": "us",
+    "retrievalMode": "realtime",
+    "fetchedAt": "2026-07-18T10:30:00.000Z",
     "reviews": [
       {
         "id": "10458723456",
