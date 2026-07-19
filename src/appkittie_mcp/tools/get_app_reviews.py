@@ -11,7 +11,9 @@ IDENTIFIER_KEYS = ["appId", "appSlug", "app_slug", "appStoreId", "appStoreUrl", 
 TOOL = {
     "name": "get_app_reviews",
     "description": (
-        "Fetch user reviews for a specific Apple App Store or Google Play app. "
+        "Fetch current user reviews in real time for a specific Apple App "
+        "Store or Google Play app. Results are retrieved from the store and are "
+        "not read from AppKittie's review-monitor database. "
         "Accepts a numeric App Store ID, Google Play package name, AppKittie app "
         "slug, or store URL. Supports pagination via offset. "
         "Costs 1 credit per review returned."

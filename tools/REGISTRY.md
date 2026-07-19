@@ -26,7 +26,7 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 | `/api/v1/organic` | GET | Organic creator videos (per app or per category) | 1 credit/item |
 | `/api/v1/keywords/difficulty` | GET | Single keyword analysis | 10 credits |
 | `/api/v1/keywords/difficulty` | POST | Batch keyword analysis (up to 10) | 10 credits/keyword |
-| `/api/v1/reviews` | GET / POST | Fetch app reviews | 1 credit/review |
+| `/api/v1/reviews` | GET / POST | Fetch current app reviews in real time | 1 credit/review |
 
 App-scoped endpoints accept any identifier form: app slug, AppKittie app ID, numeric App Store ID, Google Play package name, or store URL.
 

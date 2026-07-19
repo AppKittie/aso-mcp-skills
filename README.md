@@ -147,7 +147,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | `list_organic_content` | Organic creator videos for one app or across a category | 1 × rows returned |
 | `get_keyword_difficulty` | One keyword: popularity, difficulty, traffic, top apps (`topAppsLimit`, default 10) | 10 / call |
 | `batch_keyword_difficulty` | Up to 10 keywords, ranked by opportunity | 10 × keyword |
-| `get_app_reviews` | User reviews for one App Store or Google Play app | 1 × rows returned |
+| `get_app_reviews` | Real-time store reviews for one app | 1 × rows returned |
 | `get_supported_countries` | Valid storefront codes | Free |
 
 **App identifiers:** every app-scoped tool (`get_app_detail`, `get_app_historicals`, `search_ads`, `list_creators`, `list_organic_content`, `get_app_reviews`) accepts an app slug, AppKittie app ID, numeric App Store ID, Google Play package name, or store URL. Resolution happens automatically — pass whichever identifier you have.
@@ -247,7 +247,7 @@ curl -sS "https://appkittie.com/api/v1/apps?search=fitness&limit=5" \
 | `/api/v1/organic` | GET | Organic creator videos for one app or a category | 1 per item in the payload |
 | `/api/v1/keywords/difficulty` | GET | Single keyword (`topAppsLimit` / `includeTopApps=false` for compact payloads) | 10 per request |
 | `/api/v1/keywords/difficulty` | POST | Batch (≤10 keywords) | 10 per keyword with data |
-| `/api/v1/reviews` | GET / POST | User reviews for one app (any identifier form) | 1 per review in the payload |
+| `/api/v1/reviews` | GET / POST | Real-time store reviews (any identifier form) | 1 per review in the payload |
 
 ### Payload shape
 
