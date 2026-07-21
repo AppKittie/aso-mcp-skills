@@ -1,4 +1,4 @@
-API_BASE = "https://appkittie.com"
+API_BASE = "https://www.appkittie.com"
 PROTOCOL_VERSION = "2025-03-26"
 SERVER_NAME = "appkittie"
 SERVER_VERSION = "1.0.0"
@@ -62,4 +62,3 @@ APP_STORE_COUNTRY_CODES = [
     "SE", "NO", "DK", "FI",
     "JP", "KR", "CN", "TW", "HK", "SG",
 ]
-
