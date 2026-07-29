@@ -50,6 +50,16 @@ TOOL = {
                 "enum": STORE_SOURCES,
                 "description": "Store source to exclude: apple_mobile or google_mobile",
             },
+            "countries": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Representative country codes whose primary app languages should be included",
+            },
+            "excludedCountries": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Representative country codes whose primary app languages should be excluded",
+            },
             "sortBy": {
                 "type": "string",
                 "enum": SORT_BY_OPTIONS,
@@ -101,12 +111,49 @@ TOOL = {
             },
             "developer": {"type": "string", "description": "Filter by developer name"},
             "releasedAfter": {"type": "integer", "description": "Only apps released after this Unix timestamp"},
+            "releasedBefore": {"type": "integer", "description": "Only apps released before this Unix timestamp"},
             "updatedAfter": {"type": "integer", "description": "Only apps updated after this Unix timestamp"},
+            "updatedBefore": {"type": "integer", "description": "Only apps updated before this Unix timestamp"},
+            "textSearchFields": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": ["title", "developer", "description"],
+                },
+                "minItems": 1,
+                "description": "Document fields used by full-text search",
+            },
             "hasWebsite": {"type": "boolean", "description": "Only apps with a developer website"},
+            "hasIpadSupport": {"type": "boolean", "description": "Only apps with iPad support"},
             "hasCreators": {"type": "boolean", "description": "Only apps with known creator/influencer partnerships"},
+            "organicSources": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": ["tiktok", "instagram", "youtube"],
+                },
+                "description": "Only apps with organic content on the selected platforms",
+            },
             "hasMetaAds": {"type": "boolean", "description": "Only apps running Meta ads"},
             "hasAppleAds": {"type": "boolean", "description": "Only apps running Apple Search Ads"},
             "hasEmails": {"type": "boolean", "description": "Only apps with contact emails available"},
+            "hasInAppPurchases": {"type": "boolean", "description": "Filter by whether apps offer in-app purchases"},
+            "minInAppPurchaseCount": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5,
+                "description": "Minimum number of in-app purchases",
+            },
+            "minInAppPurchasePrice": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Minimum in-app purchase price in USD",
+            },
+            "maxInAppPurchasePrice": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Maximum in-app purchase price in USD",
+            },
             "limit": {
                 "type": "integer",
                 "description": "Results per page (1-100, default: 50)",
@@ -122,16 +169,7 @@ TOOL = {
 }
 
 
-SEARCH_APPS_KEYS = [
-    "search", "categories", "excludedCategories", "source", "excludedSource",
-    "sortBy", "sortOrder", "priceType", "minPrice", "maxPrice",
-    "minRating", "maxRating", "minReviews", "maxReviews", "minDownloads",
-    "maxDownloads", "minRevenue", "maxRevenue", "minLifetimeDownloads",
-    "maxLifetimeDownloads", "minLifetimeRevenue", "maxLifetimeRevenue",
-    "growthMetric", "growthPeriod", "contentRating", "languages",
-    "developer", "releasedAfter", "updatedAfter", "hasWebsite", "hasCreators",
-    "hasMetaAds", "hasAppleAds", "hasEmails", "limit", "cursor",
-]
+SEARCH_APPS_KEYS = tuple(TOOL["inputSchema"]["properties"])
 
 
 def _pick(args, keys):
@@ -144,4 +182,3 @@ async def handle(args, api_key):
     if err:
         return tool_result(err, is_error=True)
     return tool_result(json.dumps(data, indent=2))
-
