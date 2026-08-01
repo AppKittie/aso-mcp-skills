@@ -144,7 +144,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | `search_ads` | Search Meta and Google ad creatives; compact view by default, `view='full'` for complete payloads | 1 × rows returned |
 | `get_ad_detail` | Full detail for one ad creative | 1 / call |
 | `list_creators` | Creator discovery for one app or across a category; filter by platform, country, and followers | 1 × rows returned |
-| `list_organic_content` | Organic creator videos for one app or across a category | 1 × rows returned |
+| `list_organic_content` | Search organic creator content globally or filter by app, category, language, reach, views, and app performance | 1 × rows returned |
 | `get_keyword_difficulty` | One keyword: popularity, difficulty, traffic, top apps (`topAppsLimit`, default 10) | 10 / call |
 | `batch_keyword_difficulty` | Up to 10 keywords, ranked by opportunity | 10 × keyword |
 | `get_app_reviews` | Real-time store reviews for one app | 1 × rows returned |

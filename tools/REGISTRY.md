@@ -149,4 +149,7 @@ All ad list fields plus deeper delivery/transparency fields such as `transparenc
 | `count` / `limit` | integer | Results per page (1–100) |
 | `cursor` | integer | Pagination offset |
 
-`list_organic_content` supports the same scope parameters plus `platform`.
+`list_organic_content` can search globally or by app/category. It supports
+full-text search, content platform and language include/exclude lists, creator
+handle and follower filters, content view ranges, app
+downloads/revenue ranges, and organic metric sorting.

@@ -37,7 +37,14 @@ MISSING_SCOPE_ERROR = (
 )
 
 
-async def handle_app_scoped_list(args, api_key, endpoint, extra_keys=(), allow_category=False):
+async def handle_app_scoped_list(
+    args,
+    api_key,
+    endpoint,
+    extra_keys=(),
+    allow_category=False,
+    allow_global=False,
+):
     params = {}
 
     for key in IDENTIFIER_KEYS:
@@ -50,7 +57,7 @@ async def handle_app_scoped_list(args, api_key, endpoint, extra_keys=(), allow_c
     if category:
         params["category"] = category
 
-    if not params:
+    if not params and not allow_global:
         return tool_result(MISSING_SCOPE_ERROR, is_error=True)
 
     if "count" in args:
