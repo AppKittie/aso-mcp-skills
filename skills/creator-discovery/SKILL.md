@@ -40,7 +40,11 @@ Every creator includes `app_slug` and `app_title` so you always know which app t
 
 ### `list_organic_content` — the actual videos
 
-Same scoping (app identifier or `category`), plus `platform`. Returns hosted video URLs, captions, and creation dates — useful for verifying creator coverage and judging content style before outreach.
+Search globally or scope by app identifier/category. Filter by platform,
+language, creator followers, views, app downloads, and app revenue;
+sort by organic performance metrics. Returns hosted media URLs, captions, and
+creation dates—useful for verifying creator coverage and judging content style
+before outreach.
 
 ## Workflows
 
