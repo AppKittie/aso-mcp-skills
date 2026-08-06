@@ -5,8 +5,10 @@ from . import get_app_historicals
 from . import get_app_reviews
 from . import get_keyword_difficulty
 from . import get_supported_countries
+from . import get_store_ranking_history
 from . import list_creators
 from . import list_organic_content
+from . import list_store_rankings
 from . import search_ads
 from . import search_apps
 
@@ -15,6 +17,8 @@ TOOL_MODULES = [
     search_apps,
     get_app_detail,
     get_app_historicals,
+    list_store_rankings,
+    get_store_ranking_history,
     search_ads,
     get_ad_detail,
     list_creators,
@@ -27,4 +31,3 @@ TOOL_MODULES = [
 
 TOOLS = [module.TOOL for module in TOOL_MODULES]
 TOOL_HANDLERS = {module.TOOL["name"]: module.handle for module in TOOL_MODULES}
-

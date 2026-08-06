@@ -33,6 +33,8 @@ Prefer live AppKittie data. Use the MCP tools if the client exposes them:
 - `search_apps`
 - `get_app_detail`
 - `get_app_historicals`
+- `list_store_rankings`
+- `get_store_ranking_history`
 - `search_ads`
 - `get_ad_detail`
 - `list_creators`

@@ -37,6 +37,8 @@ App-scoped endpoints accept any identifier form: app slug, AppKittie app ID, num
 | `search_apps` | `/api/v1/apps` | GET |
 | `get_app_detail` | `/api/v1/apps/:appId` | GET |
 | `get_app_historicals` | `/api/v1/apps/:appId/historicals` | GET |
+| `list_store_rankings` | `/api/v1/trending` | GET |
+| `get_store_ranking_history` | `/api/v1/trending/:appSlug/history` | GET |
 | `search_ads` | `/api/v1/ads` | GET |
 | `get_ad_detail` | `/api/v1/ads/:adId` | GET |
 | `list_creators` | `/api/v1/creators` | GET |

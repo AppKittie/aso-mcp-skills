@@ -33,6 +33,11 @@ Cost: 1 credit per app returned. Use smaller `limit` values while exploring.
 Use `get_app_detail` for metadata, screenshots, IAPs, contacts, and growth summaries.
 Use `get_app_historicals` for raw time-series metrics such as reviews, score, downloads, revenue, MAU, DAU, size, and price.
 
+## Store Rankings
+
+Use `list_store_rankings` to browse the current Top Free, Top Paid, or Top Grossing chart for a store, country, and category.
+Use `get_store_ranking_history` with an exact app slug and the same chart filters to inspect daily positions. Positive position changes mean the app improved toward rank 1.
+
 ## Ads
 
 Use `search_ads` and `get_ad_detail` for Meta and Google creatives. App detail responses do not embed ad payloads.
@@ -70,6 +75,8 @@ Use `get_app_reviews` with any app identifier (numeric App Store ID, Google Play
 | search_apps | 1 credit per app returned |
 | get_app_detail | 1 credit per request |
 | get_app_historicals | 1 credit per request |
+| list_store_rankings | 1 credit per app returned |
+| get_store_ranking_history | 10 credits per request |
 | search_ads | 1 credit per ad returned |
 | get_ad_detail | 1 credit per request |
 | list_creators | 1 credit per creator returned |
