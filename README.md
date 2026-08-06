@@ -141,6 +141,8 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | `search_apps` | Filter App Store and Google Play apps (30+ parameters) | 1 × rows returned |
 | `get_app_detail` | Metadata, revenue, IAPs, contacts, growth summaries | 1 / call |
 | `get_app_historicals` | Raw historical metric series for one app | 1 / call |
+| `list_store_rankings` | Current store chart by collection, country, and category | 1 × rows returned |
+| `get_store_ranking_history` | Daily chart positions for one app and chart | 10 / call |
 | `search_ads` | Search Meta and Google ad creatives; compact view by default, `view='full'` for complete payloads | 1 × rows returned |
 | `get_ad_detail` | Full detail for one ad creative | 1 / call |
 | `list_creators` | Creator discovery for one app or across a category; filter by platform, country, and followers | 1 × rows returned |
