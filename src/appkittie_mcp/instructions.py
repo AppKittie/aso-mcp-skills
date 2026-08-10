@@ -25,12 +25,13 @@ Key filters:
 - `growthMetric` - currently `reviews`
 - `growthPeriod` - `7d`, `14d`, `30d`, `60d`, `90d`
 - `hasMetaAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` - marketing/contact signals
+- `hasMetaAdSpend`, `minMetaAdSpend`, `maxMetaAdSpend` - reported Meta Ads transparency spend
 
 Cost: 1 credit per app returned. Use smaller `limit` values while exploring.
 
 ## App Details and Historicals
 
-Use `get_app_detail` for metadata, screenshots, IAPs, contacts, and growth summaries.
+Use `get_app_detail` for metadata, screenshots, IAPs, contacts, Meta Ads transparency, and growth summaries.
 Use `get_app_historicals` for raw time-series metrics such as reviews, score, downloads, revenue, MAU, DAU, size, and price.
 
 ## Store Rankings
