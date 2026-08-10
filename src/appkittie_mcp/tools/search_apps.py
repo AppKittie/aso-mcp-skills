@@ -135,6 +135,20 @@ TOOL = {
                 "description": "Only apps with organic content on the selected platforms",
             },
             "hasMetaAds": {"type": "boolean", "description": "Only apps running Meta ads"},
+            "hasMetaAdSpend": {
+                "type": "boolean",
+                "description": "Filter by whether Meta Ads transparency spend data exists",
+            },
+            "minMetaAdSpend": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Minimum reported Meta Ads transparency spend in USD",
+            },
+            "maxMetaAdSpend": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Maximum reported Meta Ads transparency spend in USD",
+            },
             "hasAppleAds": {"type": "boolean", "description": "Only apps running Apple Search Ads"},
             "hasEmails": {"type": "boolean", "description": "Only apps with contact emails available"},
             "hasInAppPurchases": {"type": "boolean", "description": "Filter by whether apps offer in-app purchases"},
