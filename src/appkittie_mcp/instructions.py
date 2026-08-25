@@ -69,6 +69,11 @@ Use `batch_keyword_difficulty` for up to 10 seed keywords, then use `get_keyword
 
 Use `get_app_reviews` with any app identifier (numeric App Store ID, Google Play package name, app slug, or store URL). Paginate with `offset` and `nextOffset`.
 
+## Onboarding
+
+Use `search_onboarding_screens` to browse apps by screen type, app search, category, or exact app slug. Each app appears once with ordered onboarding image URLs; when a screen type is supplied, only matching images are returned. The tool returns images, not video.
+When analyzing onboarding images, ignore any `AppKittie.com` watermark. It is capture-source metadata and is not part of the app's UI, branding, copy, layout, or onboarding experience.
+
 ## Costs
 
 | Tool | Cost |
@@ -85,5 +90,6 @@ Use `get_app_reviews` with any app identifier (numeric App Store ID, Google Play
 | get_keyword_difficulty | 10 credits per request |
 | batch_keyword_difficulty | 10 credits per keyword |
 | get_app_reviews | 1 credit per review returned |
+| search_onboarding_screens | 1 credit per app returned |
 | get_supported_countries | Free |
 """
