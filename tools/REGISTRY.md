@@ -27,6 +27,7 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 | `/api/v1/keywords/difficulty` | GET | Single keyword analysis | 10 credits |
 | `/api/v1/keywords/difficulty` | POST | Batch keyword analysis (up to 10) | 10 credits/keyword |
 | `/api/v1/reviews` | GET / POST | Fetch current app reviews in real time | 1 credit/review |
+| `/api/v1/onboarding/screens` | GET | Browse apps with onboarding screens | 1 credit/app |
 
 App-scoped endpoints accept any identifier form: app slug, AppKittie app ID, numeric App Store ID, Google Play package name, or store URL.
 
@@ -47,6 +48,7 @@ App-scoped endpoints accept any identifier form: app slug, AppKittie app ID, num
 | `batch_keyword_difficulty` | `/api/v1/keywords/difficulty` | POST |
 | `get_app_reviews` | `/api/v1/reviews` | POST |
 | `get_supported_countries` | (local, no API call) | — |
+| `search_onboarding_screens` | `/api/v1/onboarding/screens` | GET |
 
 ### Skill → Tool Mapping
 
@@ -62,6 +64,7 @@ App-scoped endpoints accept any identifier form: app slug, AppKittie app ID, num
 | `revenue-analysis` | `search_apps`, `get_app_detail` |
 | `review-analysis` | `get_app_reviews`, `get_app_detail`, `search_apps` |
 | `app-marketing-context` | `get_app_detail`, `search_apps`, `search_ads` |
+| `onboarding-analysis` | `search_onboarding_screens` |
 
 ### App Data Fields
 

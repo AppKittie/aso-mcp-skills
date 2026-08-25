@@ -11,6 +11,7 @@ from . import list_organic_content
 from . import list_store_rankings
 from . import search_ads
 from . import search_apps
+from . import search_onboarding_screens
 
 
 TOOL_MODULES = [
@@ -27,6 +28,7 @@ TOOL_MODULES = [
     batch_keyword_difficulty,
     get_supported_countries,
     get_app_reviews,
+    search_onboarding_screens,
 ]
 
 TOOLS = [module.TOOL for module in TOOL_MODULES]
