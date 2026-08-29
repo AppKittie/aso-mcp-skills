@@ -292,7 +292,7 @@ Full parameter matrix: [tools/REGISTRY.md](tools/REGISTRY.md).
 | App | `app_slug`/`appSlug`/`appId`/`appStoreId`/`appStoreUrl` (any identifier form), `categories`, `excludedCategories`, `developer`, app download/revenue min/max |
 | Delivery | `countries`, `excludedCountries`, `surfaces`, `excludedSurfaces`, start/end timestamp bounds |
 | Shape | `view` (`full` \| `compact`) |
-| Order | `sortBy` (`start_date`, `end_date`, `app_downloads`, `app_revenue`, `app_released_timestamp`, `app_updated_timestamp`), `sortOrder` (`asc` \| `desc`) |
+| Order | `sortBy` (`start_date`, `end_date`, `app_downloads`, `app_revenue`, app Meta Ads estimated spend/reach fields for `7d`, `30d`, or `90d`, `app_released_timestamp`, `app_updated_timestamp`), `sortOrder` (`asc` \| `desc`) |
 
 ### `GET /api/v1/creators` filters
 

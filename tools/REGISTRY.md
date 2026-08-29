@@ -135,7 +135,7 @@ All ad list fields plus deeper delivery/transparency fields such as `transparenc
 | `endedAfter` / `endedBefore` | integer | Ad end date Unix timestamp bounds |
 | `minAppDownloads` / `maxAppDownloads` | integer | Advertised app estimated monthly downloads |
 | `minAppRevenue` / `maxAppRevenue` | integer | Advertised app estimated monthly revenue |
-| `sortBy` | enum | `start_date`, `end_date`, `app_downloads`, `app_revenue`, `app_released_timestamp`, `app_updated_timestamp` |
+| `sortBy` | enum | `start_date`, `end_date`, `app_downloads`, `app_revenue`, `app_meta_ads_estimated_spend_{7d,30d,90d}_usd`, `app_meta_ads_estimated_reach_{7d,30d,90d}`, `app_released_timestamp`, `app_updated_timestamp` |
 | `sortOrder` | enum | `asc`, `desc` |
 | `limit` | integer | Results per page (1–100) |
 | `cursor` | integer | Pagination offset |

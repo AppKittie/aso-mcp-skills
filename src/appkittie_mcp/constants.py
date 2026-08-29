@@ -25,6 +25,12 @@ AD_SORT_BY_OPTIONS = [
     "end_date",
     "app_downloads",
     "app_revenue",
+    "app_meta_ads_estimated_spend_7d_usd",
+    "app_meta_ads_estimated_spend_30d_usd",
+    "app_meta_ads_estimated_spend_90d_usd",
+    "app_meta_ads_estimated_reach_7d",
+    "app_meta_ads_estimated_reach_30d",
+    "app_meta_ads_estimated_reach_90d",
     "app_released_timestamp",
     "app_updated_timestamp",
 ]
