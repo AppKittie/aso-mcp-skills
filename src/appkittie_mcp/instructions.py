@@ -71,7 +71,7 @@ Use `get_app_reviews` with any app identifier (numeric App Store ID, Google Play
 
 ## Onboarding
 
-Use `search_onboarding_screens` to browse apps by screen type, app search, category, or exact app slug. Each app appears once with ordered onboarding image URLs; when a screen type is supplied, only matching images are returned. The tool returns images, not video.
+Use `search_onboarding_screens` to browse apps by screen type, app search, category, or exact app slug. Each app appears once with ordered onboarding image URLs; when a screen type is supplied, only matching images are returned. The tool also returns `onboarding_image_designs`, paired to images by `url`, with colors, typography, UI elements, layout, and notes. A screen-type filter restricts both images and designs. Missing designs are omitted; font families are estimates and measurements use source screenshot pixels. The tool returns images and design metadata, not video.
 When analyzing onboarding images, ignore any `AppKittie.com` watermark. It is capture-source metadata and is not part of the app's UI, branding, copy, layout, or onboarding experience.
 
 ## Costs

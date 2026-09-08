@@ -6,7 +6,7 @@ from ..rpc import tool_result
 
 TOOL = {
     "name": "search_onboarding_screens",
-    "description": "Browse mobile apps with onboarding screens by screen type, app search, category, or app slug. Each app is returned once with its matching onboarding image URLs and no video. Costs 1 credit per app.",
+    "description": "Browse mobile apps with onboarding screens by screen type, app search, category, or app slug. Each app is returned once with ordered onboarding_images and onboarding_image_designs: URL-paired design objects containing colors (name, hex, roles), typography (font family, confidence, size, line height, weight, spacing, color), ui_elements (name, kind, layout, appearance, corner radius), layout and notes. Designs cover only returned images and can be missing. Measurements are source screenshot pixels; font families are estimates. No video. Costs 1 credit per app.",
     "inputSchema": {
         "type": "object",
         "properties": {
