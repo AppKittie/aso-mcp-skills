@@ -14,7 +14,7 @@ TOOL = {
         "Fetch current user reviews in real time for a specific Apple App "
         "Store or Google Play app. Results are retrieved from the store and are "
         "not read from AppKittie's review-monitor database. "
-        "Accepts a numeric App Store ID, Google Play package name, AppKittie app "
+        "Requires an app identifier: a numeric App Store ID, Google Play package name, AppKittie app "
         "slug, or store URL. Supports pagination via offset. "
         "Costs 1 credit per review returned."
     ),
@@ -40,12 +40,6 @@ TOOL = {
             "maxReviews": {"type": "integer", "description": "Maximum reviews to fetch (1-300, default: 100)."},
             "offset": {"type": "integer", "description": "Pagination offset."},
         },
-        "anyOf": [
-            {"required": ["appId"]},
-            {"required": ["appSlug"]},
-            {"required": ["appStoreId"]},
-            {"required": ["appStoreUrl"]},
-        ],
     },
     "annotations": {"readOnlyHint": True, "openWorldHint": True},
 }

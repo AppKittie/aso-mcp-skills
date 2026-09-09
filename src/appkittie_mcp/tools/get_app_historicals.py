@@ -9,7 +9,7 @@ TOOL = {
     "name": "get_app_historicals",
     "description": (
         "Fetch historical metric time series for a specific mobile app. "
-        "Accepts an AppKittie app ID, app slug, store ID, package name, "
+        "Requires an app identifier: an AppKittie app ID, app slug, store ID, package name, "
         "or App Store / Google Play URL. Costs 1 credit per request."
     ),
     "inputSchema": {
@@ -34,13 +34,6 @@ TOOL = {
                 "description": "Optional metrics to include. If omitted, all metrics are returned.",
             },
         },
-        "anyOf": [
-            {"required": ["appSlug"]},
-            {"required": ["app_slug"]},
-            {"required": ["appId"]},
-            {"required": ["appStoreId"]},
-            {"required": ["appStoreUrl"]},
-        ],
     },
     "annotations": {"readOnlyHint": True, "openWorldHint": True},
 }

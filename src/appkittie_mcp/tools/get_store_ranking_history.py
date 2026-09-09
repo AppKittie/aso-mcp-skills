@@ -11,7 +11,7 @@ TOOL = {
     "description": (
         "Fetch daily store-chart positions for one app slug in a specific "
         "collection, country, and category. Costs 10 credits per request. "
-        "Use list_store_rankings first to obtain an exact app slug and chart filters."
+        "Requires appSlug or app_slug. Use list_store_rankings first to obtain an exact app slug and chart filters."
     ),
     "inputSchema": {
         "type": "object",
@@ -50,7 +50,6 @@ TOOL = {
             },
         },
         "required": ["category"],
-        "anyOf": [{"required": ["appSlug"]}, {"required": ["app_slug"]}],
     },
     "annotations": {"readOnlyHint": True, "openWorldHint": True},
 }
