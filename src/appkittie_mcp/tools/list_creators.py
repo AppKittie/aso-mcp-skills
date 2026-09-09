@@ -1,4 +1,4 @@
-from .app_scoped import APP_SCOPED_ANY_OF, APP_SCOPED_PROPERTIES, handle_app_scoped_list
+from .app_scoped import APP_SCOPED_PROPERTIES, handle_app_scoped_list
 
 
 CREATOR_FILTER_KEYS = [
@@ -14,8 +14,8 @@ TOOL = {
     "name": "list_creators",
     "description": (
         "Fetch TopYappers creator profiles for a single app or across a category. "
-        "Accepts app slug, AppKittie app ID, store ID, package name, or store URL — "
-        "or 'category' for cross-app creator discovery. "
+        "Requires an app identifier (app slug, AppKittie app ID, store ID, package name, or store URL) — "
+        "or a 'category' for cross-app creator discovery. "
         "Filter by platform, country, and follower range. "
         "Costs 1 credit per creator returned."
     ),
@@ -47,7 +47,6 @@ TOOL = {
             },
             "sortOrder": {"type": "string", "enum": ["asc", "desc"], "description": "Sort direction. Default: desc."},
         },
-        "anyOf": [*APP_SCOPED_ANY_OF, {"required": ["category"]}],
     },
     "annotations": {"readOnlyHint": True, "openWorldHint": True},
 }

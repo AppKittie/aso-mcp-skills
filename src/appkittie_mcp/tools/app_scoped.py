@@ -19,14 +19,6 @@ APP_SCOPED_PROPERTIES = {
     "cursor": {"type": "integer", "description": "Pagination cursor from previous response."},
 }
 
-APP_SCOPED_ANY_OF = [
-    {"required": ["appSlug"]},
-    {"required": ["app_slug"]},
-    {"required": ["appId"]},
-    {"required": ["appStoreId"]},
-    {"required": ["appStoreUrl"]},
-]
-
 # Query param keys forwarded verbatim to the API. The API resolves any
 # identifier form (slug, store ID, package name, or store URL) server-side.
 IDENTIFIER_KEYS = ["app_slug", "appSlug", "appId", "appStoreId", "appStoreUrl"]
