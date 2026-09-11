@@ -124,6 +124,10 @@ TOOL = {
                 "description": "Document fields used by full-text search",
             },
             "hasWebsite": {"type": "boolean", "description": "Only apps with a developer website"},
+            "hasWebFunnel": {
+                "type": "boolean",
+                "description": "Filter by known web funnel presence: true requires a non-empty funnel name; false includes missing, null, or empty funnel names. Omit to include all apps.",
+            },
             "hasIpadSupport": {"type": "boolean", "description": "Only apps with iPad support"},
             "hasCreators": {"type": "boolean", "description": "Only apps with known creator/influencer partnerships"},
             "organicSources": {
