@@ -22,6 +22,11 @@ class SearchOnboardingScreensContractTests(unittest.IsolatedAsyncioTestCase):
     def test_schema_matches_api_contract(self):
         properties = search_onboarding_screens.TOOL['inputSchema']['properties']
 
+        self.assertEqual(properties['minScreenCount']['type'], 'integer')
+        self.assertEqual(properties['minScreenCount']['minimum'], 0)
+        self.assertEqual(properties['maxScreenCount']['minimum'], 0)
+        self.assertIn('screen_count', properties['sortBy']['enum'])
+        self.assertEqual(properties['sortOrder']['enum'], ['asc', 'desc'])
         self.assertEqual(properties['limit']['default'], 50)
         self.assertEqual(properties['limit']['maximum'], 100)
         self.assertEqual(
@@ -57,6 +62,10 @@ class SearchOnboardingScreensContractTests(unittest.IsolatedAsyncioTestCase):
             'categories': ['Health & Fitness'],
             'limit': 3,
             'cursor': 6,
+            'minScreenCount': 4,
+            'maxScreenCount': 20,
+            'sortBy': 'screen_count',
+            'sortOrder': 'asc',
         }
         response = {
             'data': [

@@ -6,7 +6,7 @@ from ..rpc import tool_result
 
 TOOL = {
     "name": "search_onboarding_screens",
-    "description": "Browse mobile apps with onboarding screens by screen type, app search, category, or app slug. Each app is returned once with ordered onboarding_images and onboarding_image_designs: URL-paired design objects containing colors (name, hex, roles), typography (font family, confidence, size, line height, weight, spacing, color), ui_elements (name, kind, layout, appearance, corner radius), layout and notes. Designs cover only returned images and can be missing. Measurements are source screenshot pixels; font families are estimates. No video. Costs 1 credit per app.",
+    "description": "Browse mobile apps with onboarding screens by screen type, app search, category, app slug, or minimum/maximum screen count. Sort by screen_count ascending for fewer screens or descending for more. Counts apply to the complete flow before label filtering (library minimum: 4 screens). Each app is returned once with ordered onboarding_images and onboarding_image_designs: URL-paired design objects containing colors (name, hex, roles), typography (font family, confidence, size, line height, weight, spacing, color), ui_elements (name, kind, layout, appearance, corner radius), layout and notes. Designs cover only returned images and can be missing. Measurements are source screenshot pixels; font families are estimates. No video. Costs 1 credit per app.",
     "inputSchema": {
         "type": "object",
         "properties": {
@@ -25,6 +25,25 @@ TOOL = {
             "search": {"type": "string", "description": "Full-text app search"},
             "categories": {"type": "array", "items": {"type": "string"}},
             "source": {"type": "string", "enum": ["apple_mobile", "google_mobile"]},
+            "minScreenCount": {
+                "type": "integer", "minimum": 0,
+                "description": "Inclusive minimum screens in the complete flow; the library requires at least 4.",
+            },
+            "maxScreenCount": {
+                "type": "integer", "minimum": 0,
+                "description": "Inclusive maximum screens in the complete flow, before label filtering. Must be >= minScreenCount.",
+            },
+            "sortBy": {
+                "type": "string",
+                "enum": ["growth", "rating", "reviews", "updated", "released", "app_updated",
+                         "downloads", "revenue", "trending", "newest", "screen_count"],
+                "default": "growth",
+                "description": "Sort apps by a metric; screen_count orders by total flow screens.",
+            },
+            "sortOrder": {
+                "type": "string", "enum": ["asc", "desc"], "default": "desc",
+                "description": "For screen_count: asc = fewer screens first, desc = more screens first.",
+            },
             "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 50},
             "cursor": {"type": "integer"},
         },
