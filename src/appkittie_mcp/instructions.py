@@ -29,6 +29,15 @@ Key filters:
 
 Cost: 1 credit per app returned. Use smaller `limit` values while exploring.
 
+## Favorites
+
+Use `list_favorite_apps` to fetch the API team's owner's saved apps from the separate
+favorites endpoint. Pass `folder` to select a folder; an empty string selects unfiled
+favorites. Follow `pagination.nextCursor` for more saved records.
+Use `get_app_detail` with a returned slug for app metadata (normal detail pricing applies).
+Favorites access is read-only and listing costs no credits. Manage saved apps and folders
+in the dashboard. `search_apps` searches the general app catalog.
+
 ## App Details and Historicals
 
 Use `get_app_detail` for metadata, screenshots, IAPs, contacts, Meta Ads transparency, and growth summaries.
