@@ -18,6 +18,7 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 | Endpoint | Method | Purpose | Cost |
 |----------|--------|---------|------|
 | `/api/v1/apps` | GET | Search and filter apps | 1 credit/hit |
+| `/api/v1/favorites/apps` | GET | List the team owner's saved app favorites | Free |
 | `/api/v1/apps/:appId` | GET | Get app detail | 1 credit |
 | `/api/v1/apps/:appId/historicals` | GET | Historical metric time series | 1 credit |
 | `/api/v1/ads` | GET | Search and filter ad creatives | 1 credit/hit |
@@ -36,6 +37,7 @@ App-scoped endpoints accept any identifier form: app slug, AppKittie app ID, num
 | MCP Tool | API Endpoint | Method |
 |----------|-------------|--------|
 | `search_apps` | `/api/v1/apps` | GET |
+| `list_favorite_apps` | `/api/v1/favorites/apps` | GET |
 | `get_app_detail` | `/api/v1/apps/:appId` | GET |
 | `get_app_historicals` | `/api/v1/apps/:appId/historicals` | GET |
 | `list_store_rankings` | `/api/v1/trending` | GET |

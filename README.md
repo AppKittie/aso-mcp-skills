@@ -139,6 +139,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | Tool | Purpose | Credits |
 |------|---------|---------|
 | `search_apps` | Filter App Store and Google Play apps (30+ parameters) | 1 × rows returned |
+| `list_favorite_apps` | List the API team's owner's saved apps and folders | Free |
 | `get_app_detail` | Metadata, revenue, IAPs, contacts, growth summaries | 1 / call |
 | `get_app_historicals` | Raw historical metric series for one app | 1 / call |
 | `list_store_rankings` | Current store chart by collection, country, and category | 1 × rows returned |

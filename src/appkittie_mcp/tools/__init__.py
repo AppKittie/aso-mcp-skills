@@ -11,11 +11,13 @@ from . import list_organic_content
 from . import list_store_rankings
 from . import search_ads
 from . import search_apps
+from . import list_favorite_apps
 from . import search_onboarding_screens
 
 
 TOOL_MODULES = [
     search_apps,
+    list_favorite_apps,
     get_app_detail,
     get_app_historicals,
     list_store_rankings,
