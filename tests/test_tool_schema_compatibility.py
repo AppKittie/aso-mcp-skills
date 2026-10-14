@@ -16,9 +16,24 @@ sys.modules.setdefault("pyodide.ffi", ffi)
 
 from appkittie_mcp.tools import TOOLS, TOOL_HANDLERS
 from appkittie_mcp.tools import app_scoped, get_app_historicals, get_app_reviews, get_store_ranking_history
+from appkittie_mcp.tools import search_ads
 
 
 class ToolSchemaCompatibilityTests(unittest.IsolatedAsyncioTestCase):
+    async def test_tiktok_ads_filter_reaches_api_and_preserves_response(self):
+        self.assertIn("tiktok", search_ads.TOOL["inputSchema"]["properties"]["adSource"]["enum"])
+        response = {"data": [{"ad_doc_id": "tiktok_ad_123", "ad_source": "tiktok"}]}
+        for view in ("compact", "full"):
+            args = {"adSource": "tiktok", "appSlug": "google-play-example"}
+            if view == "full":
+                args["view"] = view
+            with self.subTest(view=view), patch.object(
+                search_ads, "api_get", new=AsyncMock(return_value=(response, None))
+            ) as api:
+                result = await search_ads.handle(args, "test-key")
+                api.assert_awaited_once_with("/api/v1/ads", {**args, "view": view}, "test-key")
+                self.assertIn('"ad_source": "tiktok"', result["content"][0]["text"])
+
     def test_all_advertised_tools_have_client_compatible_root_schemas(self):
         # Claude rejects the entire request if any tool has a root combinator.
         for tool in TOOLS:

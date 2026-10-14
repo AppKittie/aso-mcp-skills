@@ -1,8 +1,8 @@
 ---
 name: ad-intelligence
-description: When the user wants to analyze advertising strategies, find apps running ads, or understand user acquisition tactics. Also use when the user mentions "ad intelligence", "Meta ads", "Facebook ads", "Apple Search Ads", "ad creatives", "user acquisition", "UA strategy", or "who is advertising". For growth trends, see growth-analysis. For competitive analysis, see competitor-analysis.
+description: When the user wants to analyze advertising strategies, find apps running ads, or understand user acquisition tactics. Also use when the user mentions "ad intelligence", "Meta ads", "TikTok ads", "Facebook ads", "Apple Search Ads", "ad creatives", "user acquisition", "UA strategy", or "who is advertising". For growth trends, see growth-analysis. For competitive analysis, see competitor-analysis.
 metadata:
-  version: 1.0.0
+  version: 1.0.1
 ---
 
 # Ad Intelligence
@@ -29,7 +29,9 @@ Use `search_ads` and `get_ad_detail` for creative-level data. App detail respons
 Supported creative sources:
 
 - Meta ads (`adSource: "meta"`)
-- Google ads (`adSource: "google"`)
+- TikTok ads (`adSource: "tiktok"`) for Apple App Store and Google Play apps
+
+`all` adds no network filter. `google` remains accepted for compatibility but has no current inventory.
 
 Creative data can include:
 
@@ -43,7 +45,11 @@ Creative data can include:
 Use `search_apps` to discover apps with ad presence signals:
 
 - `hasMetaAds: true` — filter `search_apps` to only show apps with Meta ad creatives
+- `hasTikTokAds: true` — `tiktok_ads_total_count > 0` in either store. False includes zero, missing, or null counts. Omit for no restriction.
+- `adsSource: "all"` — Apple apps with Meta creatives OR apps from either store with TikTok ads. Omit to include apps without ads; other filters are AND-combined.
 - `hasAppleAds: true` — filter to apps with Apple Search Ads presence signals
+
+`tiktok_ads_total_count` is an optional nullable known count, not an active-ad count or a guarantee of indexed creative availability. Paid TikTok ads are separate from organic TikTok creator content. Do not combine `hasMetaAds: true` with a TikTok-only discovery query.
 
 Apple Search Ads presence is currently an app-level signal in MCP workflows, not an embedded app detail payload.
 
@@ -52,14 +58,14 @@ Apple Search Ads presence is currently an app-level signal in MCP workflows, not
 ### Category Ad Landscape
 
 ```
-1. search_apps(categories: [cat], hasMetaAds: true, sortBy: "revenue", limit: 20)
-   → Which high-revenue apps have Meta ad signals?
+1. search_apps(categories: [cat], adsSource: "all", sortBy: "revenue", limit: 20)
+   → Which high-revenue apps have Meta or TikTok ad signals?
 2. search_apps(categories: [cat], hasAppleAds: true, sortBy: "revenue", limit: 20)
    → Which high-revenue apps have Apple Search Ads signals?
 3. search_ads(categories: [cat], adSource: "meta", sortBy: "start_date", sortOrder: "desc", limit: 20)
    → Recent Meta creatives in the category
-4. search_ads(categories: [cat], adSource: "google", sortBy: "start_date", sortOrder: "desc", limit: 20)
-   → Recent Google creatives in the category
+4. search_ads(categories: [cat], adSource: "tiktok", sortBy: "start_date", sortOrder: "desc", limit: 20)
+   → Recent TikTok creatives in the category
 5. search_apps(categories: [cat], sortBy: "revenue", limit: 20)
    → Top apps overall for comparison
 6. Cross-reference: which top-revenue apps DON'T show ad signals? (organic opportunity)
@@ -70,7 +76,7 @@ Apple Search Ads presence is currently an app-level signal in MCP workflows, not
 ```
 1. get_app_detail for each competitor to collect app context and app_slug
 2. search_ads(appSlug: competitor.app_slug, adSource: "meta", limit: 20)
-3. search_ads(appSlug: competitor.app_slug, adSource: "google", limit: 20)
+3. search_ads(appSlug: competitor.app_slug, adSource: "tiktok", limit: 20)
 4. Use get_ad_detail for standout ad_doc_id values
 5. Look for patterns: UGC vs polished, feature-focused vs emotional
 6. Note what's missing — creative angles competitors haven't tried
@@ -96,7 +102,7 @@ Apple Search Ads presence is currently an app-level signal in MCP workflows, not
 
 **Ad Platform Breakdown:**
 
-| Metric | Meta Creatives | Google Creatives | Apple Signal | No Ads |
+| Metric | Meta Creatives | TikTok Creatives | Apple Signal | No Ads |
 |--------|----------------|------------------|--------------|--------|
 | App count | [N] | [N] | [N] | [N] |
 | Avg. revenue | [est.] | [est.] | [est.] | [est.] |
@@ -106,7 +112,7 @@ Apple Search Ads presence is currently an app-level signal in MCP workflows, not
 
 | App | Platform(s) | Revenue/mo | Downloads/mo | Ad Count |
 |-----|------------|------------|-------------|----------|
-| [app] | Meta / Google / Apple signal | [est.] | [est.] | [N] |
+| [app] | Meta / TikTok / Apple signal | [est.] | [est.] | [N] |
 
 **Creative Patterns:**
 1. [Common ad formats and styles]
