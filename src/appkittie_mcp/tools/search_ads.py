@@ -15,7 +15,7 @@ from ..rpc import tool_result
 TOOL = {
     "name": "search_ads",
     "description": (
-        "Search and filter Meta and Google ad creatives for mobile apps. "
+        "Search and filter Meta and TikTok ad creatives for mobile apps across both stores. "
         "Supports full-text search, filters, sorting, app-specific lookup, "
         "and cursor-based pagination. Returns a compact view (identity, "
         "status, key copy, app metrics) by default; set view='full' for "
@@ -34,7 +34,7 @@ TOOL = {
             "adSource": {
                 "type": "string",
                 "enum": AD_SOURCE_OPTIONS,
-                "description": "Ad source: all, meta, or google.",
+                "description": "Creative network: all (default, no network filter), meta, or tiktok. Independent of the app's store. Google remains accepted for compatibility but has no current inventory.",
             },
             "mediaType": {
                 "type": "string",
@@ -120,4 +120,3 @@ async def handle(args, api_key):
     if err:
         return tool_result(err, is_error=True)
     return tool_result(json.dumps(data, indent=2))
-

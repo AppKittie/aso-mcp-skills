@@ -20,7 +20,8 @@ TOOL = {
         "Discover apps by category, revenue, downloads, traction, ratings, "
         "and more. Supports full-text search, advanced filtering, sorting, "
         "and cursor-based pagination. Returns app metadata including title, "
-        "icon, developer, genre, rating, reviews, downloads, and revenue. "
+        "icon, developer, genre, rating, reviews, downloads, revenue, and "
+        "tiktok_ads_total_count when available (known ad count, not active ads or indexed creative count). "
         "Costs 1 credit per app returned."
     ),
     "inputSchema": {
@@ -139,6 +140,15 @@ TOOL = {
                 "description": "Only apps with organic content on the selected platforms",
             },
             "hasMetaAds": {"type": "boolean", "description": "Only apps running Meta ads"},
+            "hasTikTokAds": {
+                "type": "boolean",
+                "description": "Filter paid TikTok ad presence in either store: true requires tiktok_ads_total_count > 0; false includes zero, missing, or null counts. Omit for no restriction. Fetch creatives with search_ads(adSource='tiktok'); organicSources is a separate filter.",
+            },
+            "adsSource": {
+                "type": "string",
+                "enum": ["all", "meta", "tiktok"],
+                "description": "App discovery by ads: meta selects Apple apps with Meta creatives; tiktok selects either store with tiktok_ads_total_count > 0; all selects either group. Omit to include apps without ads. Other filters are AND-combined.",
+            },
             "hasMetaAdSpend": {
                 "type": "boolean",
                 "description": "Filter by whether Meta Ads transparency spend data exists",

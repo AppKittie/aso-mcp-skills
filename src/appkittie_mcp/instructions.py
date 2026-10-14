@@ -24,8 +24,12 @@ Key filters:
 - `sortBy` - `growth`, `rating`, `reviews`, `downloads`, `revenue`, `trending`, `newest`, `updated`, `released`
 - `growthMetric` - currently `reviews`
 - `growthPeriod` - `7d`, `14d`, `30d`, `60d`, `90d`
-- `hasMetaAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` - marketing/contact signals
+- `hasMetaAds`, `hasTikTokAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` - marketing/contact signals
 - `hasMetaAdSpend`, `minMetaAdSpend`, `maxMetaAdSpend` - reported Meta Ads transparency spend
+
+`hasTikTokAds=true` requires `tiktok_ads_total_count > 0` in either store; false includes zero, missing, or null counts. Omit for no restriction. This is paid ad presence, separate from organic TikTok content.
+`adsSource` selects apps by ads signal: meta (Apple apps with Meta creatives), tiktok (either store with a positive count), or all (either group). Omit to include apps without ads. Other filters are AND-combined; do not add hasMetaAds=true when looking for TikTok-only apps.
+App list/detail responses include optional nullable `tiktok_ads_total_count` when available. It is a known ad count, not an active-ad count; fetch indexed creatives separately.
 
 Cost: 1 credit per app returned. Use smaller `limit` values while exploring.
 
@@ -40,7 +44,7 @@ in the dashboard. `search_apps` searches the general app catalog.
 
 ## App Details and Historicals
 
-Use `get_app_detail` for metadata, screenshots, IAPs, contacts, Meta Ads transparency, and growth summaries.
+Use `get_app_detail` for metadata, screenshots, IAPs, contacts, TikTok ad counts, and growth summaries.
 Use `get_app_historicals` for raw time-series metrics such as reviews, score, downloads, revenue, MAU, DAU, size, and price.
 
 ## Store Rankings
@@ -50,7 +54,9 @@ Use `get_store_ranking_history` with an exact app slug and the same chart filter
 
 ## Ads
 
-Use `search_ads` and `get_ad_detail` for Meta and Google creatives. App detail responses do not embed ad payloads.
+Use `search_ads` and `get_ad_detail` for Meta and TikTok creatives. App detail responses do not embed ad payloads.
+
+Use `adSource='tiktok'` for TikTok creatives or `adSource='meta'` for Meta. `all` adds no network filter. Google remains accepted for compatibility but has no current inventory. The returned `ad_source` identifies the creative network independently of the app store.
 
 `search_ads` returns a compact view by default (identity, status, key copy, app metrics) to keep responses small. Pass `view='full'` only when you need complete creative payloads with media URLs. Use `get_ad_detail` for a deep dive on one ad.
 

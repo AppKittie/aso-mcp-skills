@@ -17,7 +17,7 @@ CONTENT_RATINGS = ["all", "4+", "9+", "12+", "17+"]
 PRICE_TYPES = ["all", "free", "paid"]
 STORE_SOURCES = ["apple_mobile", "google_mobile"]
 
-AD_SOURCE_OPTIONS = ["all", "meta", "google"]
+AD_SOURCE_OPTIONS = ["all", "meta", "google", "tiktok"]
 AD_MEDIA_TYPES = ["all", "image", "video"]
 AD_STATUSES = ["all", "active", "inactive"]
 AD_SORT_BY_OPTIONS = [

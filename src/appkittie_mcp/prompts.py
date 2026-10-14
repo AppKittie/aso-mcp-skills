@@ -37,10 +37,10 @@ PROMPTS = [
     },
     {
         "name": "ad_intelligence",
-        "description": "Discover apps running ads and inspect Meta/Google creatives.",
+        "description": "Discover apps running ads and inspect Meta/TikTok creatives.",
         "arguments": [
             {"name": "category_or_search", "description": "Category or search term", "required": True},
-            {"name": "ad_platform", "description": "meta, google, apple, or all", "required": False},
+            {"name": "ad_platform", "description": "meta, tiktok, apple, or all; google accepted for compatibility", "required": False},
         ],
     },
     {
@@ -117,19 +117,26 @@ def render_prompt(name, arguments):
     if name == "ad_intelligence":
         target = args.get("category_or_search", "")
         platform = (args.get("ad_platform", "all") or "all").lower()
-        meta_filter = platform in ("meta", "all", "both")
+        app_ad_filter = {
+            "meta": ", adsSource: 'meta'",
+            "tiktok": ", hasTikTokAds: true",
+            "all": ", adsSource: 'all'",
+            "both": ", adsSource: 'all'",
+        }.get(platform, "")
         apple_filter = platform in ("apple", "all", "both")
         creative_sources = []
         if platform in ("meta", "all", "both"):
             creative_sources.append("meta")
-        if platform in ("google", "all", "both"):
+        if platform in ("tiktok", "all", "both"):
+            creative_sources.append("tiktok")
+        if platform == "google":
             creative_sources.append("google")
         if not creative_sources:
-            creative_sources = ["meta", "google"]
+            creative_sources = ["meta", "tiktok"]
         creative_source_text = " and ".join(f"adSource: '{source}'" for source in creative_sources)
         return [_user_message(
             f"Discover which apps are running ads for '{target}'.\n\n"
-            f"1. Use search_apps with search: '{target}'{', hasMetaAds: true' if meta_filter else ''}, sortBy: 'revenue', limit: 20.\n"
+            f"1. Use search_apps with search: '{target}'{app_ad_filter}, sortBy: 'revenue', limit: 20.\n"
             f"2. Use search_apps with search: '{target}'{', hasAppleAds: true' if apple_filter else ''}, sortBy: 'revenue', limit: 20 when relevant.\n"
             f"3. For top advertisers, use search_ads with appSlug and {creative_source_text}, sortBy: 'start_date', sortOrder: 'desc', limit: 10.\n"
             "4. Use get_ad_detail on standout ad_doc_id values.\n"
@@ -154,4 +161,3 @@ def render_prompt(name, arguments):
 
 def _user_message(text):
     return {"role": "user", "content": {"type": "text", "text": text}}
-

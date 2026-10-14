@@ -76,7 +76,11 @@ App-scoped endpoints accept any identifier form: app slug, AppKittie app ID, num
 **Detail response** (from `get_app_detail`):
 All list fields plus: `description`, `genres`, `languages`, `size`, `version`, `released`, `updated`, `release_notes`, `price`, `currency`, `free`, `developer_url`, `historical_counts`, `historical_data`, `screenshots`, `in_app_purchases`, `decision_makers`, `socials`, `hiring`, `emails`, `websites`, `topyappers_creators`
 
+App list/detail responses also include optional nullable `tiktok_ads_total_count` when available: known TikTok ads, not active ads or the indexed creative count.
+
 Ad creatives are fetched separately with `search_ads` and `get_ad_detail`.
+
+The returned `ad_source` is `meta`, `tiktok`, or legacy `google`, independently of the app store.
 
 ### Ad Data Fields
 
@@ -112,6 +116,8 @@ All ad list fields plus deeper delivery/transparency fields such as `transparenc
 | `hasWebsite` | boolean | Has developer website |
 | `hasCreators` | boolean | Has creator partnerships |
 | `hasMetaAds` | boolean | Running Meta ads |
+| `hasTikTokAds` | boolean | True: `tiktok_ads_total_count > 0` in either store. False: zero, missing, or null. Omit for no restriction. |
+| `adsSource` | enum | `meta`: Apple apps with Meta creatives; `tiktok`: either store with a positive count; `all`: either group. Omit to include apps without ads. Other filters are AND-combined. |
 | `hasAppleAds` | boolean | Running Apple Search Ads |
 | `hasEmails` | boolean | Has contact emails |
 | `limit` | integer | Results per page (1–100) |
@@ -123,7 +129,7 @@ All ad list fields plus deeper delivery/transparency fields such as `transparenc
 |--------|------|-------------|
 | `search` | string | Full-text search across creative text and app metadata |
 | `textSearchFields` | string[] | Search fields such as `creative_text`, `title`, `body`, `cta_text`, `page_name`, `developer`, `app_title`, `category` |
-| `adSource` | enum | `all`, `meta`, `google` |
+| `adSource` | enum | `all` (no network filter), `meta`, `tiktok`, `google` (legacy; no current inventory) |
 | `mediaType` | enum | `all`, `image`, `video` |
 | `status` | enum | `all`, `active`, `inactive` |
 | `appSlug` / `appId` / `appStoreId` / `appStoreUrl` | string | Ads for one app (any identifier form) |

@@ -20,7 +20,9 @@ https://appkittie.com/api/v1
 
 ### GET /apps
 
-Search and filter Apple App Store and Google Play apps.
+Search and filter Apple App Store and Google Play apps. Use `hasTikTokAds=true` for `tiktok_ads_total_count > 0`; false includes zero, missing, or null counts. `adsSource=tiktok` finds either store with that signal, `meta` finds Apple apps with Meta creatives, and `all` finds either group. Omit `adsSource` to include apps without ads. Other filters are AND-combined.
+
+App list/detail responses include optional nullable `tiktok_ads_total_count` when available. This known ad count is not an active-ad count and can differ from indexed creatives. Fetch TikTok creatives separately using `GET /ads?appSlug=...&adSource=tiktok`.
 
 **Query Parameters:** See [REGISTRY.md](../REGISTRY.md) for the full filter list.
 
@@ -82,7 +84,7 @@ Historical metric time series (reviews, score, downloads, revenue, MAU, DAU, siz
 
 ### GET /ads
 
-Search and filter Meta and Google ad creatives.
+Search and filter Meta and TikTok ad creatives. Use `adSource=tiktok` for TikTok or `adSource=meta` for Meta; `all` adds no network filter. `google` remains accepted for compatibility but has no current inventory. The returned `ad_source` identifies the network independently of the app store.
 
 **Query Parameters:** See [REGISTRY.md](../REGISTRY.md) for the full ad filter list. Use `view=compact` for trimmed payloads (identity, status, key copy, and app metrics only) in automated workflows.
 

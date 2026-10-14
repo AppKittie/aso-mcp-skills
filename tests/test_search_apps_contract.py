@@ -41,6 +41,8 @@ class SearchAppsContractTests(unittest.TestCase):
             "hasIpadSupport",
             "hasWebFunnel",
             "organicSources",
+            "hasTikTokAds",
+            "adsSource",
             "hasMetaAdSpend",
             "minMetaAdSpend",
             "maxMetaAdSpend",
@@ -54,6 +56,23 @@ class SearchAppsContractTests(unittest.TestCase):
 
 
 class SearchAppsWebFunnelTests(unittest.IsolatedAsyncioTestCase):
+    async def test_tiktok_filters_are_forwarded_including_false(self):
+        for args, expected in [
+            ({"hasTikTokAds": True, "source": "google_mobile"}, {"hasTikTokAds": "true", "source": "google_mobile"}),
+            ({"hasTikTokAds": False}, {"hasTikTokAds": "false"}),
+            ({"adsSource": "tiktok"}, {"adsSource": "tiktok"}),
+            ({"adsSource": "all"}, {"adsSource": "all"}),
+            ({}, {}),
+        ]:
+            with self.subTest(args=args), patch(
+                "appkittie_mcp.tools.search_apps.api_get",
+                new_callable=AsyncMock,
+                return_value=({"data": []}, None),
+            ) as api_get:
+                await handle(args, "test-key")
+                api_get.assert_awaited_once_with("/api/v1/apps", args, "test-key")
+                self.assertEqual(_clean_params(api_get.call_args.args[1]), expected)
+
     async def test_web_funnel_is_forwarded_and_serialized_without_dropping_false(self):
         self.assertEqual(
             TOOL["inputSchema"]["properties"]["hasWebFunnel"]["type"], "boolean"

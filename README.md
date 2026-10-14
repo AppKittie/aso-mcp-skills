@@ -144,7 +144,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | `get_app_historicals` | Raw historical metric series for one app | 1 / call |
 | `list_store_rankings` | Current store chart by collection, country, and category | 1 × rows returned |
 | `get_store_ranking_history` | Daily chart positions for one app and chart | 10 / call |
-| `search_ads` | Search Meta and Google ad creatives; compact view by default, `view='full'` for complete payloads | 1 × rows returned |
+| `search_ads` | Search Meta and TikTok ad creatives; compact view by default, `view='full'` for complete payloads | 1 × rows returned |
 | `get_ad_detail` | Full detail for one ad creative | 1 / call |
 | `list_creators` | Creator discovery for one app or across a category; filter by platform, country, and followers | 1 × rows returned |
 | `list_organic_content` | Search organic creator content globally or filter by app, category, language, reach, views, and app performance | 1 × rows returned |
@@ -277,10 +277,14 @@ App-scoped routes accept any identifier form — `app_slug`/`appSlug`, `appId`, 
 | Metrics | `minDownloads` / `maxDownloads`, `minRevenue` / `maxRevenue`, `minRating` / `maxRating`, `minReviews` / `maxReviews`, lifetime download/revenue min/max |
 | Price | `priceType` (`all` \| `free` \| `paid`), `minPrice`, `maxPrice` |
 | Growth sort | `sortBy=growth`, `growthMetric=reviews`, `growthPeriod` (`7d`, `14d`, `30d`, `60d`, `90d`). Growth direction/range filters are temporarily unavailable |
-| Signals | `hasMetaAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` |
+| Signals | `hasMetaAds`, `hasTikTokAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` |
 | Content | `contentRating`, `languages`, `developer` |
 | Time | `releasedAfter`, `updatedAfter` (Unix seconds) |
 | Order | `sortBy` (`growth`, `rating`, `reviews`, `updated`, `released`, `downloads`, `revenue`, `trending`, `newest`), `sortOrder` (`asc` \| `desc`) |
+
+`hasTikTokAds=true` requires `tiktok_ads_total_count > 0`; `false` includes zero, missing, or null counts. App list/detail responses include optional `tiktok_ads_total_count` when available. Fetch creatives separately with `search_ads(adSource="tiktok", appSlug=...)`; counts can differ from indexed creatives.
+
+`adsSource` accepts `meta` (Apple apps with Meta creatives), `tiktok` (either store with a positive TikTok count), or `all` (either group). Omit it to include apps without ads. Other filters are AND-combined.
 
 Full parameter matrix: [tools/REGISTRY.md](tools/REGISTRY.md).
 
@@ -289,11 +293,13 @@ Full parameter matrix: [tools/REGISTRY.md](tools/REGISTRY.md).
 | Group | Parameters |
 |-------|------------|
 | Text | `search`, `textSearchFields` |
-| Creative | `adSource` (`all` \| `meta` \| `google`), `mediaType` (`all` \| `image` \| `video`), `status` (`all` \| `active` \| `inactive`) |
+| Creative | `adSource` (`all` \| `meta` \| `tiktok` \| `google` (legacy)), `mediaType` (`all` \| `image` \| `video`), `status` (`all` \| `active` \| `inactive`) |
 | App | `app_slug`/`appSlug`/`appId`/`appStoreId`/`appStoreUrl` (any identifier form), `categories`, `excludedCategories`, `developer`, app download/revenue min/max |
 | Delivery | `countries`, `excludedCountries`, `surfaces`, `excludedSurfaces`, start/end timestamp bounds |
 | Shape | `view` (`full` \| `compact`) |
 | Order | `sortBy` (`start_date`, `end_date`, `app_downloads`, `app_revenue`, app Meta Ads estimated spend/reach fields for `7d`, `30d`, or `90d`, `app_released_timestamp`, `app_updated_timestamp`), `sortOrder` (`asc` \| `desc`) |
+
+`adSource=all` adds no network filter. Google remains accepted for compatibility but has no current inventory. `ad_source` identifies the creative network independently of the app store.
 
 ### `GET /api/v1/creators` filters
 

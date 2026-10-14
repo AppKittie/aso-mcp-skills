@@ -9,7 +9,8 @@ from ..rpc import tool_result
 TOOL = {
     "name": "get_ad_detail",
     "description": (
-        "Get detailed information for a single ad creative by ad_doc_id. "
+        "Get detailed information for a single Meta or TikTok ad creative by ad_doc_id. "
+        "The ad_source field identifies the network (meta, tiktok, or legacy google). "
         "Returns hosted creative assets, copy, delivery metadata, advertised app fields, "
         "and compact app summary when available. Costs 1 credit per request."
     ),
@@ -33,4 +34,3 @@ async def handle(args, api_key):
     if err:
         return tool_result(err, is_error=True)
     return tool_result(json.dumps(data, indent=2))
-

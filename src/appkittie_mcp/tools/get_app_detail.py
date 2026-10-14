@@ -8,8 +8,8 @@ TOOL = {
     "name": "get_app_detail",
     "description": (
         "Get detailed information about a specific mobile app by its ID. "
-        "Returns metadata, screenshots, growth summary fields, Meta Ads "
-        "transparency and spend data, in-app purchases, "
+        "Returns metadata, screenshots, growth summary fields, "
+        "tiktok_ads_total_count when available (known ad count, not active ads or indexed creative count), in-app purchases, "
         "decision-makers, and social links. Use get_app_historicals for raw "
         "time-series metrics, list_creators/list_organic_content for creator "
         "data, and search_ads/get_ad_detail for ad creatives. Costs 1 credit per request."
