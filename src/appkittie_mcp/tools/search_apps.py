@@ -64,7 +64,13 @@ TOOL = {
             "sortBy": {
                 "type": "string",
                 "enum": SORT_BY_OPTIONS,
-                "description": "Sort results by growth, rating, reviews, updated, released, downloads, revenue, trending, or newest.",
+                "description": (
+                    "Sort results by growth (review growth over growthPeriod), "
+                    "downloads_growth or revenue_growth (percentage change in "
+                    "estimated monthly downloads or revenue over the last 30 "
+                    "days), rating, reviews, updated, released, app_updated, "
+                    "downloads, revenue, trending, or newest."
+                ),
             },
             "sortOrder": {
                 "type": "string",
@@ -93,12 +99,19 @@ TOOL = {
             "growthMetric": {
                 "type": "string",
                 "enum": GROWTH_METRICS,
-                "description": "Which metric to sort growth on: reviews (default: reviews)",
+                "description": (
+                    "Metric for sortBy=growth: reviews (default: reviews). "
+                    "For downloads or revenue growth, use sortBy=downloads_growth "
+                    "or sortBy=revenue_growth instead."
+                ),
             },
             "growthPeriod": {
                 "type": "string",
                 "enum": GROWTH_PERIODS,
-                "description": "Growth sort period window: 7d, 14d, 30d, 60d, 90d",
+                "description": (
+                    "Review growth window for sortBy=growth: 7d, 14d, 30d, 60d, "
+                    "90d. downloads_growth and revenue_growth always use 30d."
+                ),
             },
             "contentRating": {
                 "type": "string",
@@ -151,17 +164,7 @@ TOOL = {
             },
             "hasMetaAdSpend": {
                 "type": "boolean",
-                "description": "Filter by whether Meta Ads transparency spend data exists",
-            },
-            "minMetaAdSpend": {
-                "type": "integer",
-                "minimum": 0,
-                "description": "Minimum reported Meta Ads transparency spend in USD",
-            },
-            "maxMetaAdSpend": {
-                "type": "integer",
-                "minimum": 0,
-                "description": "Maximum reported Meta Ads transparency spend in USD",
+                "description": "Filter by estimated Meta Ads spend over the last 30 days: true requires meta_ads_estimated_spend_30d_usd > 0; false includes zero, missing, or null estimates. Omit for no restriction.",
             },
             "hasAppleAds": {"type": "boolean", "description": "Only apps running Apple Search Ads"},
             "hasEmails": {"type": "boolean", "description": "Only apps with contact emails available"},

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "appkittie": {
+      "type": "streamable-http",
+      "url": "https://mcp.appkittie.com/chatgpt/mcp",
+      "extensions": {
+        "com.openai": {
+          "auth": {
+            "type": "mixed",
+            "client": {
+              "mode": "provided",
+              "clientId": "appkittie-chatgpt",
+              "tokenEndpointAuthMethod": "none"
+            },
+            "authorizationUrl": "https://www.appkittie.com/api/mcp/oauth/authorize",
+            "tokenUrl": "https://www.appkittie.com/api/mcp/oauth/token",
+            "baseScopes": ["appkittie:read"]
+          }
+        }
+      }
+    }
+  }
+}

@@ -64,7 +64,7 @@ Identify apps gaining traction right now.
 | 30d | Emerging trends |
 | 60d-90d | Seasonal or structural shifts |
 
-Reviews growth sorting is available with `sortBy: "growth"`, `growthMetric: "reviews"`, and `growthPeriod`. Growth direction/range filters are temporarily unavailable.
+Reviews growth sorting is available with `sortBy: "growth"`, `growthMetric: "reviews"`, and `growthPeriod`. For download or revenue momentum, use `sortBy: "downloads_growth"` or `sortBy: "revenue_growth"` (30-day change; `growthPeriod` doesn't apply). Growth direction/range filters are temporarily unavailable.
 
 ### Ad Intelligence
 

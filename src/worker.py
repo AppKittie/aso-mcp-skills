@@ -7,6 +7,7 @@ MCP JSON-RPC routing. Tool definitions and handlers live in appkittie_mcp/tools.
 
 import json
 
+from appkittie_mcp import chatgpt
 from appkittie_mcp.constants import PROTOCOL_VERSION, SERVER_NAME, SERVER_VERSION
 from appkittie_mcp.http import empty_response, json_response
 from appkittie_mcp.instructions import INSTRUCTIONS
@@ -14,6 +15,7 @@ from appkittie_mcp.oauth import (
     auth_required_response,
     authorization_server_metadata,
     calls_protected_tool,
+    env_get,
     handle_authorize,
     handle_token,
     protected_resource_metadata,
@@ -46,8 +48,8 @@ def handle_initialize(req_id):
     })
 
 
-def handle_tools_list(req_id):
-    return rpc_success(req_id, {"tools": TOOLS})
+def handle_tools_list(req_id, for_chatgpt=False):
+    return rpc_success(req_id, {"tools": chatgpt.tool_definitions(TOOLS) if for_chatgpt else TOOLS})
 
 
 def handle_prompts_list(req_id):
@@ -98,7 +100,7 @@ async def _call_tool(req_id, handler, arguments, api_key):
         )
 
 
-async def handle_rpc(rpc, api_key, env):
+async def handle_rpc(rpc, api_key, env, for_chatgpt=False):
     """Process a single JSON-RPC message."""
     method = rpc.get("method", "")
     req_id = rpc.get("id")
@@ -115,7 +117,7 @@ async def handle_rpc(rpc, api_key, env):
         return rpc_success(req_id, {})
 
     if method == "tools/list":
-        return handle_tools_list(req_id)
+        return handle_tools_list(req_id, for_chatgpt)
 
     if method == "prompts/list":
         return handle_prompts_list(req_id)
@@ -138,6 +140,14 @@ async def on_fetch(request, env):
     if request.method == "OPTIONS":
         return empty_response(204)
 
+    if request.method == "GET" and path == "/.well-known/openai-apps-challenge":
+        from appkittie_mcp.http import text_response
+        challenge = env_get(env, "OPENAI_APPS_CHALLENGE")
+        return text_response(challenge or "Not configured", status=200 if challenge else 404)
+
+    if request.method == "GET" and path == chatgpt.METADATA_PATH:
+        return json_response(chatgpt.resource_metadata())
+
     if request.method == "GET" and path.startswith("/.well-known/oauth-protected-resource"):
         return json_response(protected_resource_metadata(request))
 
@@ -158,7 +168,7 @@ async def on_fetch(request, env):
         # We don't support server-initiated streams, so return 405 per spec —
         # a 200 here puts the client in a tight reconnect loop.
         accept = request.headers.get("Accept") or ""
-        if "text/event-stream" in accept or path == "/mcp":
+        if "text/event-stream" in accept or path in ("/mcp", chatgpt.MCP_PATH):
             return empty_response(405)
 
     if request.method == "GET":
@@ -191,20 +201,38 @@ async def on_fetch(request, env):
 
     api_key = extract_api_key(request)
 
+    # Invalid envelopes must not reach dispatch or bypass the protected-tool check.
+    messages = rpc if isinstance(rpc, list) else [rpc]
+    if not messages or any(
+        not isinstance(message, dict)
+        or not isinstance(message.get("method"), str)
+        or not isinstance(message.get("params", {}), dict)
+        for message in messages
+    ):
+        return json_response(rpc_error(None, -32600, "Invalid Request"))
+
+    for_chatgpt = path == chatgpt.MCP_PATH
+    if for_chatgpt and calls_protected_tool(rpc, TOOL_HANDLERS):
+        try:
+            if not await chatgpt.validate_token(api_key):
+                return chatgpt.auth_challenge(request)
+        except Exception:
+            return json_response({"error": "Authorization service unavailable"}, status=503)
+
     if not api_key and calls_protected_tool(rpc, TOOL_HANDLERS):
         return auth_required_response(request)
 
     if isinstance(rpc, list):
         results = []
         for message in rpc:
-            result = await handle_rpc(message, api_key, env)
+            result = await handle_rpc(message, api_key, env, for_chatgpt)
             if result is not None:
                 results.append(result)
         if results:
             return json_response(results)
         return empty_response()
 
-    result = await handle_rpc(rpc, api_key, env)
+    result = await handle_rpc(rpc, api_key, env, for_chatgpt)
     if result is None:
         return empty_response()
     return json_response(result)

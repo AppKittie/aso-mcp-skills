@@ -5,7 +5,8 @@ SERVER_VERSION = "1.0.0"
 
 SORT_BY_OPTIONS = [
     "growth", "rating", "reviews", "updated", "released",
-    "app_updated", "downloads", "revenue", "trending", "newest",
+    "app_updated", "downloads", "revenue", "downloads_growth",
+    "revenue_growth", "trending", "newest",
 ]
 
 SORT_ORDERS = ["asc", "desc"]

@@ -44,6 +44,14 @@ def empty_response(status=202):
     return Response.new("", status=status, headers=headers)
 
 
+def text_response(body, status=200):
+    headers = Headers.new()
+    headers.set("Content-Type", "text/plain; charset=utf-8")
+    headers.set("Cache-Control", "no-store")
+    apply_cors(headers)
+    return Response.new(body, status=status, headers=headers)
+
+
 def redirect_response(url, status=302):
     headers = Headers.new()
     headers.set("Location", url)

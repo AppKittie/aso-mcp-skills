@@ -63,6 +63,17 @@ App-scoped endpoints accept any of these identifier forms and resolve them autom
 
 Get detailed data for a single app. The path segment accepts any identifier form (app slug recommended).
 
+The response includes optional nullable `meta_ads_transparency` and `tiktok_ads_transparency` with the same schema:
+
+| Field | Meaning |
+|-------|---------|
+| `countries` | Country records with `country`, `reach`, `spend` (`cpm_usd`, `spend_usd`), `is_estimated`, and demographic breakdowns |
+| `countries_by_code` | The same country metrics keyed by country code |
+| `summary` | Aggregate ad counts, reach, spend, and demographic breakdowns; use `all_spend_usd` and `all_reach` for lifetime totals |
+| `summary.periods`, `countries[].periods`, `countries_by_code[code].periods` | Optional `last_7d`, `last_30d`, and `last_90d` estimates, each with `reach`, `spend_usd`, `gender_breakdown`, `age_breakdown`, and `age_gender_breakdown` |
+
+TikTok's reach fields count impressions, not unique people. Period demographic breakdowns include both reach and spend; lifetime demographic breakdowns contain reach only. Missing transparency or periods mean unavailable data, not zero spend. App list responses omit these objects.
+
 **Response:**
 ```json
 {
@@ -85,6 +96,8 @@ Historical metric time series (reviews, score, downloads, revenue, MAU, DAU, siz
 ### GET /ads
 
 Search and filter Meta and TikTok ad creatives. Use `adSource=tiktok` for TikTok or `adSource=meta` for Meta; `all` adds no network filter. `google` remains accepted for compatibility but has no current inventory. The returned `ad_source` identifies the network independently of the app store.
+
+Use `mediaType=image` or `mediaType=video` to keep one creative format on either network (for example `adSource=tiktok&mediaType=video`). Each creative reports its format in `type`.
 
 **Query Parameters:** See [REGISTRY.md](../REGISTRY.md) for the full ad filter list. Use `view=compact` for trimmed payloads (identity, status, key copy, and app metrics only) in automated workflows.
 

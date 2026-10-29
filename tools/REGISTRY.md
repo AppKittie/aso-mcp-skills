@@ -71,12 +71,14 @@ App-scoped endpoints accept any identifier form: app slug, AppKittie app ID, num
 ### App Data Fields
 
 **List response** (from `search_apps`):
-`app_slug`, `source`, `icon`, `title`, `developer`, `primary_genre`, `score`, `reviews`, `url`, `downloads`, `revenue`, `app_released_date_timestamp`, `app_updated_date_timestamp`, `date_updated_timestamp`, `historical_counts.reviews_growth_7d`
+`app_slug`, `source`, `icon`, `title`, `developer`, `primary_genre`, `score`, `reviews`, `url`, `downloads`, `revenue`, `app_released_date_timestamp`, `app_updated_date_timestamp`, `date_updated_timestamp`, `historical_counts.reviews_growth_7d`, `historical_counts.downloads_growth_30d`, `historical_counts.revenue_growth_30d`
 
 **Detail response** (from `get_app_detail`):
 All list fields plus: `description`, `genres`, `languages`, `size`, `version`, `released`, `updated`, `release_notes`, `price`, `currency`, `free`, `developer_url`, `historical_counts`, `historical_data`, `screenshots`, `in_app_purchases`, `decision_makers`, `socials`, `hiring`, `emails`, `websites`, `topyappers_creators`
 
 App list/detail responses also include optional nullable `tiktok_ads_total_count` when available: known TikTok ads, not active ads or the indexed creative count.
+
+`get_app_detail` also returns optional nullable `meta_ads_transparency` and `tiktok_ads_transparency`. Both contain `countries`, `countries_by_code`, and `summary`, with lifetime reach/spend and demographic breakdowns. `summary.periods` and each country's optional `periods` contain `last_7d`, `last_30d`, and `last_90d` estimates (`reach`, `spend_usd`, and demographic breakdowns). TikTok's `reach` fields count impressions. Missing fields mean unavailable data, not zero spend. Transparency objects are not included in `search_apps` results.
 
 Ad creatives are fetched separately with `search_ads` and `get_ad_detail`.
 
@@ -98,10 +100,10 @@ All ad list fields plus deeper delivery/transparency fields such as `transparenc
 | `source` | enum | `apple_mobile` or `google_mobile` |
 | `excludedSource` | enum | `apple_mobile` or `google_mobile` |
 | `categories` | string[] | App Store categories |
-| `sortBy` | enum | growth, rating, reviews, downloads, revenue, trending, newest, updated, released |
+| `sortBy` | enum | growth, downloads_growth, revenue_growth, rating, reviews, downloads, revenue, trending, newest, updated, released, app_updated |
 | `sortOrder` | enum | asc, desc |
-| `growthMetric` | enum | reviews |
-| `growthPeriod` | enum | 7d, 14d, 30d, 60d, 90d |
+| `growthMetric` | enum | reviews (for `sortBy=growth`) |
+| `growthPeriod` | enum | 7d, 14d, 30d, 60d, 90d (for `sortBy=growth`; downloads/revenue growth is always 30d) |
 | `priceType` | enum | all, free, paid |
 | `minPrice` / `maxPrice` | number | Price range (USD) |
 | `minRating` / `maxRating` | number | Star rating (0–5) |
@@ -130,7 +132,7 @@ All ad list fields plus deeper delivery/transparency fields such as `transparenc
 | `search` | string | Full-text search across creative text and app metadata |
 | `textSearchFields` | string[] | Search fields such as `creative_text`, `title`, `body`, `cta_text`, `page_name`, `developer`, `app_title`, `category` |
 | `adSource` | enum | `all` (no network filter), `meta`, `tiktok`, `google` (legacy; no current inventory) |
-| `mediaType` | enum | `all`, `image`, `video` |
+| `mediaType` | enum | `all` (no media filter), `image`, `video` — matches each creative's `type` on any network, including TikTok |
 | `status` | enum | `all`, `active`, `inactive` |
 | `appSlug` / `appId` / `appStoreId` / `appStoreUrl` | string | Ads for one app (any identifier form) |
 | `view` | enum | `full`, `compact` — compact returns identity, status, key copy, and app metrics only |

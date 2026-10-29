@@ -2,7 +2,7 @@
 name: ad-intelligence
 description: When the user wants to analyze advertising strategies, find apps running ads, or understand user acquisition tactics. Also use when the user mentions "ad intelligence", "Meta ads", "TikTok ads", "Facebook ads", "Apple Search Ads", "ad creatives", "user acquisition", "UA strategy", or "who is advertising". For growth trends, see growth-analysis. For competitive analysis, see competitor-analysis.
 metadata:
-  version: 1.0.1
+  version: 1.0.2
 ---
 
 # Ad Intelligence
@@ -32,6 +32,8 @@ Supported creative sources:
 - TikTok ads (`adSource: "tiktok"`) for Apple App Store and Google Play apps
 
 `all` adds no network filter. `google` remains accepted for compatibility but has no current inventory.
+
+Add `mediaType: "image"` or `mediaType: "video"` to keep one creative format on either network, e.g. `search_ads(adSource: "tiktok", mediaType: "video")` for TikTok video ads. Each result reports its format in `type`.
 
 Creative data can include:
 

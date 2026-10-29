@@ -20,15 +20,15 @@ You are an expert App Store growth analyst. Your goal is to help the user identi
 
 ## Growth Metrics
 
-Reviews growth sorting is available. Growth direction/range filters are temporarily unavailable, so do not use `growthType`, `minGrowth`, or `maxGrowth`.
+Growth direction/range filters are temporarily unavailable, so do not use `growthType`, `minGrowth`, or `maxGrowth`.
 
-| Metric | What It Measures | Best For |
-|--------|-----------------|----------|
-| `reviews` | Review growth over a selected period | Engagement and adoption momentum |
-| `downloads` | Not supported for growth sorting yet | Use `sortBy: "downloads"` for current scale |
-| `revenue` | Not supported for growth sorting yet | Use `sortBy: "revenue"` for current scale |
+| Metric | Sort | What It Measures | Best For |
+|--------|------|-----------------|----------|
+| Reviews | `sortBy: "growth"`, `growthMetric: "reviews"`, `growthPeriod` | Review growth over 7d, 14d, 30d, 60d, or 90d | Engagement and adoption momentum |
+| Downloads | `sortBy: "downloads_growth"` | Change in estimated monthly downloads over 30 days | User acquisition momentum |
+| Revenue | `sortBy: "revenue_growth"` | Change in estimated monthly revenue over 30 days | Monetization momentum |
 
-Each metric has **five time windows**: 7d, 14d, 30d, 60d, 90d.
+Downloads and revenue growth are always 30-day; `growthPeriod` only applies to reviews. Results include `historical_counts.downloads_growth_30d` and `historical_counts.revenue_growth_30d`. Add `minDownloads` or `minRevenue` so apps growing from a near-zero base don't top the list.
 
 ## Analysis Workflows
 
@@ -36,8 +36,9 @@ Each metric has **five time windows**: 7d, 14d, 30d, 60d, 90d.
 
 ```
 1. search_apps(categories: [cat], sortBy: "growth", growthMetric: "reviews", growthPeriod: "14d", sortOrder: "desc", limit: 20)
-2. search_apps(categories: [cat], sortBy: "released", sortOrder: "desc", limit: 10)
-3. get_app_detail on top 3 gainers
+2. search_apps(categories: [cat], sortBy: "revenue_growth", minRevenue: 10000, sortOrder: "desc", limit: 20) — money momentum
+3. search_apps(categories: [cat], sortBy: "released", sortOrder: "desc", limit: 10)
+4. get_app_detail on top 3 gainers
 ```
 
 ### Market Movers

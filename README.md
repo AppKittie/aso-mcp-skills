@@ -48,6 +48,12 @@ cp -r mcp/skills/* .cursor/skills/   # or .claude/skills/, .agents/skills/, .cod
 
 ## Install the MCP server
 
+**ChatGPT plugin:** See [ChatGPT packaging and deployment](chatgpt-plugin/README.md)
+for the upload ZIP, AppKittie sign-in flow, and deployment requirements. Build it
+with `npm run plugin:build`. The plugin uses the OAuth endpoint
+`https://mcp.appkittie.com/chatgpt/mcp` after the frontend and worker changes are
+deployed; the API-key setup below continues to use `/mcp`.
+
 Skills describe *how* to reason about mobile app store work; **MCP** exposes live tools (`search_apps`, keyword endpoints, etc.) against AppKittie. Create an API key at [appkittie.com/settings/api-keys](https://appkittie.com/settings/api-keys) (it is only shown once when created).
 
 **Claude Code** — register the hosted server (HTTP transport + bearer auth):
@@ -276,11 +282,11 @@ App-scoped routes accept any identifier form — `app_slug`/`appSlug`, `appId`, 
 | Store | `source`, `excludedSource` (`apple_mobile` \| `google_mobile`) |
 | Metrics | `minDownloads` / `maxDownloads`, `minRevenue` / `maxRevenue`, `minRating` / `maxRating`, `minReviews` / `maxReviews`, lifetime download/revenue min/max |
 | Price | `priceType` (`all` \| `free` \| `paid`), `minPrice`, `maxPrice` |
-| Growth sort | `sortBy=growth`, `growthMetric=reviews`, `growthPeriod` (`7d`, `14d`, `30d`, `60d`, `90d`). Growth direction/range filters are temporarily unavailable |
+| Growth sort | Review growth: `sortBy=growth`, `growthMetric=reviews`, `growthPeriod` (`7d`, `14d`, `30d`, `60d`, `90d`). Downloads/revenue growth over 30 days: `sortBy=downloads_growth` / `sortBy=revenue_growth`. Growth direction/range filters are temporarily unavailable |
 | Signals | `hasMetaAds`, `hasTikTokAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` |
 | Content | `contentRating`, `languages`, `developer` |
 | Time | `releasedAfter`, `updatedAfter` (Unix seconds) |
-| Order | `sortBy` (`growth`, `rating`, `reviews`, `updated`, `released`, `downloads`, `revenue`, `trending`, `newest`), `sortOrder` (`asc` \| `desc`) |
+| Order | `sortBy` (`growth`, `downloads_growth`, `revenue_growth`, `rating`, `reviews`, `updated`, `released`, `app_updated`, `downloads`, `revenue`, `trending`, `newest`), `sortOrder` (`asc` \| `desc`) |
 
 `hasTikTokAds=true` requires `tiktok_ads_total_count > 0`; `false` includes zero, missing, or null counts. App list/detail responses include optional `tiktok_ads_total_count` when available. Fetch creatives separately with `search_ads(adSource="tiktok", appSlug=...)`; counts can differ from indexed creatives.
 
@@ -299,7 +305,7 @@ Full parameter matrix: [tools/REGISTRY.md](tools/REGISTRY.md).
 | Shape | `view` (`full` \| `compact`) |
 | Order | `sortBy` (`start_date`, `end_date`, `app_downloads`, `app_revenue`, app Meta Ads estimated spend/reach fields for `7d`, `30d`, or `90d`, `app_released_timestamp`, `app_updated_timestamp`), `sortOrder` (`asc` \| `desc`) |
 
-`adSource=all` adds no network filter. Google remains accepted for compatibility but has no current inventory. `ad_source` identifies the creative network independently of the app store.
+`adSource=all` adds no network filter. Google remains accepted for compatibility but has no current inventory. `ad_source` identifies the creative network independently of the app store. `mediaType=image` or `video` keeps creatives whose `type` matches on any network; pair it with `adSource=tiktok` for TikTok images or videos.
 
 ### `GET /api/v1/creators` filters
 

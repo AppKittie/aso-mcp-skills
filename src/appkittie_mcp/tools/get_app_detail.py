@@ -9,6 +9,9 @@ TOOL = {
     "description": (
         "Get detailed information about a specific mobile app by its ID. "
         "Returns metadata, screenshots, growth summary fields, "
+        "optional meta_ads_transparency and tiktok_ads_transparency summaries "
+        "(same schema: countries, countries_by_code, summary, and optional 7/30/90-day periods; "
+        "TikTok reach fields count impressions), "
         "tiktok_ads_total_count when available (known ad count, not active ads or indexed creative count), in-app purchases, "
         "decision-makers, and social links. Use get_app_historicals for raw "
         "time-series metrics, list_creators/list_organic_content for creator "

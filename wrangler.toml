@@ -4,5 +4,10 @@ main = "src/worker.py"
 compatibility_date = "2024-12-06"
 compatibility_flags = ["python_workers"]
 
+# Set OPENAI_APPS_CHALLENGE in the worker environment to the exact public
+# domain-verification token supplied by the OpenAI submission portal.
+# ChatGPT OAuth discovery uses https://www.appkittie.com; deploy the frontend
+# account-linking routes before connecting https://mcp.appkittie.com/chatgpt/mcp.
+
 [observability]
 enabled = true
