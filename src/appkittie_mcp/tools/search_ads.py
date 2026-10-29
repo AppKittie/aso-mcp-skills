@@ -39,7 +39,7 @@ TOOL = {
             "mediaType": {
                 "type": "string",
                 "enum": AD_MEDIA_TYPES,
-                "description": "Creative media type: all, image, or video.",
+                "description": "Creative media type: all (default, no media filter), image, or video. Matches each creative's type on any network; combine with adSource='tiktok' for TikTok image or video ads.",
             },
             "status": {
                 "type": "string",

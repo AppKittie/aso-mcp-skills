@@ -1,0 +1,44 @@
+{
+  "name": "appkittie",
+  "version": "0.1.0",
+  "description": "Research App Store and Google Play apps, competitors, keywords, reviews, and advertising with AppKittie data.",
+  "author": {
+    "name": "AppKittie",
+    "url": "https://www.appkittie.com"
+  },
+  "homepage": "https://www.appkittie.com/docs",
+  "repository": "https://github.com/appkittie/mcp",
+  "license": "MIT",
+  "keywords": [
+    "app-store",
+    "google-play",
+    "aso",
+    "competitors",
+    "mobile-apps"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "AppKittie",
+    "shortDescription": "Research mobile apps and their growth",
+    "longDescription": "Discover App Store and Google Play apps, compare competitors, research ASO keywords, and analyze reviews, ads, and creators. Download and revenue figures are estimates. Connect an AppKittie team with API access; research uses that team's API credits and subscription limits. Saved apps are read from the connected team's owner account.",
+    "developerName": "AppKittie",
+    "category": "Productivity",
+    "capabilities": [
+      "App research",
+      "Keyword research",
+      "Competitor analysis"
+    ],
+    "websiteURL": "https://www.appkittie.com",
+    "privacyPolicyURL": "https://www.appkittie.com/privacy",
+    "termsOfServiceURL": "https://www.appkittie.com/terms",
+    "defaultPrompt": [
+      "Find five growing fitness apps in the US.",
+      "Compare competitors for my mobile app.",
+      "Research keywords for a meditation app."
+    ],
+    "brandColor": "#66C69F",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png"
+  }
+}

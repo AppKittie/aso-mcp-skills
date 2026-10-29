@@ -44,8 +44,6 @@ class SearchAppsContractTests(unittest.TestCase):
             "hasTikTokAds",
             "adsSource",
             "hasMetaAdSpend",
-            "minMetaAdSpend",
-            "maxMetaAdSpend",
             "hasInAppPurchases",
             "minInAppPurchaseCount",
             "minInAppPurchasePrice",
@@ -53,6 +51,13 @@ class SearchAppsContractTests(unittest.TestCase):
         }
 
         self.assertLessEqual(expected, properties.keys())
+
+    def test_downloads_and_revenue_growth_are_sortable(self):
+        sort_by = TOOL["inputSchema"]["properties"]["sortBy"]
+
+        for value in ("downloads_growth", "revenue_growth"):
+            self.assertIn(value, sort_by["enum"])
+            self.assertIn(value, sort_by["description"])
 
 
 class SearchAppsWebFunnelTests(unittest.IsolatedAsyncioTestCase):

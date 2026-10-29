@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "tail": "wrangler tail"
+    "tail": "wrangler tail",
+    "plugin:build": "python3 scripts/build_chatgpt_plugin.py",
+    "test": "PYTHONPATH=src python3 -m unittest discover -s tests"
   },
   "devDependencies": {
     "wrangler": "^4"

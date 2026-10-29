@@ -21,11 +21,13 @@ Key filters:
 - `search` - full-text search query
 - `source` - `apple_mobile` or `google_mobile`
 - `categories` - App Store categories
-- `sortBy` - `growth`, `rating`, `reviews`, `downloads`, `revenue`, `trending`, `newest`, `updated`, `released`
-- `growthMetric` - currently `reviews`
-- `growthPeriod` - `7d`, `14d`, `30d`, `60d`, `90d`
+- `sortBy` - `growth`, `downloads_growth`, `revenue_growth`, `rating`, `reviews`, `downloads`, `revenue`, `trending`, `newest`, `updated`, `released`
+- `growthMetric` - currently `reviews` (for `sortBy=growth`)
+- `growthPeriod` - `7d`, `14d`, `30d`, `60d`, `90d` (for `sortBy=growth`)
 - `hasMetaAds`, `hasTikTokAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` - marketing/contact signals
-- `hasMetaAdSpend`, `minMetaAdSpend`, `maxMetaAdSpend` - reported Meta Ads transparency spend
+- `hasMetaAdSpend` - estimated Meta Ads spend over the last 30 days (`meta_ads_estimated_spend_30d_usd > 0`)
+
+`downloads_growth` and `revenue_growth` rank apps by the percentage change in estimated monthly downloads or revenue over the last 30 days; results carry it as `historical_counts.downloads_growth_30d` / `historical_counts.revenue_growth_30d`. Add `minDownloads` or `minRevenue` to skip small apps whose percentages spike from a near-zero base.
 
 `hasTikTokAds=true` requires `tiktok_ads_total_count > 0` in either store; false includes zero, missing, or null counts. Omit for no restriction. This is paid ad presence, separate from organic TikTok content.
 `adsSource` selects apps by ads signal: meta (Apple apps with Meta creatives), tiktok (either store with a positive count), or all (either group). Omit to include apps without ads. Other filters are AND-combined; do not add hasMetaAds=true when looking for TikTok-only apps.
@@ -45,6 +47,7 @@ in the dashboard. `search_apps` searches the general app catalog.
 ## App Details and Historicals
 
 Use `get_app_detail` for metadata, screenshots, IAPs, contacts, TikTok ad counts, and growth summaries.
+It also returns `meta_ads_transparency` and `tiktok_ads_transparency` when available. Both are optional nullable objects with the same schema: `countries`, `countries_by_code`, and `summary`. Use `summary.all_spend_usd` for lifetime spend and `summary.periods.last_7d`, `last_30d`, or `last_90d` for period estimates when present. Each period contains `reach`, `spend_usd`, and demographic breakdowns. TikTok's reach fields count impressions, not unique people. Missing transparency or periods mean unavailable data, not zero spend.
 Use `get_app_historicals` for raw time-series metrics such as reviews, score, downloads, revenue, MAU, DAU, size, and price.
 
 ## Store Rankings
@@ -54,9 +57,11 @@ Use `get_store_ranking_history` with an exact app slug and the same chart filter
 
 ## Ads
 
-Use `search_ads` and `get_ad_detail` for Meta and TikTok creatives. App detail responses do not embed ad payloads.
+Use `search_ads` and `get_ad_detail` for Meta and TikTok creatives. App detail responses include transparency summaries but do not embed ad creatives.
 
 Use `adSource='tiktok'` for TikTok creatives or `adSource='meta'` for Meta. `all` adds no network filter. Google remains accepted for compatibility but has no current inventory. The returned `ad_source` identifies the creative network independently of the app store.
+
+Use `mediaType='image'` or `mediaType='video'` to keep one creative format on either network, e.g. `adSource='tiktok', mediaType='video'` for TikTok video ads. Each creative reports its format in `type`.
 
 `search_ads` returns a compact view by default (identity, status, key copy, app metrics) to keep responses small. Pass `view='full'` only when you need complete creative payloads with media URLs. Use `get_ad_detail` for a deep dive on one ad.
 
