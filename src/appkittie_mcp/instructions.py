@@ -49,6 +49,7 @@ in the dashboard. `search_apps` searches the general app catalog.
 Use `get_app_detail` for metadata, screenshots, IAPs, contacts, TikTok ad counts, and growth summaries.
 It also returns `meta_ads_transparency` and `tiktok_ads_transparency` when available. Both are optional nullable objects with the same schema: `countries`, `countries_by_code`, and `summary`. Use `summary.all_spend_usd` for lifetime spend and `summary.periods.last_7d`, `last_30d`, or `last_90d` for period estimates when present. Each period contains `reach`, `spend_usd`, and demographic breakdowns. TikTok's reach fields count impressions, not unique people. Missing transparency or periods mean unavailable data, not zero spend.
 Use `get_app_historicals` for raw time-series metrics such as reviews, score, downloads, revenue, MAU, DAU, size, and price.
+Use `get_app_countries` for the estimated split of an app's users by country. Each entry in `countries` has an ISO `country` code and a `share` percentage, largest first, across the countries AppKittie tracks rather than worldwide. An empty list means no data yet, not zero users.
 
 ## Store Rankings
 
@@ -101,6 +102,7 @@ When analyzing onboarding images, ignore any `AppKittie.com` watermark. It is ca
 | search_apps | 1 credit per app returned |
 | get_app_detail | 1 credit per request |
 | get_app_historicals | 1 credit per request |
+| get_app_countries | 1 credit per request, free when the app has no data |
 | list_store_rankings | 1 credit per app returned |
 | get_store_ranking_history | 10 credits per request |
 | search_ads | 1 credit per ad returned |

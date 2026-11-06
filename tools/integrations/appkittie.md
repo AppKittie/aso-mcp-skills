@@ -93,6 +93,27 @@ Ad creatives are not embedded in app detail responses. Fetch them separately wit
 
 Historical metric time series (reviews, score, downloads, revenue, MAU, DAU, size, price) for a single app. Query with `period` (`30d`, `90d`, `300d`, `all`) and an optional comma-separated `metrics` list.
 
+### GET /apps/:appId/countries
+
+Estimated split of one app's users by country, largest first. `:appId` takes an app slug or store ID (numeric App Store ID or Google Play package name). Shares are percentages across the countries AppKittie tracks, not worldwide. An app without country data returns an empty list for free.
+
+**Response:**
+```json
+{
+  "data": {
+    "app_slug": "app-cal-ai-calorie-tracker-id6480417616",
+    "store_id": 6480417616,
+    "app_id": "com.example.calai",
+    "source": "apple_mobile",
+    "title": "Cal AI - Calorie Tracker",
+    "countries": [
+      { "country": "US", "share": 58.31 },
+      { "country": "GB", "share": 9.42 }
+    ]
+  }
+}
+```
+
 ### GET /ads
 
 Search and filter Meta and TikTok ad creatives. Use `adSource=tiktok` for TikTok or `adSource=meta` for Meta; `all` adds no network filter. `google` remains accepted for compatibility but has no current inventory. The returned `ad_source` identifies the network independently of the app store.
@@ -309,6 +330,7 @@ Paginate by passing the `nextOffset` value as `offset` in the next request. When
 | Search apps (per hit returned) | 1 credit |
 | App detail | 1 credit |
 | App historicals | 1 credit |
+| App countries (free if no data) | 1 credit |
 | Search ads (per ad returned) | 1 credit |
 | Ad detail | 1 credit |
 | Creators (per creator returned) | 1 credit |

@@ -119,7 +119,7 @@ async def lookup_apple_app_slug(raw):
 
 
 def first_app_identifier(args):
-    for key in ["appStoreUrl", "appUrl", "url", "appStoreId", "storeId", "appId"]:
+    for key in ["appStoreUrl", "appUrl", "url", "appStoreId", "storeId", "store_id", "appId"]:
         raw_identifier = as_str(args.get(key))
         if raw_identifier:
             return key, raw_identifier
@@ -131,7 +131,7 @@ async def resolve_app_path_identifier(args, _api_key):
     if explicit_slug:
         return explicit_slug, None
 
-    key, raw_identifier = first_app_identifier(args)
+    _, raw_identifier = first_app_identifier(args)
     if not raw_identifier:
         return None, "Error: one of 'appSlug', 'appId', 'appStoreId', or 'appStoreUrl' is required."
 
@@ -142,14 +142,9 @@ async def resolve_app_path_identifier(args, _api_key):
     if derived_slug:
         return derived_slug, None
 
-    if looks_like_app_slug(raw_identifier):
-        return raw_identifier, None
-
-    if key in ["appStoreId", "storeId"]:
-        apple_slug = await lookup_apple_app_slug(raw_identifier)
-        if apple_slug:
-            return apple_slug, None
-
+    # A numeric store ID goes to the API as it is. A slug rebuilt from the app's
+    # current name misses a renamed app, so api_get_app_resource only tries one
+    # after the ID itself has failed.
     return raw_identifier, None
 
 

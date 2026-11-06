@@ -21,6 +21,7 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 | `/api/v1/favorites/apps` | GET | List the team owner's saved app favorites | Free |
 | `/api/v1/apps/:appId` | GET | Get app detail | 1 credit |
 | `/api/v1/apps/:appId/historicals` | GET | Historical metric time series | 1 credit |
+| `/api/v1/apps/:appId/countries` | GET | Estimated split of users by country | 1 credit (free if no data) |
 | `/api/v1/ads` | GET | Search and filter ad creatives | 1 credit/hit |
 | `/api/v1/ads/:adId` | GET | Get ad detail | 1 credit |
 | `/api/v1/creators` | GET | Creator discovery (per app or per category) | 1 credit/creator |
@@ -40,6 +41,7 @@ App-scoped endpoints accept any identifier form: app slug, AppKittie app ID, num
 | `list_favorite_apps` | `/api/v1/favorites/apps` | GET |
 | `get_app_detail` | `/api/v1/apps/:appId` | GET |
 | `get_app_historicals` | `/api/v1/apps/:appId/historicals` | GET |
+| `get_app_countries` | `/api/v1/apps/:appId/countries` | GET |
 | `list_store_rankings` | `/api/v1/trending` | GET |
 | `get_store_ranking_history` | `/api/v1/trending/:appSlug/history` | GET |
 | `search_ads` | `/api/v1/ads` | GET |

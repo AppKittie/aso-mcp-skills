@@ -16,7 +16,8 @@ ffi.to_js = lambda value, **_kwargs: value
 sys.modules.setdefault("pyodide.ffi", ffi)
 
 from appkittie_mcp.tools import TOOLS, TOOL_HANDLERS
-from appkittie_mcp.tools import app_scoped, get_app_historicals, get_app_reviews, get_store_ranking_history
+from appkittie_mcp import identifiers
+from appkittie_mcp.tools import app_scoped, get_app_countries, get_app_historicals, get_app_reviews, get_store_ranking_history
 from appkittie_mcp.tools import get_app_detail, search_ads
 
 
@@ -45,6 +46,49 @@ class ToolSchemaCompatibilityTests(unittest.IsolatedAsyncioTestCase):
                 result = await get_app_detail.handle({"appId": "google-play-example"}, "test-key")
                 api.assert_awaited_once_with("google-play-example", "", {}, "test-key")
                 self.assertEqual(json.loads(result["content"][0]["text"]), response)
+
+    async def test_app_countries_finds_the_app_by_slug_or_store_id(self):
+        response = {
+            "data": {
+                "app_slug": "app-cal-ai-id6480417616",
+                "store_id": 6480417616,
+                "countries": [{"country": "US", "share": 58.31}],
+            }
+        }
+        for args, path in [
+            ({"appSlug": "app-cal-ai-id6480417616"}, "/api/v1/apps/app-cal-ai-id6480417616/countries"),
+            ({"app_slug": "app-cal-ai-id6480417616"}, "/api/v1/apps/app-cal-ai-id6480417616/countries"),
+            ({"storeId": "6480417616"}, "/api/v1/apps/6480417616/countries"),
+            ({"store_id": 6480417616}, "/api/v1/apps/6480417616/countries"),
+            ({"appStoreId": "6480417616"}, "/api/v1/apps/6480417616/countries"),
+            ({"appId": "6480417616"}, "/api/v1/apps/6480417616/countries"),
+            ({"storeId": "com.duolingo"}, "/api/v1/apps/google-play-comduolingo/countries"),
+        ]:
+            with self.subTest(args=args), patch.object(
+                identifiers, "api_get", new=AsyncMock(return_value=(response, None))
+            ) as api, patch.object(
+                identifiers, "lookup_apple_app_slug", new_callable=AsyncMock
+            ) as lookup:
+                result = await TOOL_HANDLERS["get_app_countries"](args, "test-key")
+                api.assert_awaited_once_with(path, {}, "test-key")
+                lookup.assert_not_awaited()
+                self.assertEqual(json.loads(result["content"][0]["text"]), response)
+
+    async def test_store_id_only_falls_back_to_a_slug_after_the_id_misses(self):
+        response = {"data": {"app_slug": "app-renamed-id123", "countries": []}}
+        with patch.object(
+            identifiers, "api_get",
+            new=AsyncMock(side_effect=[(None, "App not found"), (response, None)]),
+        ) as api, patch.object(
+            identifiers, "lookup_apple_app_slug",
+            new=AsyncMock(return_value="app-renamed-id123"),
+        ):
+            result = await TOOL_HANDLERS["get_app_countries"]({"storeId": "123"}, "test-key")
+        self.assertEqual(
+            [call.args[0] for call in api.await_args_list],
+            ["/api/v1/apps/123/countries", "/api/v1/apps/app-renamed-id123/countries"],
+        )
+        self.assertEqual(json.loads(result["content"][0]["text"]), response)
 
     async def test_tiktok_ads_filter_reaches_api_and_preserves_response(self):
         self.assertIn("tiktok", search_ads.TOOL["inputSchema"]["properties"]["adSource"]["enum"])
@@ -85,6 +129,7 @@ class ToolSchemaCompatibilityTests(unittest.IsolatedAsyncioTestCase):
     async def test_missing_scope_is_rejected_before_api_calls(self):
         cases = [
             ("get_app_historicals", get_app_historicals, "api_get_app_resource", {}),
+            ("get_app_countries", get_app_countries, "api_get_app_resource", {}),
             ("get_app_reviews", get_app_reviews, "api_post", {}),
             ("get_store_ranking_history", get_store_ranking_history, "api_get", {"category": "BUSINESS"}),
             ("list_creators", app_scoped, "api_get", {}),

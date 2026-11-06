@@ -24,7 +24,8 @@ error should be explained without repeatedly retrying chargeable requests.
 - Discover apps with `search_apps`; resolve ambiguous names before comparisons.
   App-scoped tools accept supported identifiers such as store URLs or app slugs.
 - Compare metadata and estimated revenue with `get_app_detail`. Use
-  `get_app_historicals` for actual series instead of extrapolating from summaries.
+  `get_app_historicals` for actual series instead of extrapolating from summaries,
+  and `get_app_countries` for where an app's users are.
 - Use `list_store_rankings` for a current chart and `get_store_ranking_history`
   for an app's positions over time.
 - Research one keyword with `get_keyword_difficulty`; use

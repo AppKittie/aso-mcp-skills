@@ -148,6 +148,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | `list_favorite_apps` | List the API team's owner's saved apps and folders | Free |
 | `get_app_detail` | Metadata, revenue, IAPs, contacts, growth summaries | 1 / call |
 | `get_app_historicals` | Raw historical metric series for one app | 1 / call |
+| `get_app_countries` | Estimated split of one app's users by country | 1 / call, free if no data |
 | `list_store_rankings` | Current store chart by collection, country, and category | 1 × rows returned |
 | `get_store_ranking_history` | Daily chart positions for one app and chart | 10 / call |
 | `search_ads` | Search Meta and TikTok ad creatives; compact view by default, `view='full'` for complete payloads | 1 × rows returned |
@@ -159,7 +160,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | `get_app_reviews` | Real-time store reviews for one app | 1 × rows returned |
 | `get_supported_countries` | Valid storefront codes | Free |
 
-**App identifiers:** every app-scoped tool (`get_app_detail`, `get_app_historicals`, `search_ads`, `list_creators`, `list_organic_content`, `get_app_reviews`) accepts an app slug, AppKittie app ID, numeric App Store ID, Google Play package name, or store URL. Resolution happens automatically — pass whichever identifier you have.
+**App identifiers:** every app-scoped tool (`get_app_detail`, `get_app_historicals`, `get_app_countries`, `search_ads`, `list_creators`, `list_organic_content`, `get_app_reviews`) accepts an app slug, AppKittie app ID, numeric App Store ID, Google Play package name, or store URL. Resolution happens automatically — pass whichever identifier you have.
 
 **Influencer discovery:** `list_creators` supports `category` for cross-app discovery, `platform` / `country` / `minFollowers` / `maxFollowers` filters, and `sortBy='followers'`. To confirm a creator actually posted about an app, cross-reference their handle against `list_organic_content` for that app.
 
@@ -250,6 +251,7 @@ curl -sS "https://appkittie.com/api/v1/apps?search=fitness&limit=5" \
 | `/api/v1/apps` | GET | Search / filter apps | 1 per app in the payload |
 | `/api/v1/apps/:appId` | GET | Full detail for one app | 1 per request |
 | `/api/v1/apps/:appId/historicals` | GET | Historical metric time series | 1 per request |
+| `/api/v1/apps/:appId/countries` | GET | Estimated split of users by country | 1 per request, free if no data |
 | `/api/v1/ads` | GET | Search / filter ad creatives (`view=compact` for trimmed payloads) | 1 per ad in the payload |
 | `/api/v1/ads/:adId` | GET | Full detail for one ad creative | 1 per request |
 | `/api/v1/creators` | GET | Creator discovery for one app or a category, with filters and match quality | 1 per creator in the payload |
@@ -340,6 +342,7 @@ curl -sS -X POST "https://appkittie.com/api/v1/keywords/difficulty" \
 - **App list:** 1 credit per returned row; if your balance is below `limit`, the API trims the page.
 - **App detail:** 1 credit per call.
 - **App historicals:** 1 credit per call.
+- **App countries:** 1 credit per call; an app without country data returns an empty list for free.
 - **Ads list:** 1 credit per returned ad; if your balance is below `limit`, the API trims the page.
 - **Ad detail:** 1 credit per call.
 - **Creators list:** 1 credit per returned creator.

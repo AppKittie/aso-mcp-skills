@@ -1,5 +1,6 @@
 from . import batch_keyword_difficulty
 from . import get_ad_detail
+from . import get_app_countries
 from . import get_app_detail
 from . import get_app_historicals
 from . import get_app_reviews
@@ -20,6 +21,7 @@ TOOL_MODULES = [
     list_favorite_apps,
     get_app_detail,
     get_app_historicals,
+    get_app_countries,
     list_store_rankings,
     get_store_ranking_history,
     search_ads,
