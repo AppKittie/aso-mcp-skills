@@ -292,6 +292,8 @@ App-scoped routes accept any identifier form — `app_slug`/`appSlug`, `appId`, 
 
 `hasTikTokAds=true` requires `tiktok_ads_total_count > 0`; `false` includes zero, missing, or null counts. App list/detail responses include optional `tiktok_ads_total_count` when available. Fetch creatives separately with `search_ads(adSource="tiktok", appSlug=...)`; counts can differ from indexed creatives.
 
+App list/detail responses include `date_removed_timestamp`: Unix seconds when the store stopped listing the app in every country AppKittie tracks, or null while it is listed. Removed apps still appear in results, so check this field before treating an app as live.
+
 `adsSource` accepts `meta` (Apple apps with Meta creatives), `tiktok` (either store with a positive TikTok count), or `all` (either group). Omit it to include apps without ads. Other filters are AND-combined.
 
 Full parameter matrix: [tools/REGISTRY.md](tools/REGISTRY.md).

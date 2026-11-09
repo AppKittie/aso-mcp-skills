@@ -13,7 +13,8 @@ TOOL = {
         "(same schema: countries, countries_by_code, summary, and optional 7/30/90-day periods; "
         "TikTok reach fields count impressions), "
         "tiktok_ads_total_count when available (known ad count, not active ads or indexed creative count), in-app purchases, "
-        "decision-makers, and social links. Use get_app_historicals for raw "
+        "decision-makers, and social links. date_removed_timestamp (Unix seconds) is set when the store no "
+        "longer lists the app in any tracked country and is null while it is listed. Use get_app_historicals for raw "
         "time-series metrics, list_creators/list_organic_content for creator "
         "data, and search_ads/get_ad_detail for ad creatives. Costs 1 credit per request."
     ),

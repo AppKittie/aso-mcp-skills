@@ -22,6 +22,8 @@ TOOL = {
         "and cursor-based pagination. Returns app metadata including title, "
         "icon, developer, genre, rating, reviews, downloads, revenue, and "
         "tiktok_ads_total_count when available (known ad count, not active ads or indexed creative count). "
+        "Results include apps the store no longer lists: date_removed_timestamp holds the removal time "
+        "(Unix seconds) and is null while the app is listed. "
         "Costs 1 credit per app returned."
     ),
     "inputSchema": {

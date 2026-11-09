@@ -33,6 +33,8 @@ Key filters:
 `adsSource` selects apps by ads signal: meta (Apple apps with Meta creatives), tiktok (either store with a positive count), or all (either group). Omit to include apps without ads. Other filters are AND-combined; do not add hasMetaAds=true when looking for TikTok-only apps.
 App list/detail responses include optional nullable `tiktok_ads_total_count` when available. It is a known ad count, not an active-ad count; fetch indexed creatives separately.
 
+App list/detail responses include `date_removed_timestamp`: Unix seconds when AppKittie first saw the store stop listing the app in every country it tracks. It is null or missing while the app is listed and returns to null if the store lists it again. `search_apps` still returns removed apps with their last known metrics, so check this field before calling an app live, a current competitor, or a market leader.
+
 Cost: 1 credit per app returned. Use smaller `limit` values while exploring.
 
 ## Favorites
