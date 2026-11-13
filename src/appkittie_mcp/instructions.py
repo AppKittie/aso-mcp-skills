@@ -26,12 +26,17 @@ Key filters:
 - `growthPeriod` - `7d`, `14d`, `30d`, `60d`, `90d` (for `sortBy=growth`)
 - `hasMetaAds`, `hasTikTokAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` - marketing/contact signals
 - `hasMetaAdSpend` - estimated Meta Ads spend over the last 30 days (`meta_ads_estimated_spend_30d_usd > 0`)
+- `isRemoved` - `true` for apps the store no longer lists, `false` for apps still listed
+- `removedAfter`, `removedBefore` - Unix seconds bounding the removal date
 
 `downloads_growth` and `revenue_growth` rank apps by the percentage change in estimated monthly downloads or revenue over the last 30 days; results carry it as `historical_counts.downloads_growth_30d` / `historical_counts.revenue_growth_30d`. Add `minDownloads` or `minRevenue` to skip small apps whose percentages spike from a near-zero base.
 
 `hasTikTokAds=true` requires `tiktok_ads_total_count > 0` in either store; false includes zero, missing, or null counts. Omit for no restriction. This is paid ad presence, separate from organic TikTok content.
 `adsSource` selects apps by ads signal: meta (Apple apps with Meta creatives), tiktok (either store with a positive count), or all (either group). Omit to include apps without ads. Other filters are AND-combined; do not add hasMetaAds=true when looking for TikTok-only apps.
 App list/detail responses include optional nullable `tiktok_ads_total_count` when available. It is a known ad count, not an active-ad count; fetch indexed creatives separately.
+
+App list/detail responses include `date_removed_timestamp`: Unix seconds when AppKittie first saw the store stop listing the app in every country it tracks. It is null or missing while the app is listed and returns to null if the store lists it again. `search_apps` still returns removed apps with their last known metrics, so check this field before calling an app live, a current competitor, or a market leader.
+Pass `isRemoved=false` when the user wants live apps only. For "which apps were removed recently", pass `isRemoved=true` with `removedAfter` set to the start of the period, and sort by `revenue` or `downloads` to lead with the biggest ones.
 
 Cost: 1 credit per app returned. Use smaller `limit` values while exploring.
 
