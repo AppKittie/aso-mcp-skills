@@ -24,7 +24,7 @@ Search and filter Apple App Store and Google Play apps. Use `hasTikTokAds=true` 
 
 App list/detail responses include optional nullable `tiktok_ads_total_count` when available. This known ad count is not an active-ad count and can differ from indexed creatives. Fetch TikTok creatives separately using `GET /ads?appSlug=...&adSource=tiktok`.
 
-App list/detail responses include `date_removed_timestamp`: Unix seconds when AppKittie first saw the store stop listing the app in every country it tracks, or null while it is listed. Results still include removed apps, so check this field before treating an app as live.
+App list/detail responses include `date_removed_timestamp`: Unix seconds when AppKittie first saw the store stop listing the app in every country it tracks, or null while it is listed. Results still include removed apps, so check this field before treating an app as live. `isRemoved=false` returns only listed apps; `isRemoved=true` returns only removed ones, and `removedAfter` / `removedBefore` (Unix seconds) bound the removal date.
 
 **Query Parameters:** See [REGISTRY.md](../REGISTRY.md) for the full filter list.
 

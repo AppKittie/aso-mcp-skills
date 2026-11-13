@@ -23,7 +23,8 @@ TOOL = {
         "icon, developer, genre, rating, reviews, downloads, revenue, and "
         "tiktok_ads_total_count when available (known ad count, not active ads or indexed creative count). "
         "Results include apps the store no longer lists: date_removed_timestamp holds the removal time "
-        "(Unix seconds) and is null while the app is listed. "
+        "(Unix seconds) and is null while the app is listed. Pass isRemoved=false to leave removed apps out, "
+        "or isRemoved=true with removedAfter/removedBefore to find apps removed in a date range. "
         "Costs 1 credit per app returned."
     ),
     "inputSchema": {
@@ -130,6 +131,18 @@ TOOL = {
             "releasedBefore": {"type": "integer", "description": "Only apps released before this Unix timestamp"},
             "updatedAfter": {"type": "integer", "description": "Only apps updated after this Unix timestamp"},
             "updatedBefore": {"type": "integer", "description": "Only apps updated before this Unix timestamp"},
+            "isRemoved": {
+                "type": "boolean",
+                "description": "Filter by whether the store still lists the app: true returns only removed apps (date_removed_timestamp is set); false returns only apps still listed. Omit to include both.",
+            },
+            "removedAfter": {
+                "type": "integer",
+                "description": "Only apps the store removed on or after this Unix timestamp. Matches removed apps only.",
+            },
+            "removedBefore": {
+                "type": "integer",
+                "description": "Only apps the store removed on or before this Unix timestamp. Matches removed apps only.",
+            },
             "textSearchFields": {
                 "type": "array",
                 "items": {

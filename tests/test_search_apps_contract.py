@@ -44,6 +44,9 @@ class SearchAppsContractTests(unittest.TestCase):
             "hasTikTokAds",
             "adsSource",
             "hasMetaAdSpend",
+            "isRemoved",
+            "removedAfter",
+            "removedBefore",
             "hasInAppPurchases",
             "minInAppPurchaseCount",
             "minInAppPurchasePrice",
@@ -67,6 +70,28 @@ class SearchAppsWebFunnelTests(unittest.IsolatedAsyncioTestCase):
             ({"hasTikTokAds": False}, {"hasTikTokAds": "false"}),
             ({"adsSource": "tiktok"}, {"adsSource": "tiktok"}),
             ({"adsSource": "all"}, {"adsSource": "all"}),
+            ({}, {}),
+        ]:
+            with self.subTest(args=args), patch(
+                "appkittie_mcp.tools.search_apps.api_get",
+                new_callable=AsyncMock,
+                return_value=({"data": []}, None),
+            ) as api_get:
+                await handle(args, "test-key")
+                api_get.assert_awaited_once_with("/api/v1/apps", args, "test-key")
+                self.assertEqual(_clean_params(api_get.call_args.args[1]), expected)
+
+    async def test_removed_filters_are_forwarded_including_false(self):
+        self.assertEqual(
+            TOOL["inputSchema"]["properties"]["isRemoved"]["type"], "boolean"
+        )
+        for args, expected in [
+            ({"isRemoved": True}, {"isRemoved": "true"}),
+            ({"isRemoved": False}, {"isRemoved": "false"}),
+            (
+                {"isRemoved": True, "removedAfter": 1793491200, "removedBefore": 1794096000},
+                {"isRemoved": "true", "removedAfter": 1793491200, "removedBefore": 1794096000},
+            ),
             ({}, {}),
         ]:
             with self.subTest(args=args), patch(

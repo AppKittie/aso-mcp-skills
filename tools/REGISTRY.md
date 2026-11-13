@@ -80,7 +80,7 @@ All list fields plus: `description`, `genres`, `languages`, `size`, `version`, `
 
 App list/detail responses also include optional nullable `tiktok_ads_total_count` when available: known TikTok ads, not active ads or the indexed creative count.
 
-`date_removed_timestamp` (number | null) is the Unix time in seconds when AppKittie first saw the store stop listing the app in every country it tracks. It is null or missing while the app is listed and returns to null if the store lists it again. An app missing from one country only is not marked removed. `search_apps` still returns removed apps with their last known metrics.
+`date_removed_timestamp` (number | null) is the Unix time in seconds when AppKittie first saw the store stop listing the app in every country it tracks. It is null or missing while the app is listed and returns to null if the store lists it again. An app missing from one country only is not marked removed. `search_apps` still returns removed apps with their last known metrics. Filter on it with `isRemoved`, `removedAfter`, and `removedBefore`.
 
 `get_app_detail` also returns optional nullable `meta_ads_transparency` and `tiktok_ads_transparency`. Both contain `countries`, `countries_by_code`, and `summary`, with lifetime reach/spend and demographic breakdowns. `summary.periods` and each country's optional `periods` contain `last_7d`, `last_30d`, and `last_90d` estimates (`reach`, `spend_usd`, and demographic breakdowns). TikTok's `reach` fields count impressions. Missing fields mean unavailable data, not zero spend. Transparency objects are not included in `search_apps` results.
 
@@ -126,6 +126,8 @@ All ad list fields plus deeper delivery/transparency fields such as `transparenc
 | `adsSource` | enum | `meta`: Apple apps with Meta creatives; `tiktok`: either store with a positive count; `all`: either group. Omit to include apps without ads. Other filters are AND-combined. |
 | `hasAppleAds` | boolean | Running Apple Search Ads |
 | `hasEmails` | boolean | Has contact emails |
+| `isRemoved` | boolean | True: only apps the store no longer lists (`date_removed_timestamp` set). False: only apps still listed. Omit for both. |
+| `removedAfter` / `removedBefore` | integer | Removal date range (Unix seconds). Matches removed apps only. |
 | `limit` | integer | Results per page (1–100) |
 | `cursor` | integer | Pagination offset |
 
