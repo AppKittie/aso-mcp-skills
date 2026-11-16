@@ -116,6 +116,73 @@ Estimated split of one app's users by country, largest first. `:appId` takes an 
 }
 ```
 
+### GET /developers
+
+Search developer profiles across both stores. Costs **1 credit per developer
+returned**; empty pages are free, and low balances reduce the requested page
+size. Requires at least one credit to search.
+
+MCP equivalent: `search_developers`.
+
+```bash
+curl --get "https://appkittie.com/api/v1/developers" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  --data-urlencode "stores=both" \
+  --data-urlencode "minMrr=10000" \
+  --data-urlencode "limit=5"
+```
+
+Use `search`, `stores` (`all`, `both`, `apple`, `google`), category include/exclude
+lists, app-count/revenue/download ranges, `hasWebsite`, and latest-launch Unix
+timestamp bounds. REST category lists are comma-separated; MCP takes arrays.
+See [REGISTRY.md](../REGISTRY.md#developer-data-and-filters) for every filter.
+
+The response contains `data` profiles and `pagination.nextCursor` / `totalCount`.
+Each profile has `developer`, `developer_slug`, app counts by store, categories,
+websites, monthly `total_mrr` (USD) and `total_downloads`, latest release time,
+and compact `top_apps`. Sort by `total_mrr` (default), `total_downloads`,
+`app_count`, or `latest_released`. Use the returned next cursor even when a
+low credit balance reduces the page size.
+
+### GET /developers/:name
+
+Get a cross-store portfolio by its **exact developer name**, not
+`developer_slug`. URL-encode the entire name, including slashes and plus signs.
+Requires 1–1,024 characters after trimming. Costs **1 credit per successful
+request**. Unknown developers return 404 without a charge.
+
+MCP equivalent: `get_developer_detail` with `{"name": "Example Games"}`.
+
+```python
+from urllib.parse import quote
+import requests
+
+name = "Example Games"
+response = requests.get(
+    f"https://appkittie.com/api/v1/developers/{quote(name, safe='')}",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+)
+response.raise_for_status()
+portfolio = response.json()["data"]
+```
+
+The response is `{"data": {"developer": "...", "summary": {...}, "apps": [...]}}`.
+`summary` includes `appCount`, `appleAppCount`, `googleAppCount`, `totalRevenue`
+(estimated monthly USD), `totalDownloads` (estimated monthly), `categories`,
+`websites`, `topEarners`, `otherRevenue`, `otherAppCount`, `storeRevenue`, and
+`latestLaunchTimestamp`. Revenue shares are fractions from 0 to 1.
+
+Apps include matched Google Play apps whose account name differs. Compact rows
+are ordered by revenue and capped at 1,000; totals and breakdowns cover those
+rows, while portfolio/store app counts can exceed the cap. No pagination is
+provided. Profile-list aggregates refresh separately and may differ. Fetch
+full app metadata with `/apps/:appId`; ad creatives and creators have separate
+endpoints.
+
+Both developer endpoints use the API key's team, require an active subscription,
+and default to 120 requests per minute per team per endpoint. Credit and
+rate-limit headers follow the existing API conventions.
+
 ### GET /ads
 
 Search and filter Meta and TikTok ad creatives. Use `adSource=tiktok` for TikTok or `adSource=meta` for Meta; `all` adds no network filter. `google` remains accepted for compatibility but has no current inventory. The returned `ad_source` identifies the network independently of the app store.

@@ -149,6 +149,8 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | `get_app_detail` | Metadata, revenue, IAPs, contacts, growth summaries | 1 / call |
 | `get_app_historicals` | Raw historical metric series for one app | 1 / call |
 | `get_app_countries` | Estimated split of one app's users by country | 1 / call, free if no data |
+| `search_developers` | Discover developers by portfolio revenue, downloads, size, stores, categories, and websites | 1 × rows returned |
+| `get_developer_detail` | Cross-store portfolio summary and up to 1,000 compact app rows | 1 / call |
 | `list_store_rankings` | Current store chart by collection, country, and category | 1 × rows returned |
 | `get_store_ranking_history` | Daily chart positions for one app and chart | 10 / call |
 | `search_ads` | Search Meta and TikTok ad creatives; compact view by default, `view='full'` for complete payloads | 1 × rows returned |
@@ -163,6 +165,41 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 **App identifiers:** every app-scoped tool (`get_app_detail`, `get_app_historicals`, `get_app_countries`, `search_ads`, `list_creators`, `list_organic_content`, `get_app_reviews`) accepts an app slug, AppKittie app ID, numeric App Store ID, Google Play package name, or store URL. Resolution happens automatically — pass whichever identifier you have.
 
 **Influencer discovery:** `list_creators` supports `category` for cross-app discovery, `platform` / `country` / `minFollowers` / `maxFollowers` filters, and `sortBy='followers'`. To confirm a creator actually posted about an app, cross-reference their handle against `list_organic_content` for that app.
+
+### Developer portfolios
+
+Use `search_developers` to discover studios, then pass the exact `developer`
+name to `get_developer_detail` as `name`. The `developer_slug` is not a lookup
+identifier. Portfolios include matched Google Play apps even when their store
+account name differs from the Apple account name.
+
+```json
+{"stores": "both", "categories": ["Games"], "minMrr": 10000, "sortBy": "total_mrr", "limit": 5}
+```
+
+Search supports `search`, `stores` (`all`, `both`, `apple`, `google`), category
+include/exclude arrays, `minApps`/`maxApps`, `minMrr`/`maxMrr`,
+`minDownloads`/`maxDownloads`, `hasWebsite`, latest-release timestamp bounds,
+and `limit`/`cursor`. Follow `pagination.nextCursor`. `apple` and `google`
+include developers present on both stores. Set `hasWebsite=false` for developers
+without a known website; omit it for either.
+
+Sort by `total_mrr` (default), `total_downloads`, `app_count`, or
+`latest_released`; `sortOrder` defaults to `desc`. Revenue is estimated monthly
+USD and downloads are estimated monthly totals across the developer's apps.
+
+Detail example: `get_developer_detail` with `{"name": "Example Games"}`.
+It returns `data.developer`, `data.summary`, and `data.apps`, ordered by revenue.
+The portfolio reader returns at most 1,000 apps. Revenue/download totals and
+breakdowns cover those apps; `summary.appCount` and store counts describe the
+matching portfolio and may be larger. List profiles are refreshed separately,
+so their aggregates can differ from detail. Use `get_app_detail` for full app
+metadata and the ad/creator tools for separate content.
+
+Both developer tools require the connected team's active subscription and API
+credits. Search costs one credit per returned developer; empty pages are free
+and low balances cap page size. Detail costs one credit; unknown developers
+return an error without a charge.
 
 ### MCP prompts
 
