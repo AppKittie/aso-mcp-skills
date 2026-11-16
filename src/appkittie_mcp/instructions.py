@@ -40,6 +40,24 @@ Pass `isRemoved=false` when the user wants live apps only. For "which apps were 
 
 Cost: 1 credit per app returned. Use smaller `limit` values while exploring.
 
+## Developer Discovery and Portfolios
+
+Use `search_developers` to find studios by estimated monthly portfolio revenue
+(`minMrr`/`maxMrr`), downloads, app count, categories, stores, website presence,
+or latest app launch. Sort by `total_mrr`, `total_downloads`, `app_count`, or
+`latest_released`. `stores` accepts all, both, apple, or google; apple/google
+also include developers on both stores. Follow `pagination.nextCursor`.
+
+Pass the exact returned `developer` name as `name` to `get_developer_detail`.
+Do not pass `developer_slug`. Detail includes matched Google Play apps, a
+summary with top earners and store revenue shares, websites, and compact app
+rows ordered by revenue. It returns up to 1,000 apps; revenue/download totals
+and breakdowns cover those apps, while app counts can be larger. List profiles
+refresh separately, so their aggregates can differ. Label revenue/downloads
+as monthly estimates. Use `get_app_detail` for full app data.
+
+Search costs 1 credit per developer returned; detail costs 1 credit per request.
+
 ## Favorites
 
 Use `list_favorite_apps` to fetch the API team's owner's saved apps from the separate
@@ -108,6 +126,8 @@ When analyzing onboarding images, ignore any `AppKittie.com` watermark. It is ca
 | get_app_detail | 1 credit per request |
 | get_app_historicals | 1 credit per request |
 | get_app_countries | 1 credit per request, free when the app has no data |
+| search_developers | 1 credit per developer returned |
+| get_developer_detail | 1 credit per request |
 | list_store_rankings | 1 credit per app returned |
 | get_store_ranking_history | 10 credits per request |
 | search_ads | 1 credit per ad returned |

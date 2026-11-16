@@ -22,6 +22,8 @@ Tools and integrations that AppKittie skills can use for real-time App Store dat
 | `/api/v1/apps/:appId` | GET | Get app detail | 1 credit |
 | `/api/v1/apps/:appId/historicals` | GET | Historical metric time series | 1 credit |
 | `/api/v1/apps/:appId/countries` | GET | Estimated split of users by country | 1 credit (free if no data) |
+| `/api/v1/developers` | GET | Search developer profiles | 1 credit/developer |
+| `/api/v1/developers/:name` | GET | Portfolio summary and compact apps | 1 credit |
 | `/api/v1/ads` | GET | Search and filter ad creatives | 1 credit/hit |
 | `/api/v1/ads/:adId` | GET | Get ad detail | 1 credit |
 | `/api/v1/creators` | GET | Creator discovery (per app or per category) | 1 credit/creator |
@@ -42,6 +44,8 @@ App-scoped endpoints accept any identifier form: app slug, AppKittie app ID, num
 | `get_app_detail` | `/api/v1/apps/:appId` | GET |
 | `get_app_historicals` | `/api/v1/apps/:appId/historicals` | GET |
 | `get_app_countries` | `/api/v1/apps/:appId/countries` | GET |
+| `search_developers` | `/api/v1/developers` | GET |
+| `get_developer_detail` | `/api/v1/developers/:name` | GET |
 | `list_store_rankings` | `/api/v1/trending` | GET |
 | `get_store_ranking_history` | `/api/v1/trending/:appSlug/history` | GET |
 | `search_ads` | `/api/v1/ads` | GET |
@@ -87,6 +91,36 @@ App list/detail responses also include optional nullable `tiktok_ads_total_count
 Ad creatives are fetched separately with `search_ads` and `get_ad_detail`.
 
 The returned `ad_source` is `meta`, `tiktok`, or legacy `google`, independently of the app store.
+
+### Developer Data and Filters
+
+`search_developers` returns `developer`, `developer_slug`, `app_count`,
+`appstore_app_count`, `googleplay_app_count`, `categories`, `websites`,
+`total_downloads`, `total_mrr`, `latest_released_timestamp`, and `top_apps`
+(`app_slug`, `title`, `icon`). Internal Google Play join slugs are not returned.
+
+| Filter | Type | Description |
+|--------|------|-------------|
+| `search` | string | Developer search, at most 200 characters |
+| `stores` | enum | `all` (default), `both`, `apple`, `google`; apple/google include both-store developers |
+| `categories` / `excludedCategories` | string[] | Include/exclude portfolio app categories |
+| `minApps` / `maxApps` | integer | Portfolio app count bounds |
+| `minMrr` / `maxMrr` | number | Estimated monthly portfolio revenue in USD |
+| `minDownloads` / `maxDownloads` | number | Estimated monthly portfolio downloads |
+| `hasWebsite` | boolean | Known website presence; omit for either |
+| `latestReleasedAfter` / `latestReleasedBefore` | integer | Bounds on the most recent app launch, Unix seconds |
+| `sortBy` | enum | `total_mrr` (default), `total_downloads`, `app_count`, `latest_released` |
+| `sortOrder` | enum | `desc` (default), `asc` |
+| `limit` | integer | 1–100, default 50; capped by remaining credits |
+| `cursor` | integer | Nonnegative pagination offset, default 0 |
+
+`get_developer_detail` requires the exact `name` from the `developer` field,
+not the slug. It returns `data.developer`, `data.summary`, and `data.apps`,
+including matched Google Play apps. Apps are compact rows, highest revenue
+first, capped at 1,000. Summary revenue/download totals and breakdowns cover
+those rows; portfolio and store app counts can exceed the cap. List aggregates
+can differ because profiles refresh separately. Get individual app metadata
+with `get_app_detail`; ads and creators remain separate tool calls.
 
 ### Ad Data Fields
 

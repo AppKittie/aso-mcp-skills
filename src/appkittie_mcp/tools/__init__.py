@@ -4,6 +4,7 @@ from . import get_app_countries
 from . import get_app_detail
 from . import get_app_historicals
 from . import get_app_reviews
+from . import get_developer_detail
 from . import get_keyword_difficulty
 from . import get_supported_countries
 from . import get_store_ranking_history
@@ -12,6 +13,7 @@ from . import list_organic_content
 from . import list_store_rankings
 from . import search_ads
 from . import search_apps
+from . import search_developers
 from . import list_favorite_apps
 from . import search_onboarding_screens
 
@@ -22,6 +24,8 @@ TOOL_MODULES = [
     get_app_detail,
     get_app_historicals,
     get_app_countries,
+    search_developers,
+    get_developer_detail,
     list_store_rankings,
     get_store_ranking_history,
     search_ads,
