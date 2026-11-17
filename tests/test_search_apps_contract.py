@@ -17,6 +17,7 @@ sys.modules.setdefault("pyodide", pyodide)
 sys.modules.setdefault("pyodide.ffi", pyodide_ffi)
 
 from appkittie_mcp.api import _clean_params
+from appkittie_mcp.constants import SDK_NAMES
 from appkittie_mcp.tools.search_apps import SEARCH_APPS_KEYS, TOOL, _pick, handle
 
 
@@ -51,9 +52,22 @@ class SearchAppsContractTests(unittest.TestCase):
             "minInAppPurchaseCount",
             "minInAppPurchasePrice",
             "maxInAppPurchasePrice",
+            "sdks",
+            "excludedSdks",
         }
 
         self.assertLessEqual(expected, properties.keys())
+
+    def test_sdk_filters_accept_only_known_sdk_names(self):
+        properties = TOOL["inputSchema"]["properties"]
+
+        for key in ("sdks", "excludedSdks"):
+            self.assertEqual(properties[key]["items"]["enum"], SDK_NAMES)
+        self.assertEqual(len(SDK_NAMES), len(set(SDK_NAMES)))
+        # Lists reach the API comma-joined, so a comma would split a name.
+        self.assertFalse([name for name in SDK_NAMES if "," in name])
+        for name in ("Superwall", "RevenueCat", "AppLovin MAX", "AppLovin"):
+            self.assertIn(name, SDK_NAMES)
 
     def test_downloads_and_revenue_growth_are_sortable(self):
         sort_by = TOOL["inputSchema"]["properties"]["sortBy"]
@@ -92,6 +106,24 @@ class SearchAppsWebFunnelTests(unittest.IsolatedAsyncioTestCase):
                 {"isRemoved": True, "removedAfter": 1793491200, "removedBefore": 1794096000},
                 {"isRemoved": "true", "removedAfter": 1793491200, "removedBefore": 1794096000},
             ),
+            ({}, {}),
+        ]:
+            with self.subTest(args=args), patch(
+                "appkittie_mcp.tools.search_apps.api_get",
+                new_callable=AsyncMock,
+                return_value=({"data": []}, None),
+            ) as api_get:
+                await handle(args, "test-key")
+                api_get.assert_awaited_once_with("/api/v1/apps", args, "test-key")
+                self.assertEqual(_clean_params(api_get.call_args.args[1]), expected)
+
+    async def test_sdk_filters_are_forwarded_as_comma_joined_names(self):
+        for args, expected in [
+            (
+                {"sdks": ["Superwall", "Google Mobile Ads / AdMob"]},
+                {"sdks": "Superwall,Google Mobile Ads / AdMob"},
+            ),
+            ({"excludedSdks": ["RevenueCat"]}, {"excludedSdks": "RevenueCat"}),
             ({}, {}),
         ]:
             with self.subTest(args=args), patch(

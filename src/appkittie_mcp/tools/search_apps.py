@@ -6,6 +6,7 @@ from ..constants import (
     GROWTH_METRICS,
     GROWTH_PERIODS,
     PRICE_TYPES,
+    SDK_NAMES,
     SORT_BY_OPTIONS,
     SORT_ORDERS,
     STORE_SOURCES,
@@ -25,6 +26,8 @@ TOOL = {
         "Results include apps the store no longer lists: date_removed_timestamp holds the removal time "
         "(Unix seconds) and is null while the app is listed. Pass isRemoved=false to leave removed apps out, "
         "or isRemoved=true with removedAfter/removedBefore to find apps removed in a date range. "
+        "Scanned apps carry sdk: sdk.sdks lists the SDKs found in the app's build "
+        "(sdk is null until scanned); filter on them with sdks/excludedSdks. "
         "Costs 1 credit per app returned."
     ),
     "inputSchema": {
@@ -199,6 +202,25 @@ TOOL = {
                 "type": "number",
                 "minimum": 0,
                 "description": "Maximum in-app purchase price in USD",
+            },
+            "sdks": {
+                "type": "array",
+                "items": {"type": "string", "enum": SDK_NAMES},
+                "maxItems": 50,
+                "description": (
+                    "Only apps whose scanned build contains any of these SDKs. Unscanned apps never match. "
+                    "Google Play names three SDKs differently, so pass both names to cover both stores: "
+                    "AppLovin MAX + AppLovin, Firebase Firestore + Cloud Firestore, Unity Engine + Unity."
+                ),
+            },
+            "excludedSdks": {
+                "type": "array",
+                "items": {"type": "string", "enum": SDK_NAMES},
+                "maxItems": 50,
+                "description": (
+                    "Only scanned apps whose build contains none of these SDKs. "
+                    "Unscanned apps are left out because their SDKs are unknown."
+                ),
             },
             "limit": {
                 "type": "integer",
