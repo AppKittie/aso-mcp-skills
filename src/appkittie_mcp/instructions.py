@@ -24,7 +24,7 @@ Key filters:
 - `sortBy` - `growth`, `downloads_growth`, `revenue_growth`, `rating`, `reviews`, `downloads`, `revenue`, `trending`, `newest`, `updated`, `released`
 - `growthMetric` - currently `reviews` (for `sortBy=growth`)
 - `growthPeriod` - `7d`, `14d`, `30d`, `60d`, `90d` (for `sortBy=growth`)
-- `hasMetaAds`, `hasTikTokAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` - marketing/contact signals
+- `hasMetaAds`, `hasTikTokAds`, `hasGoogleAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` - marketing/contact signals
 - `hasMetaAdSpend` - estimated Meta Ads spend over the last 30 days (`meta_ads_estimated_spend_30d_usd > 0`)
 - `isRemoved` - `true` for apps the store no longer lists, `false` for apps still listed
 - `removedAfter`, `removedBefore` - Unix seconds bounding the removal date
@@ -33,7 +33,8 @@ Key filters:
 `downloads_growth` and `revenue_growth` rank apps by the percentage change in estimated monthly downloads or revenue over the last 30 days; results carry it as `historical_counts.downloads_growth_30d` / `historical_counts.revenue_growth_30d`. Add `minDownloads` or `minRevenue` to skip small apps whose percentages spike from a near-zero base.
 
 `hasTikTokAds=true` requires `tiktok_ads_total_count > 0` in either store; false includes zero, missing, or null counts. Omit for no restriction. This is paid ad presence, separate from organic TikTok content.
-`adsSource` selects apps by ads signal: meta (Apple apps with Meta creatives), tiktok (either store with a positive count), or all (either group). Omit to include apps without ads. Other filters are AND-combined; do not add hasMetaAds=true when looking for TikTok-only apps.
+`hasGoogleAds=true` finds apps in either store with a nonempty `google_ads` array. False matches empty, null, or missing arrays. Omit it to include both groups.
+`adsSource` selects Apple apps with Meta creatives (`meta`), apps with a positive TikTok ad count (`tiktok`), or apps with Google creatives (`google`). Use `all` for apps with any of these signals. Omit it to include apps without ads. Additional filters narrow the results.
 App list/detail responses include optional nullable `tiktok_ads_total_count` when available. It is a known ad count, not an active-ad count; fetch indexed creatives separately.
 
 App list/detail responses include `date_removed_timestamp`: Unix seconds when AppKittie first saw the store stop listing the app in every country it tracks. It is null or missing while the app is listed and returns to null if the store lists it again. `search_apps` still returns removed apps with their last known metrics, so check this field before calling an app live, a current competitor, or a market leader.
@@ -85,11 +86,11 @@ Use `get_store_ranking_history` with an exact app slug and the same chart filter
 
 ## Ads
 
-Use `search_ads` and `get_ad_detail` for Meta and TikTok creatives. App detail responses include transparency summaries but do not embed ad creatives.
+Use `search_ads` and `get_ad_detail` for Meta, TikTok, and Google creatives.
 
-Use `adSource='tiktok'` for TikTok creatives or `adSource='meta'` for Meta. `all` adds no network filter. Google remains accepted for compatibility but has no current inventory. The returned `ad_source` identifies the creative network independently of the app store.
+Set `adSource` to `google`, `meta`, or `tiktok` for a single network. The default `all` includes all three. The returned `ad_source` identifies the creative network independently of the app store.
 
-Use `mediaType='image'` or `mediaType='video'` to keep one creative format on either network, e.g. `adSource='tiktok', mediaType='video'` for TikTok video ads. Each creative reports its format in `type`.
+For Google video ads, call `search_ads` with `adSource='google'` and `mediaType='video'`. Add `appSlug` to scope the search to an app found with `search_apps(hasGoogleAds=true)`. Pass a result's `ad_doc_id` to `get_ad_detail` as `adId` for the hosted media and available copy. Use `mediaType='image'` for static creatives.
 
 `search_ads` returns a compact view by default (identity, status, key copy, app metrics) to keep responses small. Pass `view='full'` only when you need complete creative payloads with media URLs. Use `get_ad_detail` for a deep dive on one ad.
 

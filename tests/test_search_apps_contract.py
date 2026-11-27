@@ -43,6 +43,7 @@ class SearchAppsContractTests(unittest.TestCase):
             "hasWebFunnel",
             "organicSources",
             "hasTikTokAds",
+            "hasGoogleAds",
             "adsSource",
             "hasMetaAdSpend",
             "isRemoved",
@@ -78,11 +79,17 @@ class SearchAppsContractTests(unittest.TestCase):
 
 
 class SearchAppsWebFunnelTests(unittest.IsolatedAsyncioTestCase):
-    async def test_tiktok_filters_are_forwarded_including_false(self):
+    async def test_ad_network_filters_are_forwarded_including_false(self):
+        properties = TOOL["inputSchema"]["properties"]
+        self.assertEqual(properties["hasGoogleAds"]["type"], "boolean")
+        self.assertIn("google", properties["adsSource"]["enum"])
         for args, expected in [
             ({"hasTikTokAds": True, "source": "google_mobile"}, {"hasTikTokAds": "true", "source": "google_mobile"}),
             ({"hasTikTokAds": False}, {"hasTikTokAds": "false"}),
             ({"adsSource": "tiktok"}, {"adsSource": "tiktok"}),
+            ({"hasGoogleAds": True, "source": "apple_mobile"}, {"hasGoogleAds": "true", "source": "apple_mobile"}),
+            ({"hasGoogleAds": False}, {"hasGoogleAds": "false"}),
+            ({"adsSource": "google"}, {"adsSource": "google"}),
             ({"adsSource": "all"}, {"adsSource": "all"}),
             ({}, {}),
         ]:

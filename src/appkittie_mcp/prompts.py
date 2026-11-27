@@ -37,10 +37,10 @@ PROMPTS = [
     },
     {
         "name": "ad_intelligence",
-        "description": "Discover apps running ads and inspect Meta/TikTok creatives.",
+        "description": "Find apps with Google, Meta, TikTok, or Apple Search Ads and inspect available creatives.",
         "arguments": [
             {"name": "category_or_search", "description": "Category or search term", "required": True},
-            {"name": "ad_platform", "description": "meta, tiktok, apple, or all; google accepted for compatibility", "required": False},
+            {"name": "ad_platform", "description": "Choose google, meta, tiktok, apple (app signal), or all (default).", "required": False},
         ],
     },
     {
@@ -56,7 +56,10 @@ PROMPTS = [
 
 
 def render_prompt(name, arguments):
-    args = {arg["name"]: arg.get("value", "") for arg in (arguments or [])}
+    # MCP sends a name-to-value object. Older clients used a list of named values.
+    args = arguments if isinstance(arguments, dict) else {
+        arg["name"]: arg.get("value", "") for arg in (arguments or [])
+    }
 
     if name == "discover_niche":
         category = args.get("category", "")
@@ -116,32 +119,41 @@ def render_prompt(name, arguments):
 
     if name == "ad_intelligence":
         target = args.get("category_or_search", "")
-        platform = (args.get("ad_platform", "all") or "all").lower()
-        app_ad_filter = {
-            "meta": ", adsSource: 'meta'",
-            "tiktok": ", hasTikTokAds: true",
-            "all": ", adsSource: 'all'",
-            "both": ", adsSource: 'all'",
-        }.get(platform, "")
-        apple_filter = platform in ("apple", "all", "both")
-        creative_sources = []
-        if platform in ("meta", "all", "both"):
-            creative_sources.append("meta")
-        if platform in ("tiktok", "all", "both"):
-            creative_sources.append("tiktok")
-        if platform == "google":
-            creative_sources.append("google")
-        if not creative_sources:
-            creative_sources = ["meta", "tiktok"]
-        creative_source_text = " and ".join(f"adSource: '{source}'" for source in creative_sources)
-        return [_user_message(
-            f"Discover which apps are running ads for '{target}'.\n\n"
-            f"1. Use search_apps with search: '{target}'{app_ad_filter}, sortBy: 'revenue', limit: 20.\n"
-            f"2. Use search_apps with search: '{target}'{', hasAppleAds: true' if apple_filter else ''}, sortBy: 'revenue', limit: 20 when relevant.\n"
-            f"3. For top advertisers, use search_ads with appSlug and {creative_source_text}, sortBy: 'start_date', sortOrder: 'desc', limit: 10.\n"
-            "4. Use get_ad_detail on standout ad_doc_id values.\n"
-            "5. Analyze platforms, creative angles, copy, and opportunities."
-        )]
+        platform = (args.get("ad_platform") or "all").strip().lower()
+        app_filters = {
+            "meta": "adsSource: 'meta'",
+            "tiktok": "hasTikTokAds: true",
+            "google": "hasGoogleAds: true",
+            "apple": "hasAppleAds: true",
+            "all": "adsSource: 'all'",
+        }
+        if platform == "all":
+            app_sources, creative_sources = ("all", "apple"), ("meta", "tiktok", "google")
+        elif platform == "both":
+            # Preserve the original Meta and TikTok comparison and separate Apple signal.
+            app_sources, creative_sources = ("meta", "tiktok", "apple"), ("meta", "tiktok")
+        elif platform in app_filters:
+            app_sources = (platform,)
+            creative_sources = () if platform == "apple" else (platform,)
+        else:
+            return [_user_message("Choose google, meta, tiktok, apple, or all for ad_platform.")]
+
+        steps = [
+            f"Use search_apps with search: {target!r}, {app_filters[source]}, sortBy: 'revenue', limit: 20."
+            for source in app_sources
+        ]
+        for source in creative_sources:
+            steps.append(
+                f"Pass a returned app_slug to search_ads as appSlug with adSource: '{source}', "
+                "sortBy: 'start_date', sortOrder: 'desc', limit: 10."
+            )
+        if creative_sources:
+            steps.append("Pass a returned ad_doc_id to get_ad_detail as adId to inspect the media and available copy.")
+            steps.append("Summarize the observed creative formats and messaging for the requested networks.")
+        else:
+            steps.append("Summarize Apple Search Ads presence and the estimated revenue of the matching apps.")
+        workflow = "\n".join(f"{i}. {step}" for i, step in enumerate(steps, 1))
+        return [_user_message(f"Research ads for {target!r}.\n\n{workflow}")]
 
     if name == "review_analysis":
         app_id = args.get("app_id", "")

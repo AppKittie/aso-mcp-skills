@@ -49,7 +49,7 @@ For each competitor, use `get_app_detail` to collect:
 | Rating & reviews | User satisfaction, common complaints |
 | Downloads & revenue | Market share estimate |
 | Historical data | Growth trajectory |
-| Ad signals | Meta / Apple presence from search results |
+| Ad signals | Use `search_apps` to check Google, Meta, TikTok, or Apple Search Ads presence |
 | Ad creatives | Use `search_ads(appSlug)` and `get_ad_detail(adId)` for creative strategy |
 | In-app purchases | Monetization model |
 | Creators | Influencer partnerships |

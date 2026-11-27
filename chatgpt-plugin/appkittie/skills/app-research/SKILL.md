@@ -30,8 +30,11 @@ error should be explained without repeatedly retrying chargeable requests.
   for an app's positions over time.
 - Research one keyword with `get_keyword_difficulty`; use
   `batch_keyword_difficulty` for a user-requested set of up to ten keywords.
-- Search ad creatives with `search_ads`; expand only relevant items with
-  `get_ad_detail`. Use `list_creators` and `list_organic_content` for creator
+- Search creatives with `search_ads`. For Google video ads, use `adSource: "google"`
+  and `mediaType: "video"`. Pass a selected `ad_doc_id` to `get_ad_detail` as `adId`.
+  To start with advertisers, call `search_apps` with `hasGoogleAds: true` and
+  pass a returned `app_slug` to `search_ads` as `appSlug`.
+- Use `list_creators` and `list_organic_content` for creator
   discovery and evidence of posts about an app.
 - Use `get_app_reviews` to analyze a bounded sample of store reviews.
 - Use `search_onboarding_screens` for onboarding design research.

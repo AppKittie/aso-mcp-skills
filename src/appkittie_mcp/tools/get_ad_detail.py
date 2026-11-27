@@ -9,8 +9,8 @@ from ..rpc import tool_result
 TOOL = {
     "name": "get_ad_detail",
     "description": (
-        "Get detailed information for a single Meta or TikTok ad creative by ad_doc_id. "
-        "The ad_source field identifies the network (meta, tiktok, or legacy google). "
+        "Get a Meta, TikTok, or Google creative using the ad_doc_id from search_ads. "
+        "The ad_source field identifies its network. "
         "Returns hosted creative assets, copy, delivery metadata, advertised app fields, "
         "and compact app summary when available. Costs 1 credit per request."
     ),

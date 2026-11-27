@@ -15,7 +15,7 @@ from ..rpc import tool_result
 TOOL = {
     "name": "search_ads",
     "description": (
-        "Search and filter Meta and TikTok ad creatives for mobile apps across both stores. "
+        "Search and filter Meta, TikTok, and Google ad creatives for mobile apps across both stores. "
         "Supports full-text search, filters, sorting, app-specific lookup, "
         "and cursor-based pagination. Returns a compact view (identity, "
         "status, key copy, app metrics) by default; set view='full' for "
@@ -34,12 +34,12 @@ TOOL = {
             "adSource": {
                 "type": "string",
                 "enum": AD_SOURCE_OPTIONS,
-                "description": "Creative network: all (default, no network filter), meta, or tiktok. Independent of the app's store. Google remains accepted for compatibility but has no current inventory.",
+                "description": "Select google, meta, or tiktok to search one creative network across app stores. The default all includes every network.",
             },
             "mediaType": {
                 "type": "string",
                 "enum": AD_MEDIA_TYPES,
-                "description": "Creative media type: all (default, no media filter), image, or video. Matches each creative's type on any network; combine with adSource='tiktok' for TikTok image or video ads.",
+                "description": "Select image or video on any network. For Google video ads, use mediaType='video' with adSource='google'. The default all includes both formats.",
             },
             "status": {
                 "type": "string",

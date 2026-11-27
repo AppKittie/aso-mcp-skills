@@ -2,6 +2,7 @@ import json
 
 from ..api import api_get
 from ..constants import (
+    AD_SOURCE_OPTIONS,
     CONTENT_RATINGS,
     GROWTH_METRICS,
     GROWTH_PERIODS,
@@ -175,10 +176,14 @@ TOOL = {
                 "type": "boolean",
                 "description": "Filter paid TikTok ad presence in either store: true requires tiktok_ads_total_count > 0; false includes zero, missing, or null counts. Omit for no restriction. Fetch creatives with search_ads(adSource='tiktok'); organicSources is a separate filter.",
             },
+            "hasGoogleAds": {
+                "type": "boolean",
+                "description": "Find apps in either store with at least one creative in google_ads (true), or an empty, null, or missing google_ads field (false). Omit to include both groups.",
+            },
             "adsSource": {
                 "type": "string",
-                "enum": ["all", "meta", "tiktok"],
-                "description": "App discovery by ads: meta selects Apple apps with Meta creatives; tiktok selects either store with tiktok_ads_total_count > 0; all selects either group. Omit to include apps without ads. Other filters are AND-combined.",
+                "enum": AD_SOURCE_OPTIONS,
+                "description": "Choose meta for Apple apps with Meta creatives, tiktok for apps with a positive TikTok ad count, or google for apps with Google creatives. TikTok and Google cover either store. All matches any of these signals. Omit to include apps without ads.",
             },
             "hasMetaAdSpend": {
                 "type": "boolean",

@@ -20,7 +20,9 @@ https://appkittie.com/api/v1
 
 ### GET /apps
 
-Search and filter Apple App Store and Google Play apps. Use `hasTikTokAds=true` for `tiktok_ads_total_count > 0`; false includes zero, missing, or null counts. `adsSource=tiktok` finds either store with that signal, `meta` finds Apple apps with Meta creatives, and `all` finds either group. Omit `adsSource` to include apps without ads. Other filters are AND-combined.
+Search and filter Apple App Store and Google Play apps. Use `hasTikTokAds=true` for a positive TikTok ad count or `hasGoogleAds=true` for a nonempty `google_ads` array. For TikTok, false includes zero, missing, and null counts. For Google, false includes empty, missing, and null arrays.
+
+`adsSource=tiktok` and `adsSource=google` select apps with the respective signal in either store. `meta` selects Apple apps with Meta creatives. Use `all` to require any of these signals, or omit the parameter to include apps without ads.
 
 App list/detail responses include optional nullable `tiktok_ads_total_count` when available. This known ad count is not an active-ad count and can differ from indexed creatives. Fetch TikTok creatives separately using `GET /ads?appSlug=...&adSource=tiktok`.
 
@@ -187,9 +189,9 @@ rate-limit headers follow the existing API conventions.
 
 ### GET /ads
 
-Search and filter Meta and TikTok ad creatives. Use `adSource=tiktok` for TikTok or `adSource=meta` for Meta; `all` adds no network filter. `google` remains accepted for compatibility but has no current inventory. The returned `ad_source` identifies the network independently of the app store.
+Search Google, Meta, and TikTok ad creatives. Set `adSource` to `google`, `meta`, or `tiktok`, or use the default `all` to include every network. The returned `ad_source` identifies the network independently of the app store.
 
-Use `mediaType=image` or `mediaType=video` to keep one creative format on either network (for example `adSource=tiktok&mediaType=video`). Each creative reports its format in `type`.
+Use `mediaType=image` or `mediaType=video` on any network. For example, `GET /ads?adSource=google&mediaType=video&limit=5` returns up to five Google video ads. Pass a returned `ad_doc_id` to `GET /ads/:adId` for its hosted media.
 
 **Query Parameters:** See [REGISTRY.md](../REGISTRY.md) for the full ad filter list. Use `view=compact` for trimmed payloads (identity, status, key copy, and app metrics only) in automated workflows.
 

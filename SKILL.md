@@ -19,7 +19,7 @@ Read only the focused workflow that matches the user's intent:
 | Compare apps or analyze a competitive landscape | `skills/competitor-analysis/SKILL.md` |
 | Analyze fast movers, trends, or growth windows | `skills/growth-analysis/SKILL.md` |
 | Benchmark revenue, pricing, IAPs, or monetization | `skills/revenue-analysis/SKILL.md` |
-| Analyze Meta ads, Apple Search Ads, creatives, or UA angles | `skills/ad-intelligence/SKILL.md` |
+| Research Google, Meta, or TikTok creatives and Apple Search Ads signals | `skills/ad-intelligence/SKILL.md` |
 | Find influencers, creators, or organic content for an app or niche | `skills/creator-discovery/SKILL.md` |
 | Analyze user reviews, complaints, sentiment, or feature requests | `skills/review-analysis/SKILL.md` |
 | Capture reusable app, audience, rival, and goal context | `skills/app-marketing-context/SKILL.md` |

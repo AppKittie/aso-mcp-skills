@@ -58,7 +58,7 @@ def handle_prompts_list(req_id):
 
 def handle_prompts_get(req_id, params):
     name = params.get("name", "")
-    arguments = params.get("arguments", [])
+    arguments = params.get("arguments", {})
     prompt = next((item for item in PROMPTS if item["name"] == name), None)
     if not prompt:
         return rpc_error(req_id, -32602, f"Unknown prompt: {name}")
