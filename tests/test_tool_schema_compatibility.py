@@ -18,7 +18,7 @@ sys.modules.setdefault("pyodide.ffi", ffi)
 from appkittie_mcp.tools import TOOLS, TOOL_HANDLERS
 from appkittie_mcp import identifiers
 from appkittie_mcp.tools import app_scoped, get_app_countries, get_app_historicals, get_app_reviews, get_store_ranking_history
-from appkittie_mcp.tools import get_app_detail, search_ads
+from appkittie_mcp.tools import get_ad_detail, get_app_detail, search_ads
 
 
 class ToolSchemaCompatibilityTests(unittest.IsolatedAsyncioTestCase):
@@ -116,6 +116,25 @@ class ToolSchemaCompatibilityTests(unittest.IsolatedAsyncioTestCase):
             ) as api:
                 await search_ads.handle(args, "test-key")
                 api.assert_awaited_once_with("/api/v1/ads", {**args, "view": "compact"}, "test-key")
+
+    async def test_google_creative_search_supplies_the_id_for_detail(self):
+        self.assertIn("google", search_ads.TOOL["inputSchema"]["properties"]["adSource"]["enum"])
+        for media_type in ("image", "video"):
+            args = {"adSource": "google", "mediaType": media_type, "appSlug": "fitness-app", "limit": 5}
+            ad = {"ad_doc_id": "google_ad_123", "ad_source": "google", "type": media_type}
+            detail = {"data": {**ad, "src": "https://example.com/creative"}}
+            with self.subTest(media_type=media_type), patch.object(
+                search_ads, "api_get", new=AsyncMock(return_value=({"data": [ad]}, None))
+            ) as search_api, patch.object(
+                get_ad_detail, "api_get", new=AsyncMock(return_value=(detail, None))
+            ) as detail_api:
+                result = await TOOL_HANDLERS["search_ads"](args, "test-key")
+                search_api.assert_awaited_once_with("/api/v1/ads", {**args, "view": "compact"}, "test-key")
+                hit, = json.loads(result["content"][0]["text"])["data"]
+                self.assertEqual(hit, ad)
+                result = await TOOL_HANDLERS["get_ad_detail"]({"adId": hit["ad_doc_id"]}, "test-key")
+                detail_api.assert_awaited_once_with("/api/v1/ads/google_ad_123", {}, "test-key")
+                self.assertEqual(json.loads(result["content"][0]["text"]), detail)
 
     def test_all_advertised_tools_have_client_compatible_root_schemas(self):
         # Claude rejects the entire request if any tool has a root combinator.

@@ -22,7 +22,7 @@
         "termsOfServiceURL": "https://www.appkittie.com/terms",
         "defaultPrompt": [
           "Find five growing fitness apps in the US.",
-          "Compare competitors for my mobile app.",
+          "Show me five Google video ads for fitness apps and open one.",
           "Research keywords for a meditation app."
         ],
         "brandColor": "#66C69F",
@@ -44,6 +44,12 @@
               "prompt": "Compare Calm and Headspace on iOS using AppKittie.",
               "tools_triggered": "search_apps, get_app_detail",
               "expected_behavior": "Resolve the two apps, obtain detail, and compare evidence with source links. Distinguish estimates from facts."
+            },
+            {
+              "description": "Inspect a Google video creative",
+              "prompt": "Show me five Google video ads for fitness apps and open one.",
+              "tools_triggered": "search_ads, get_ad_detail",
+              "expected_behavior": "Search the Health & Fitness category with adSource=google, mediaType=video, and limit=5. If a creative is returned, pass its ad_doc_id as adId and share the hosted media link from the detail."
             },
             {
               "description": "Research a keyword",

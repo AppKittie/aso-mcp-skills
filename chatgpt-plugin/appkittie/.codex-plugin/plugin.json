@@ -34,7 +34,7 @@
     "termsOfServiceURL": "https://www.appkittie.com/terms",
     "defaultPrompt": [
       "Find five growing fitness apps in the US.",
-      "Compare competitors for my mobile app.",
+      "Show me five Google video ads for fitness apps and open one.",
       "Research keywords for a meditation app."
     ],
     "brandColor": "#66C69F",

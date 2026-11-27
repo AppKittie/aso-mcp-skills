@@ -92,7 +92,7 @@ App list/detail responses also include optional nullable `tiktok_ads_total_count
 
 Ad creatives are fetched separately with `search_ads` and `get_ad_detail`.
 
-The returned `ad_source` is `meta`, `tiktok`, or legacy `google`, independently of the app store.
+Each creative identifies its network in `ad_source` (`meta`, `tiktok`, or `google`), independently of the app store.
 
 ### Developer Data and Filters
 
@@ -159,7 +159,8 @@ All ad list fields plus deeper delivery/transparency fields such as `transparenc
 | `hasCreators` | boolean | Has creator partnerships |
 | `hasMetaAds` | boolean | Running Meta ads |
 | `hasTikTokAds` | boolean | True: `tiktok_ads_total_count > 0` in either store. False: zero, missing, or null. Omit for no restriction. |
-| `adsSource` | enum | `meta`: Apple apps with Meta creatives; `tiktok`: either store with a positive count; `all`: either group. Omit to include apps without ads. Other filters are AND-combined. |
+| `hasGoogleAds` | boolean | True matches a nonempty `google_ads` array in either store. False matches an empty, null, or missing array. |
+| `adsSource` | enum | `meta` selects Apple apps with Meta creatives, `tiktok` matches a positive TikTok ad count, and `google` matches Google creatives. Use `all` for any of these signals. Omit to include apps without ads. |
 | `hasAppleAds` | boolean | Running Apple Search Ads |
 | `hasEmails` | boolean | Has contact emails |
 | `isRemoved` | boolean | True: only apps the store no longer lists (`date_removed_timestamp` set). False: only apps still listed. Omit for both. |
@@ -175,7 +176,7 @@ All ad list fields plus deeper delivery/transparency fields such as `transparenc
 |--------|------|-------------|
 | `search` | string | Full-text search across creative text and app metadata |
 | `textSearchFields` | string[] | Search fields such as `creative_text`, `title`, `body`, `cta_text`, `page_name`, `developer`, `app_title`, `category` |
-| `adSource` | enum | `all` (no network filter), `meta`, `tiktok`, `google` (legacy; no current inventory) |
+| `adSource` | enum | `meta`, `tiktok`, or `google` for one creative network. The default `all` includes every network. |
 | `mediaType` | enum | `all` (no media filter), `image`, `video` — matches each creative's `type` on any network, including TikTok |
 | `status` | enum | `all`, `active`, `inactive` |
 | `appSlug` / `appId` / `appStoreId` / `appStoreUrl` | string | Ads for one app (any identifier form) |

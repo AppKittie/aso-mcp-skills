@@ -153,7 +153,7 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 | `get_developer_detail` | Cross-store portfolio summary and up to 1,000 compact app rows | 1 / call |
 | `list_store_rankings` | Current store chart by collection, country, and category | 1 × rows returned |
 | `get_store_ranking_history` | Daily chart positions for one app and chart | 10 / call |
-| `search_ads` | Search Meta and TikTok ad creatives; compact view by default, `view='full'` for complete payloads | 1 × rows returned |
+| `search_ads` | Search Google, Meta, and TikTok creatives by app and media type. Use `view='full'` for media URLs. | 1 × rows returned |
 | `get_ad_detail` | Full detail for one ad creative | 1 / call |
 | `list_creators` | Creator discovery for one app or across a category; filter by platform, country, and followers | 1 × rows returned |
 | `list_organic_content` | Search organic creator content globally or filter by app, category, language, reach, views, and app performance | 1 × rows returned |
@@ -165,6 +165,15 @@ The worker on **Cloudflare** forwards requests to AppKittie. **Claude Code** use
 **App identifiers:** every app-scoped tool (`get_app_detail`, `get_app_historicals`, `get_app_countries`, `search_ads`, `list_creators`, `list_organic_content`, `get_app_reviews`) accepts an app slug, AppKittie app ID, numeric App Store ID, Google Play package name, or store URL. Resolution happens automatically — pass whichever identifier you have.
 
 **Influencer discovery:** `list_creators` supports `category` for cross-app discovery, `platform` / `country` / `minFollowers` / `maxFollowers` filters, and `sortBy='followers'`. To confirm a creator actually posted about an app, cross-reference their handle against `list_organic_content` for that app.
+
+### Find Google Ads with MCP
+
+Try asking **“Show me five Google video ads for fitness apps. Open one and give me the app name, the video link, and any available ad copy.”**
+
+1. Call `search_ads` with `{"adSource":"google","mediaType":"video","categories":["Health & Fitness"],"sortBy":"start_date","sortOrder":"desc","limit":5}`.
+2. Pass one result's `ad_doc_id` to `get_ad_detail` as `adId`. The response includes the hosted media URL in `src` and the available creative metadata.
+
+To start with apps, use `search_apps` with `{"hasGoogleAds":true,"limit":3}`. Pass a returned `app_slug` as `appSlug` to narrow the creative search. In clients that support MCP prompts, choose `ad_intelligence` with `category_or_search="fitness"` and `ad_platform="google"` for the guided workflow.
 
 ### Developer portfolios
 
@@ -231,7 +240,7 @@ return an error without a charge.
 |-------|------|---------|
 | Growth | [growth-analysis](skills/growth-analysis) | Fast movers, drivers, emerging patterns |
 | Revenue | [revenue-analysis](skills/revenue-analysis) | Benchmarks, monetization, IAP shape, pricing |
-| Ads | [ad-intelligence](skills/ad-intelligence) | Meta/Google creatives, Apple Search Ads signals, UA angles |
+| Ads | [ad-intelligence](skills/ad-intelligence) | Google, Meta, and TikTok creatives and Apple Search Ads signals |
 | Creators | [creator-discovery](skills/creator-discovery) | Influencer discovery per app or category — follower tiers, platforms, outreach lists |
 
 ### Shared context
@@ -322,7 +331,7 @@ App-scoped routes accept any identifier form — `app_slug`/`appSlug`, `appId`, 
 | Metrics | `minDownloads` / `maxDownloads`, `minRevenue` / `maxRevenue`, `minRating` / `maxRating`, `minReviews` / `maxReviews`, lifetime download/revenue min/max |
 | Price | `priceType` (`all` \| `free` \| `paid`), `minPrice`, `maxPrice` |
 | Growth sort | Review growth: `sortBy=growth`, `growthMetric=reviews`, `growthPeriod` (`7d`, `14d`, `30d`, `60d`, `90d`). Downloads/revenue growth over 30 days: `sortBy=downloads_growth` / `sortBy=revenue_growth`. Growth direction/range filters are temporarily unavailable |
-| Signals | `hasMetaAds`, `hasTikTokAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` |
+| Signals | `hasMetaAds`, `hasTikTokAds`, `hasGoogleAds`, `hasAppleAds`, `hasCreators`, `hasEmails`, `hasWebsite` |
 | Content | `contentRating`, `languages`, `developer` |
 | Time | `releasedAfter`, `updatedAfter` (Unix seconds) |
 | Removed apps | `isRemoved` (`true` \| `false`), `removedAfter`, `removedBefore` (Unix seconds) |
@@ -335,7 +344,9 @@ App list/detail responses include `date_removed_timestamp`: Unix seconds when th
 
 App list/detail responses include `sdk` once AppKittie has scanned the app's build: `sdk.sdks` lists the SDKs found and `sdk.scanned_at_timestamp` is the scan time (Unix seconds). It is null for apps not scanned yet. `sdks` matches apps whose build contains any of the listed SDKs; `excludedSdks` keeps only scanned apps without them. The accepted names are the `SDK_NAMES` enum in [`constants.py`](src/appkittie_mcp/constants.py).
 
-`adsSource` accepts `meta` (Apple apps with Meta creatives), `tiktok` (either store with a positive TikTok count), or `all` (either group). Omit it to include apps without ads. Other filters are AND-combined.
+`hasGoogleAds=true` matches a nonempty `google_ads` array in either store. False matches an empty, null, or missing array. Omit it to include both groups.
+
+`adsSource` accepts `meta` for Apple apps with Meta creatives, `tiktok` for apps with a positive TikTok ad count, or `google` for apps with Google creatives. Use `all` to require any of these signals. Omit it to include apps without ads.
 
 Full parameter matrix: [tools/REGISTRY.md](tools/REGISTRY.md).
 
@@ -344,13 +355,13 @@ Full parameter matrix: [tools/REGISTRY.md](tools/REGISTRY.md).
 | Group | Parameters |
 |-------|------------|
 | Text | `search`, `textSearchFields` |
-| Creative | `adSource` (`all` \| `meta` \| `tiktok` \| `google` (legacy)), `mediaType` (`all` \| `image` \| `video`), `status` (`all` \| `active` \| `inactive`) |
+| Creative | `adSource` (`all` \| `meta` \| `tiktok` \| `google`), `mediaType` (`all` \| `image` \| `video`), `status` (`all` \| `active` \| `inactive`) |
 | App | `app_slug`/`appSlug`/`appId`/`appStoreId`/`appStoreUrl` (any identifier form), `categories`, `excludedCategories`, `developer`, app download/revenue min/max |
 | Delivery | `countries`, `excludedCountries`, `surfaces`, `excludedSurfaces`, start/end timestamp bounds |
 | Shape | `view` (`full` \| `compact`) |
 | Order | `sortBy` (`start_date`, `end_date`, `app_downloads`, `app_revenue`, app Meta Ads estimated spend/reach fields for `7d`, `30d`, or `90d`, `app_released_timestamp`, `app_updated_timestamp`), `sortOrder` (`asc` \| `desc`) |
 
-`adSource=all` adds no network filter. Google remains accepted for compatibility but has no current inventory. `ad_source` identifies the creative network independently of the app store. `mediaType=image` or `video` keeps creatives whose `type` matches on any network; pair it with `adSource=tiktok` for TikTok images or videos.
+`adSource=all` includes all creative networks. Each creative reports its network in `ad_source` and its format in `type`. Combine `adSource=google` with `mediaType=image` or `video` to select Google images or videos across app stores.
 
 ### `GET /api/v1/creators` filters
 

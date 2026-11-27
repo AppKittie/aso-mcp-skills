@@ -71,6 +71,7 @@ Reviews growth sorting is available with `sortBy: "growth"`, `growthMetric: "rev
 Discover which apps are investing in user acquisition.
 
 - `hasMetaAds: true` — apps running Facebook/Instagram ads
+- `hasGoogleAds: true` finds apps with Google creatives in either store. Use the returned app slug with `search_ads` and `adSource: "google"` to see the creatives.
 - `hasAppleAds: true` — apps running Apple Search Ads
 - Combine with `sortBy: "revenue"` to see if ad spend correlates with revenue
 

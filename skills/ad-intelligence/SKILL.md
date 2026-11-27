@@ -1,8 +1,8 @@
 ---
 name: ad-intelligence
-description: When the user wants to analyze advertising strategies, find apps running ads, or understand user acquisition tactics. Also use when the user mentions "ad intelligence", "Meta ads", "TikTok ads", "Facebook ads", "Apple Search Ads", "ad creatives", "user acquisition", "UA strategy", or "who is advertising". For growth trends, see growth-analysis. For competitive analysis, see competitor-analysis.
+description: When the user wants to analyze advertising strategies, find apps running ads, or understand user acquisition tactics. Also use when the user mentions "ad intelligence", "Google Ads", "Meta ads", "TikTok ads", "Facebook ads", "Apple Search Ads", "ad creatives", "user acquisition", "UA strategy", or "who is advertising". For growth trends, see growth-analysis. For competitive analysis, see competitor-analysis.
 metadata:
-  version: 1.0.2
+  version: 1.0.3
 ---
 
 # Ad Intelligence
@@ -30,10 +30,9 @@ Supported creative sources:
 
 - Meta ads (`adSource: "meta"`)
 - TikTok ads (`adSource: "tiktok"`) for Apple App Store and Google Play apps
+- Google ads (`adSource: "google"`) for Apple App Store and Google Play apps
 
-`all` adds no network filter. `google` remains accepted for compatibility but has no current inventory.
-
-Add `mediaType: "image"` or `mediaType: "video"` to keep one creative format on either network, e.g. `search_ads(adSource: "tiktok", mediaType: "video")` for TikTok video ads. Each result reports its format in `type`.
+The default `all` includes all three networks. Set `mediaType` to `image` or `video` for a single format. For Google video ads, call `search_ads` with `{"adSource":"google","mediaType":"video","limit":5}`. Each result reports its format in `type`.
 
 Creative data can include:
 
@@ -48,7 +47,8 @@ Use `search_apps` to discover apps with ad presence signals:
 
 - `hasMetaAds: true` — filter `search_apps` to only show apps with Meta ad creatives
 - `hasTikTokAds: true` — `tiktok_ads_total_count > 0` in either store. False includes zero, missing, or null counts. Omit for no restriction.
-- `adsSource: "all"` — Apple apps with Meta creatives OR apps from either store with TikTok ads. Omit to include apps without ads; other filters are AND-combined.
+- `hasGoogleAds: true` finds apps in either store with a nonempty `google_ads` array. False matches an empty, null, or missing array.
+- `adsSource: "all"` includes Apple apps with Meta creatives and apps from either store with a TikTok or Google ad signal. Omit the filter to include apps without ads.
 - `hasAppleAds: true` — filter to apps with Apple Search Ads presence signals
 
 `tiktok_ads_total_count` is an optional nullable known count, not an active-ad count or a guarantee of indexed creative availability. Paid TikTok ads are separate from organic TikTok creator content. Do not combine `hasMetaAds: true` with a TikTok-only discovery query.
@@ -61,16 +61,18 @@ Apple Search Ads presence is currently an app-level signal in MCP workflows, not
 
 ```
 1. search_apps(categories: [cat], adsSource: "all", sortBy: "revenue", limit: 20)
-   → Which high-revenue apps have Meta or TikTok ad signals?
+   → Which high-revenue apps have Meta, TikTok, or Google ad signals?
 2. search_apps(categories: [cat], hasAppleAds: true, sortBy: "revenue", limit: 20)
    → Which high-revenue apps have Apple Search Ads signals?
 3. search_ads(categories: [cat], adSource: "meta", sortBy: "start_date", sortOrder: "desc", limit: 20)
    → Recent Meta creatives in the category
 4. search_ads(categories: [cat], adSource: "tiktok", sortBy: "start_date", sortOrder: "desc", limit: 20)
    → Recent TikTok creatives in the category
-5. search_apps(categories: [cat], sortBy: "revenue", limit: 20)
+5. search_ads(categories: [cat], adSource: "google", sortBy: "start_date", sortOrder: "desc", limit: 20)
+   → Recent Google creatives in the category
+6. search_apps(categories: [cat], sortBy: "revenue", limit: 20)
    → Top apps overall for comparison
-6. Cross-reference: which top-revenue apps DON'T show ad signals? (organic opportunity)
+7. Identify top-revenue apps with no observed ad signals.
 ```
 
 ### Competitor Creative Analysis
@@ -79,9 +81,9 @@ Apple Search Ads presence is currently an app-level signal in MCP workflows, not
 1. get_app_detail for each competitor to collect app context and app_slug
 2. search_ads(appSlug: competitor.app_slug, adSource: "meta", limit: 20)
 3. search_ads(appSlug: competitor.app_slug, adSource: "tiktok", limit: 20)
-4. Use get_ad_detail for standout ad_doc_id values
-5. Look for patterns: UGC vs polished, feature-focused vs emotional
-6. Note what's missing — creative angles competitors haven't tried
+4. search_ads(appSlug: competitor.app_slug, adSource: "google", limit: 20)
+5. Pass a returned ad_doc_id to get_ad_detail as adId for the hosted media and available ad copy.
+6. Compare creative formats, copy, and positioning across the observed ads.
 ```
 
 ## Ad Strategy Signals
@@ -104,17 +106,17 @@ Apple Search Ads presence is currently an app-level signal in MCP workflows, not
 
 **Ad Platform Breakdown:**
 
-| Metric | Meta Creatives | TikTok Creatives | Apple Signal | No Ads |
-|--------|----------------|------------------|--------------|--------|
-| App count | [N] | [N] | [N] | [N] |
-| Avg. revenue | [est.] | [est.] | [est.] | [est.] |
-| Avg. downloads | [est.] | [est.] | [est.] | [est.] |
+| Metric | Meta Creatives | TikTok Creatives | Google Creatives | Apple Signal | No Ads |
+|--------|----------------|------------------|------------------|--------------|--------|
+| App count | [N] | [N] | [N] | [N] | [N] |
+| Avg. revenue | [est.] | [est.] | [est.] | [est.] | [est.] |
+| Avg. downloads | [est.] | [est.] | [est.] | [est.] | [est.] |
 
 **Top Advertisers:**
 
 | App | Platform(s) | Revenue/mo | Downloads/mo | Ad Count |
 |-----|------------|------------|-------------|----------|
-| [app] | Meta / TikTok / Apple signal | [est.] | [est.] | [N] |
+| [app] | Meta / TikTok / Google / Apple signal | [est.] | [est.] | [N] |
 
 **Creative Patterns:**
 1. [Common ad formats and styles]
